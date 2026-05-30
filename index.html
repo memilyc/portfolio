@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-view="terminal">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>M. Emily Chang | Senior Support Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     EDIT ME: Theme palettes. Two terminal color schemes.
+     ========================================================= */
+  :root[data-theme="dark"] {
+    --bg:        #0b0e14;
+    --bg-window: #0e1219;
+    --bg-bar:    #161b25;
+    --fg:        #c4cbd8;
+    --dim:       #5b6675;
+    --prompt:    #58d68d;  /* the $ and user@host */
+    --path:      #5fb8e0;
+    --accent:    #7ee787;
+    --cyan:      #56d4dd;
+    --yellow:    #e7c664;
+    --red:       #ff6b6b;
+    --magenta:   #c792ea;
+    --border:    #1d2530;
+    --glow:      rgba(126,231,135,0.10);
+    --scan:      rgba(255,255,255,0.022);
+    --selection: rgba(126,231,135,0.25);
+  }
+  :root[data-theme="light"] {
+    --bg:        #e8e3d6;
+    --bg-window: #f6f2e7;
+    --bg-bar:    #e3dcc9;
+    --fg:        #43403a;
+    --dim:       #a39c88;
+    --prompt:    #2e8b57;
+    --path:      #1c7a9a;
+    --accent:    #408a3d;
+    --cyan:      #1c8a9a;
+    --yellow:    #b07d00;
+    --red:       #c4314b;
+    --magenta:   #8959a8;
+    --border:    #d4ccb8;
+    --glow:      rgba(64,138,61,0.08);
+    --scan:      rgba(0,0,0,0.02);
+    --selection: rgba(64,138,61,0.22);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  ::selection { background: var(--selection); }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    color: var(--fg);
+    transition: background 0.35s ease, color 0.35s ease;
+  }
+
+  /* atmospheric background grid behind the window */
+  body {
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(12px, 3vw, 40px);
+    background-image:
+      radial-gradient(circle at 50% 0%, var(--glow), transparent 60%),
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 100% 100%, 44px 44px, 44px 44px;
+    background-position: center;
+  }
+
+  .window {
+    width: min(860px, 100%);
+    height: min(78vh, 720px);
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-window);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,0.55), 0 0 0 1px var(--border);
+    position: relative;
+    animation: bootIn 0.5s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes bootIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.985); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* title bar with traffic-light dots */
+  .bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 14px;
+    background: var(--bg-bar);
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; }
+  .dot.y { background: #febc2e; }
+  .dot.g { background: #28c840; }
+  .bar .title {
+    flex: 1;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--dim);
+    letter-spacing: 0.3px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bar-btn {
+    flex: 0 0 auto;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--dim);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 4px 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  .bar-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* scanline + grain overlay for CRT feel */
+  .window::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom, var(--scan) 0px, var(--scan) 1px, transparent 1px, transparent 3px);
+    mix-blend-mode: overlay;
+    opacity: 0.7;
+  }
+
+  .screen {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 20px 22px 8px;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+  .screen::-webkit-scrollbar { width: 9px; }
+  .screen::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9px; }
+  .screen::-webkit-scrollbar-track { background: transparent; }
+
+  .line { white-space: pre-wrap; word-break: break-word; }
+  .line + .line { margin-top: 1px; }
+
+  .prompt { color: var(--prompt); }
+  .path   { color: var(--path); }
+  .cmd    { color: var(--fg); }
+  .dim    { color: var(--dim); }
+  .accent { color: var(--accent); }
+  .cyan   { color: var(--cyan); }
+  .yellow { color: var(--yellow); }
+  .red    { color: var(--red); }
+  .magenta{ color: var(--magenta); }
+  .b      { font-weight: 700; }
+
+  a.tlink { color: var(--cyan); text-decoration: none; border-bottom: 1px dotted var(--cyan); }
+  a.tlink:hover { color: var(--accent); border-color: var(--accent); }
+
+  pre.ascii {
+    color: var(--accent);
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* clickable command chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; }
+  .chip {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 12.5px;
+    padding: 4px 11px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--glow); }
+
+  /* input row */
+  .input-row {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .input-row .ps { color: var(--prompt); white-space: nowrap; }
+  .input-row .ps .path { color: var(--path); }
+  .input-wrap {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+  .ghost {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    white-space: pre;
+    pointer-events: none;
+    color: var(--dim);
+    font-family: inherit;
+    font-size: 14px;
+    overflow: hidden;
+  }
+  .ghost .gt { color: transparent; }   /* typed portion: invisible, just reserves width */
+  .hint {
+    flex: 0 0 auto;
+    color: var(--dim);
+    font-size: 12px;
+    white-space: nowrap;
+    padding-left: 10px;
+    opacity: 0.85;
+  }
+  #cmdline {
+    position: relative;
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 14px;
+    caret-color: var(--accent);
+  }
+
+  .credit {
+    flex: 0 0 auto;
+    padding: 7px 22px;
+    font-size: 11px;
+    color: var(--dim);
+    background: var(--bg-bar);
+    border-top: 1px solid var(--border);
+    letter-spacing: 0.3px;
+    user-select: none;
+    text-align: center;
+  }
+
+  /* =========================================================
+     Reader view — same content (from CONFIG), plain layout
+     ========================================================= */
+  .reader {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 40px clamp(22px, 6vw, 56px) 30px;
+  }
+  .reader::-webkit-scrollbar { width: 9px; }
+  .reader::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9px; }
+  .reader::-webkit-scrollbar-track { background: transparent; }
+
+  /* show exactly one view */
+  [data-view="terminal"] .reader { display: none; }
+  [data-view="reader"] .screen,
+  [data-view="reader"] .input-row { display: none !important; }
+
+  .r-name {
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--fg);
+    line-height: 1.1;
+  }
+  .r-role { margin-top: 8px; font-size: 15px; color: var(--accent); font-weight: 500; }
+  .r-tag  { margin-top: 12px; font-size: 15px; color: var(--dim); max-width: 60ch; line-height: 1.6; }
+  .r-sec  { margin-top: 32px; }
+  .r-h {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .r-body { font-size: 15px; line-height: 1.8; color: var(--fg); max-width: 66ch; }
+  .r-skills, .r-links { list-style: none; }
+  .r-skills li {
+    display: flex; gap: 14px; padding: 8px 0; flex-wrap: wrap;
+    border-bottom: 1px dashed var(--border);
+  }
+  .r-skills li:last-child { border-bottom: none; }
+  .r-k { color: var(--yellow); font-weight: 700; flex: 0 0 150px; }
+  .r-v { color: var(--fg); }
+  .r-links li { display: flex; gap: 14px; padding: 8px 0; flex-wrap: wrap; align-items: baseline; }
+  .r-lk { color: var(--magenta); font-weight: 700; flex: 0 0 90px; }
+  .r-cv {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 12px 24px;
+    background: var(--accent);
+    color: var(--bg-window);
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .r-cv:hover { opacity: 0.9; transform: translateY(-1px); }
+  @media (max-width: 560px) {
+    .reader { padding: 28px 18px 22px; }
+    .r-k { flex-basis: 120px; }
+  }
+
+  /* blinking block cursor used during boot typing */
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1.05em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    animation: blink 1.05s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .fade-in { animation: fadeIn 0.18s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; } }
+
+  @media (max-width: 560px) {
+    .window { height: 86vh; border-radius: 10px; }
+    .screen { font-size: 13px; padding: 16px 14px 6px; }
+    .input-row { padding: 10px 14px 14px; }
+    .bar .title { font-size: 11px; }
+    pre.ascii { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+  <div class="window" id="window">
+    <div class="bar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="title">memilyc@portfolio: ~</span>
+      <button class="bar-btn" id="viewBtn" aria-label="Switch view">▤ reader view</button>
+      <button class="bar-btn" id="themeBtn" aria-label="Toggle theme">[ light ]</button>
+    </div>
+    <div class="screen" id="screen"></div>
+    <div class="reader" id="reader"></div>
+    <div class="input-row" id="inputRow" style="display:none;">
+      <span class="ps"><span>memilyc@portfolio</span>:<span class="path">~</span>$</span>
+      <span class="input-wrap">
+        <span class="ghost" id="ghost" aria-hidden="true"></span>
+        <input id="cmdline" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal command input" />
+      </span>
+      <span class="hint" id="hint"></span>
+    </div>
+    <div class="credit">// created with love by prompting on <span class="accent">Claude</span> <span class="red">&lt;3</span></div>
+  </div>
+
+<script>
+/* =========================================================
+   EDIT ME: Your details live in this CONFIG object.
+   Swap in your real name, role, blurb, skills and contacts.
+   ========================================================= */
+const CONFIG = {
+  user: "memilyc",
+  host: "portfolio",
+  name: "M. Emily Chang",
+  role: "Senior Support Engineer @ GitLab",
+  tagline: "I turn messy production problems into clean root causes — and the docs that keep them solved.",
+  about: [
+    "Senior Support Engineer at GitLab with 5+ years helping enterprise customers debug complex issues across PostgreSQL, Linux, Docker, and multi-cloud environments (AWS, GCP, Azure).",
+    "Before GitLab I worked in system administration and software engineering — maintaining 99.95% uptime across Linux/Windows, and building financial products like loan management and credit-scoring platforms.",
+    "I run on a 24/7 on-call rotation, lead cross-regional pairing sessions, and build internal tools and documentation so the same problem never bites anyone twice.",
+  ],
+  skills: [
+    ["Support",   "customer & SaaS support · incident mgmt · 24/7 on-call"],
+    ["Systems",   "Linux admin · Docker · Kubernetes · Bash · PowerShell"],
+    ["Cloud",     "AWS · GCP · Azure · Terraform · Ansible"],
+    ["Databases", "PostgreSQL · MySQL · MongoDB · log analysis"],
+    ["Code",      "Ruby · Python · JavaScript / Node · PHP · Git & CI/CD"],
+    ["Tooling",   "Zendesk · Jira · Confluence · technical documentation"],
+  ],
+  cv:       "https://memilyc.github.io",
+  email:    "echangw2010@gmail.com",
+  linkedin: "https://linkedin.com/in/memilyc",
+  gitlab:   "https://gitlab.com/emchang",
+  readme:   "https://gitlab.com/emchang#emily-changs-readme",
+};
+
+const screen   = document.getElementById('screen');
+const inputRow = document.getElementById('inputRow');
+const cmdline  = document.getElementById('cmdline');
+const themeBtn = document.getElementById('themeBtn');
+const viewBtn  = document.getElementById('viewBtn');
+const reader   = document.getElementById('reader');
+const root     = document.documentElement;
+
+/* ---- theme (persists when deployed; degrades safely in preview) ---- */
+function applyTheme(t){
+  root.setAttribute('data-theme', t);
+  themeBtn.textContent = t === 'dark' ? '[ light ]' : '[ dark ]';
+  try { localStorage.setItem('portfolio-theme', t); } catch(e){}
+}
+(function initTheme(){
+  let t = 'dark';
+  try { t = localStorage.getItem('portfolio-theme') || 'dark'; } catch(e){}
+  applyTheme(t);
+})();
+themeBtn.addEventListener('click', () =>
+  applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+/* ---- reader view: renders the SAME CONFIG as a plain page ---- */
+function buildReader(){
+  const c = CONFIG;
+  const esc = escapeHtml;
+  reader.innerHTML = `
+    <header>
+      <h1 class="r-name">${esc(c.name)}</h1>
+      <div class="r-role">${esc(c.role)}</div>
+      <p class="r-tag">${esc(c.tagline)}</p>
+    </header>
+    <section class="r-sec">
+      <h2 class="r-h">About</h2>
+      <p class="r-body">${c.about.map(esc).join(' ')}</p>
+    </section>
+    <section class="r-sec">
+      <h2 class="r-h">Skills</h2>
+      <ul class="r-skills">
+        ${c.skills.map(([k,v]) => `<li><span class="r-k">${esc(k)}</span><span class="r-v">${esc(v)}</span></li>`).join('')}
+      </ul>
+    </section>
+    <section class="r-sec">
+      <h2 class="r-h">Contact</h2>
+      <ul class="r-links">
+        <li><span class="r-lk">Email</span><a class="tlink" href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>
+        <li><span class="r-lk">LinkedIn</span><a class="tlink" href="${esc(c.linkedin)}" target="_blank" rel="noopener">${esc(c.linkedin)}</a></li>
+        <li><span class="r-lk">GitLab</span><a class="tlink" href="${esc(c.gitlab)}" target="_blank" rel="noopener">${esc(c.gitlab)}</a></li>
+        <li><span class="r-lk">README</span><a class="tlink" href="${esc(c.readme)}" target="_blank" rel="noopener">my README page</a></li>
+      </ul>
+    </section>
+    <section class="r-sec">
+      <h2 class="r-h">Résumé</h2>
+      <a class="r-cv" href="${esc(c.cv)}" target="_blank" rel="noopener">Read my full CV →</a>
+    </section>`;
+}
+buildReader();
+
+/* ---- view toggle (persists when deployed; safe in preview) ---- */
+function applyView(v){
+  root.setAttribute('data-view', v);
+  viewBtn.textContent = v === 'terminal' ? '▤ reader view' : '❯ terminal view';
+  try { localStorage.setItem('portfolio-view', v); } catch(e){}
+  if (v === 'terminal' && inputRow.style.display !== 'none') cmdline.focus();
+}
+(function initView(){
+  let v = 'terminal';
+  try { v = localStorage.getItem('portfolio-view') || 'terminal'; } catch(e){}
+  applyView(v);
+})();
+viewBtn.addEventListener('click', () =>
+  applyView(root.getAttribute('data-view') === 'terminal' ? 'reader' : 'terminal'));
+
+/* ---- output helpers ---- */
+function el(tag, cls, html){
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (html != null) e.innerHTML = html;
+  return e;
+}
+function print(html, cls){
+  const d = el('div', 'line fade-in' + (cls ? ' ' + cls : ''), html);
+  screen.appendChild(d);
+  screen.scrollTop = screen.scrollHeight;
+  return d;
+}
+function printPromptEcho(cmd){
+  print(`<span class="prompt">${CONFIG.user}@${CONFIG.host}</span>:<span class="path">~</span>$ <span class="cmd">${escapeHtml(cmd)}</span>`);
+}
+function escapeHtml(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function blank(){ print('&nbsp;'); }
+
+/* ---- the commands ---- */
+const commands = {
+  help(){
+    print('Available commands — click a chip, or type one (typos are fine):', 'dim');
+    const names = ['about','skills','contact','cv','neofetch','credits','theme','clear','help'];
+    const wrap = el('div','line');
+    const chips = el('div','chips');
+    names.forEach(n => {
+      const b = el('button','chip', n);
+      b.onclick = () => runCommand(n);
+      chips.appendChild(b);
+    });
+    wrap.appendChild(chips);
+    screen.appendChild(wrap);
+    screen.scrollTop = screen.scrollHeight;
+  },
+  about(){
+    print(`<span class="accent b">${CONFIG.name}</span> <span class="dim">—</span> <span class="cyan">${CONFIG.role}</span>`);
+    print(`<span class="dim">// ${CONFIG.tagline}</span>`);
+    blank();
+    CONFIG.about.forEach(l => print(l));
+    blank();
+    print(`Type <span class="accent">cv</span> to read my full résumé, or <span class="accent">contact</span> to reach me.`, 'dim');
+  },
+  skills(){
+    print('<span class="dim">$ cat skills.txt</span>');
+    CONFIG.skills.forEach(([k,v]) => {
+      print(`<span class="yellow b">${k.padEnd(16,' ')}</span><span class="dim">${v}</span>`);
+    });
+  },
+  contact(){
+    print('<span class="dim">$ cat contact.txt</span>');
+    print(`<span class="magenta">email   </span> <a class="tlink" href="mailto:${CONFIG.email}">${CONFIG.email}</a>`);
+    print(`<span class="magenta">linkedin</span> <a class="tlink" href="${CONFIG.linkedin}" target="_blank" rel="noopener">${CONFIG.linkedin}</a>`);
+    print(`<span class="magenta">gitlab  </span> <a class="tlink" href="${CONFIG.gitlab}" target="_blank" rel="noopener">${CONFIG.gitlab}</a>`);
+    print(`<span class="magenta">readme  </span> <a class="tlink" href="${CONFIG.readme}" target="_blank" rel="noopener">my README page</a>`);
+    print(`<span class="magenta">cv      </span> <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`);
+  },
+  cv(){
+    print(`Opening résumé → <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`, 'cyan');
+    window.open(CONFIG.cv, '_blank', 'noopener');
+  },
+  theme(){
+    applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    print(`theme → <span class="accent">${root.getAttribute('data-theme')}</span>`, 'dim');
+  },
+  view(){
+    print('Switching to <span class="accent">reader view</span> — a plain, scrollable page.', 'dim');
+    print('<span class="dim">(use the title-bar button to switch back)</span>');
+    setTimeout(() => applyView('reader'), 150);
+  },
+  clear(){ screen.innerHTML = ''; },
+  credits(){
+    print('<span class="dim">$ cat credits.txt</span>');
+    print('This portfolio was created with <span class="red">love</span> by prompting on <span class="accent b">Claude</span>.');
+    print(`<span class="dim">design + build: ${CONFIG.name} × Claude (Anthropic)</span>`);
+  },
+  whoami(){ print(CONFIG.user); },
+  neofetch(){
+    const art = [
+"        a:::::a         ",
+"       a::::::a         ",
+"      a::::::::a        ",
+"     a:::::::::::a      ",
+"    a::::::aa:::::a     ",
+"   a::::::a   a:::::a   ",
+"  a:::::::aaaa::::::a   ",
+" a:::::::::::::::::::a  ",
+" aa::::::aaaaa::::::aa  ",
+"   aaaaaa     aaaaaa   ",
+    ];
+    const info = [
+      `<span class="accent b">${CONFIG.user}</span>@<span class="accent b">${CONFIG.host}</span>`,
+      `<span class="dim">-----------------</span>`,
+      `<span class="yellow">Name</span>:    ${CONFIG.name}`,
+      `<span class="yellow">Role</span>:    ${CONFIG.role}`,
+      `<span class="yellow">Shell</span>:   bash`,
+      `<span class="yellow">Uptime</span>:  always on-call`,
+      `<span class="yellow">CV</span>:      <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`,
+    ];
+    const rows = Math.max(art.length, info.length);
+    let out = '';
+    for (let i=0;i<rows;i++){
+      const a = (art[i]||'').padEnd(26,' ');
+      out += `<span class="accent">${a}</span>${info[i]||''}\n`;
+    }
+    print(out);
+  },
+};
+
+/* ---- run a command (echo + execute), used by chips, input & boot ---- */
+/* =========================================================
+   Autocomplete + fuzzy matching
+   ========================================================= */
+const COMMANDS = Object.keys(commands);
+const ghost = document.getElementById('ghost');
+const hint  = document.getElementById('hint');
+
+/* subsequence fuzzy score; -1 means the query isn't even a subsequence */
+function fuzzyScore(query, target){
+  query = query.toLowerCase(); target = target.toLowerCase();
+  if (!query) return 0;
+  let qi = 0, score = 0, prev = -2;
+  for (let ti = 0; ti < target.length && qi < query.length; ti++){
+    if (target[ti] === query[qi]){
+      score += 1;
+      if (ti === 0) score += 6;          // matches first char
+      if (ti === prev + 1) score += 4;   // consecutive run
+      prev = ti;
+      qi++;
+    }
+  }
+  if (qi < query.length) return -1;       // leftover query chars => no match
+  score -= (target.length - query.length) * 0.15; // prefer tighter matches
+  return score;
+}
+
+/* ranked matches: prefix matches first, then by score */
+function getMatches(input){
+  const q = (input || '').trim().toLowerCase();
+  if (!q) return [];
+  return COMMANDS
+    .map(name => ({ name, score: fuzzyScore(q, name), prefix: name.startsWith(q) }))
+    .filter(m => m.score >= 0)
+    .sort((a, b) => (b.prefix - a.prefix) || (b.score - a.score) || (a.name.length - b.name.length));
+}
+
+/* inline ghost suffix for prefix matches; right-side hint for fuzzy typos */
+function updateGhost(){
+  const v = cmdline.value;
+  const m = getMatches(v);
+  ghost.innerHTML = '';
+  hint.innerHTML = '';
+  if (!v.trim() || !m.length) return;
+  const best = m[0];
+  if (best.prefix && best.name !== v.trim().toLowerCase()){
+    ghost.innerHTML = `<span class="gt">${escapeHtml(v)}</span>${escapeHtml(best.name.slice(v.length))}`;
+    hint.innerHTML = '<span class="dim">↹ tab</span>';
+  } else if (!best.prefix){
+    hint.innerHTML = `<span class="dim">↹ ${escapeHtml(best.name)}?</span>`;
+  }
+}
+
+/* tab cycles through all candidates (prefix-first) */
+let tab = { active: false, list: [], idx: -1 };
+function onTab(){
+  if (!tab.active){
+    const m = getMatches(cmdline.value);
+    if (!m.length) return;
+    tab = { active: true, list: m.map(x => x.name), idx: -1 };
+  }
+  tab.idx = (tab.idx + 1) % tab.list.length;
+  cmdline.value = tab.list[tab.idx];
+  updateGhost();
+}
+
+/* resolve a typed command to a real one (exact, else best fuzzy) */
+function resolve(raw){
+  const v = (raw || '').trim().toLowerCase();
+  if (!v) return null;
+  if (commands[v]) return { name: v, corrected: false };
+  const m = getMatches(v);
+  return m.length ? { name: m[0].name, corrected: true } : null;
+}
+
+function runCommand(raw){
+  const cmd = (raw || '').trim();
+  printPromptEcho(cmd);
+  if (!cmd) return;
+  const r = resolve(cmd);
+  if (r){
+    if (r.corrected) print(`<span class="dim">≈ assuming <span class="accent">${r.name}</span></span>`);
+    commands[r.name]();
+  } else {
+    print(`<span class="red">command not found: ${escapeHtml(cmd)}</span> — type <span class="accent">help</span>`, '');
+  }
+  blank();
+}
+
+/* ---- command input: history + enter ---- */
+const history = []; let hi = -1;
+cmdline.addEventListener('input', () => { tab.active = false; updateGhost(); });
+cmdline.addEventListener('keydown', e => {
+  if (e.key === 'Tab'){
+    e.preventDefault();
+    onTab();
+    return;
+  }
+  // Right arrow at end of line accepts the inline ghost suggestion
+  if (e.key === 'ArrowRight' && cmdline.selectionStart === cmdline.value.length){
+    const m = getMatches(cmdline.value);
+    if (m.length && m[0].prefix && m[0].name !== cmdline.value.trim().toLowerCase()){
+      e.preventDefault();
+      cmdline.value = m[0].name;
+      tab.active = false;
+      updateGhost();
+      return;
+    }
+  }
+  if (e.key === 'Enter'){
+    const v = cmdline.value;
+    if (v.trim()) { history.push(v); hi = history.length; }
+    cmdline.value = '';
+    tab.active = false;
+    updateGhost();
+    runCommand(v);
+  } else if (e.key === 'ArrowUp'){
+    if (hi > 0){ hi--; cmdline.value = history[hi]; tab.active = false; updateGhost(); e.preventDefault(); }
+  } else if (e.key === 'ArrowDown'){
+    if (hi < history.length-1){ hi++; cmdline.value = history[hi]; }
+    else { hi = history.length; cmdline.value = ''; }
+    tab.active = false; updateGhost();
+  }
+});
+document.getElementById('window').addEventListener('click', e => {
+  if (root.getAttribute('data-view') !== 'terminal') return;
+  if (!e.target.closest('a, button')) cmdline.focus();
+});
+
+/* =========================================================
+   Boot sequence — typewriter intro, then auto-run a couple
+   of commands so content shows without any typing required.
+   ========================================================= */
+let skip = false;
+function typeLine(text, cls){
+  return new Promise(res => {
+    const node = print('', cls);
+    const cursor = el('span','cursor');
+    node.appendChild(cursor);
+    let i = 0;
+    const speed = 16;
+    (function step(){
+      if (skip){ node.innerHTML = text; res(); return; }
+      if (i <= text.length){
+        node.innerHTML = text.slice(0,i);
+        node.appendChild(cursor);
+        screen.scrollTop = screen.scrollHeight;
+        i++;
+        setTimeout(step, speed);
+      } else {
+        node.innerHTML = text;
+        res();
+      }
+    })();
+  });
+}
+function wait(ms){ return new Promise(r => setTimeout(r, skip ? 0 : ms)); }
+
+async function boot(){
+  const date = new Date().toString().replace(/ GMT.*/, '');
+  print(`<span class="dim">Last login: ${date} on ttys001</span>`);
+  blank();
+  await typeLine(`${CONFIG.user}@${CONFIG.host}:~$ whoami`, '');
+  await wait(180);
+  commands.whoami();
+  blank();
+  await typeLine(`${CONFIG.user}@${CONFIG.host}:~$ ./welcome.sh`, '');
+  await wait(180);
+  commands.about();
+  blank();
+  print('<span class="dim">Tip: type a command (<span class="accent">Tab</span> to autocomplete, <span class="accent">→</span> to accept), or just click below ↓</span>');
+  print('<span class="dim">New to terminals? Click <span class="accent">▤ reader view</span> (top-right) for a plain page.</span>');
+  commands.help();
+  blank();
+  // reveal the live prompt
+  inputRow.style.display = 'flex';
+  cmdline.focus();
+}
+
+/* let the visitor skip the typing animation */
+function armSkip(){
+  const onSkip = () => { skip = true; };
+  window.addEventListener('keydown', onSkip, { once:true });
+  screen.addEventListener('click', onSkip, { once:true });
+}
+armSkip();
+boot();
+</script>
+</body>
+</html>
