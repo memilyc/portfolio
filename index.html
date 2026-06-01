@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark" data-view="terminal">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
 <title>M. Emily Chang | Senior Support Engineer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -306,6 +306,20 @@
   .r-v { color: var(--fg); }
   .r-links li { display: flex; gap: 14px; padding: 8px 0; flex-wrap: wrap; align-items: baseline; }
   .r-lk { color: var(--magenta); font-weight: 700; flex: 0 0 90px; }
+  .r-sub { font-size: 13px; color: var(--dim); margin: -8px 0 14px; }
+  .r-strengths { list-style: none; counter-reset: s; }
+  .r-strengths li {
+    counter-increment: s;
+    display: flex; gap: 12px; padding: 8px 0; flex-wrap: wrap; align-items: baseline;
+    border-bottom: 1px dashed var(--border);
+  }
+  .r-strengths li:last-child { border-bottom: none; }
+  .r-strengths li::before {
+    content: counter(s) ".";
+    color: var(--cyan); font-weight: 700; flex: 0 0 auto; min-width: 16px;
+  }
+  .r-st { color: var(--yellow); font-weight: 700; flex: 0 0 150px; }
+  .r-sd { color: var(--fg); flex: 1; min-width: 220px; }
   .r-cv {
     display: inline-block;
     margin-top: 4px;
@@ -319,9 +333,11 @@
     transition: transform 0.15s ease, opacity 0.15s ease;
   }
   .r-cv:hover { opacity: 0.9; transform: translateY(-1px); }
-  @media (max-width: 560px) {
-    .reader { padding: 28px 18px 22px; }
-    .r-k { flex-basis: 120px; }
+  @media (max-width: 600px) {
+    .reader { padding: 26px 18px 22px; }
+    .r-name { font-size: 30px; }
+    .r-k, .r-st { flex-basis: 110px; }
+    .r-cv { display: block; text-align: center; }
   }
 
   /* blinking block cursor used during boot typing */
@@ -338,11 +354,37 @@
   .fade-in { animation: fadeIn 0.18s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; } }
 
-  @media (max-width: 560px) {
-    .window { height: 86vh; border-radius: 10px; }
-    .screen { font-size: 13px; padding: 16px 14px 6px; }
-    .input-row { padding: 10px 14px 14px; }
+  @media (max-width: 600px) {
+    /* full-screen, app-like: no floating card, use every pixel */
+    html, body { height: 100dvh; overflow: hidden; }
+    body {
+      padding: 0;
+      align-items: stretch;
+      justify-content: flex-start;
+      background-size: 100% 100%, 30px 30px, 30px 30px;
+    }
+    .window {
+      width: 100%;
+      height: 100dvh;            /* JS overrides this with the visual-viewport height when the keyboard opens */
+      max-height: none;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      animation: none;
+    }
+    .bar { padding: 12px 14px; }
     .bar .title { font-size: 11px; }
+    /* larger, thumb-friendly tap targets */
+    .bar-btn { font-size: 12px; padding: 7px 11px; }
+    .screen { font-size: 13.5px; padding: 16px 15px 6px; }
+    .chips { gap: 9px; }
+    .chip { font-size: 13.5px; padding: 8px 14px; }
+    .input-row { padding: 12px 15px calc(12px + env(safe-area-inset-bottom)); gap: 8px; }
+    /* 16px input prevents iOS Safari from auto-zooming on focus */
+    #cmdline, .ghost { font-size: 16px; }
+    .ps { font-size: 14px; }
+    .hint { display: none; }     /* free up width on small screens */
+    .credit { padding: 8px 14px calc(8px + env(safe-area-inset-bottom)); }
     pre.ascii { font-size: 9px; }
   }
 </style>
@@ -392,11 +434,21 @@ const CONFIG = {
     ["Code",      "Ruby · Python · JavaScript / Node · PHP · Git & CI/CD"],
     ["Tooling",   "Zendesk · Jira · Confluence · technical documentation"],
   ],
+  strengths: {
+    source: "CliftonStrengths — Top 5",
+    themes: [
+      ["Positivity",        "brings contagious energy and keeps morale up under pressure"],
+      ["Woo",               "wins people over quickly and builds rapport with customers"],
+      ["Individualization", "tunes in to what makes each person and each case unique"],
+      ["Ideation",          "connects ideas to find fresh angles on hard problems"],
+      ["Strategic",         "sees the patterns and picks the fastest path forward"],
+    ],
+  },
   cv:       "https://memilyc.github.io",
   email:    "echangw2010@gmail.com",
   linkedin: "https://linkedin.com/in/memilyc",
   gitlab:   "https://gitlab.com/emchang",
-  readme:   "https://github.com/memilyc",
+  readme:   "https://gitlab.com/emchang#emily-changs-readme",
 };
 
 const screen   = document.getElementById('screen');
@@ -440,6 +492,13 @@ function buildReader(){
       <ul class="r-skills">
         ${c.skills.map(([k,v]) => `<li><span class="r-k">${esc(k)}</span><span class="r-v">${esc(v)}</span></li>`).join('')}
       </ul>
+    </section>
+    <section class="r-sec">
+      <h2 class="r-h">Strengths</h2>
+      <p class="r-sub">${esc(c.strengths.source)}</p>
+      <ol class="r-strengths">
+        ${c.strengths.themes.map(([t,d]) => `<li><span class="r-st">${esc(t)}</span><span class="r-sd">${esc(d)}</span></li>`).join('')}
+      </ol>
     </section>
     <section class="r-sec">
       <h2 class="r-h">Contact</h2>
@@ -495,7 +554,7 @@ function blank(){ print('&nbsp;'); }
 const commands = {
   help(){
     print('Available commands — click a chip, or type one (typos are fine):', 'dim');
-    const names = ['about','skills','contact','cv','neofetch','credits','theme','clear','help'];
+    const names = ['about','skills','strengths','contact','cv','neofetch','credits','theme','clear','help'];
     const wrap = el('div','line');
     const chips = el('div','chips');
     names.forEach(n => {
@@ -519,6 +578,13 @@ const commands = {
     print('<span class="dim">$ cat skills.txt</span>');
     CONFIG.skills.forEach(([k,v]) => {
       print(`<span class="yellow b">${k.padEnd(16,' ')}</span><span class="dim">${v}</span>`);
+    });
+  },
+  strengths(){
+    print('<span class="dim">$ cat strengths.txt</span>');
+    print(`<span class="dim">// ${CONFIG.strengths.source}</span>`);
+    CONFIG.strengths.themes.forEach(([t,d], i) => {
+      print(`<span class="cyan b">${i+1}.</span> <span class="yellow b">${t}</span> <span class="dim">— ${d}</span>`);
     });
   },
   contact(){
@@ -705,9 +771,39 @@ cmdline.addEventListener('keydown', e => {
     tab.active = false; updateGhost();
   }
 });
-document.getElementById('window').addEventListener('click', e => {
+const win = document.getElementById('window');
+win.addEventListener('click', e => {
   if (root.getAttribute('data-view') !== 'terminal') return;
-  if (!e.target.closest('a, button')) cmdline.focus();
+  if (e.target.closest('a, button, input')) return;
+  cmdline.focus();
+});
+
+/* =========================================================
+   Mobile keyboard handling — keep the input above the keyboard.
+   On phones the visual viewport shrinks when the keyboard opens
+   (vh/dvh do not on iOS), so we size the window to it directly.
+   ========================================================= */
+const vv = window.visualViewport;
+function fitToViewport(){
+  if (!vv) return;
+  if (window.innerWidth <= 600){
+    win.style.height = vv.height + 'px';
+  } else {
+    win.style.height = '';   // desktop: let CSS own the height
+  }
+  if (root.getAttribute('data-view') === 'terminal') screen.scrollTop = screen.scrollHeight;
+}
+if (vv){
+  vv.addEventListener('resize', fitToViewport);
+  vv.addEventListener('scroll', fitToViewport);
+}
+window.addEventListener('resize', fitToViewport);
+window.addEventListener('orientationchange', () => setTimeout(fitToViewport, 200));
+fitToViewport();
+
+/* when the input gains focus, make sure the latest output is in view */
+cmdline.addEventListener('focus', () => {
+  setTimeout(() => { fitToViewport(); screen.scrollTop = screen.scrollHeight; }, 250);
 });
 
 /* =========================================================
@@ -757,7 +853,8 @@ async function boot(){
   blank();
   // reveal the live prompt
   inputRow.style.display = 'flex';
-  cmdline.focus();
+  fitToViewport();
+  if (window.innerWidth > 600) cmdline.focus();  // avoid popping the keyboard on phones
 }
 
 /* let the visitor skip the typing animation */
