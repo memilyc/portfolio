@@ -333,6 +333,19 @@
     transition: transform 0.15s ease, opacity 0.15s ease;
   }
   .r-cv:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* projects in reader view */
+  .r-projects { list-style: none; }
+  .r-projects li {
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .r-projects li:last-child { border-bottom: none; }
+  .r-proj-title { color: var(--cyan); font-weight: 700; font-size: 15px; }
+  .r-proj-stack { font-size: 12px; color: var(--magenta); margin: 3px 0 6px; }
+  .r-proj-desc { font-size: 14px; color: var(--fg); line-height: 1.7; max-width: 62ch; }
+  .r-proj-link { font-size: 13px; margin-top: 6px; }
+
   @media (max-width: 600px) {
     .reader { padding: 26px 18px 22px; }
     .r-name { font-size: 30px; }
@@ -419,10 +432,10 @@ const CONFIG = {
   user: "memilyc",
   host: "portfolio",
   name: "M. Emily Chang",
-  role: "Senior Support Engineer @ GitLab",
+  role: "Former Senior Support Engineer @ GitLab",
   tagline: "I turn messy production problems into clean root causes — and the docs that keep them solved.",
   about: [
-    "Senior Support Engineer at GitLab with 5+ years helping enterprise customers debug complex issues across PostgreSQL, Linux, Docker, and multi-cloud environments (AWS, GCP, Azure).",
+    "I have 9+ years helping enterprise customers debug complex issues across PostgreSQL, Linux, Docker, and multi-cloud environments (AWS, GCP, Azure).",
     "Before GitLab I worked in system administration and software engineering — maintaining 99.95% uptime across Linux/Windows, and building financial products like loan management and credit-scoring platforms.",
     "I run on a 24/7 on-call rotation, lead cross-regional pairing sessions, and build internal tools and documentation so the same problem never bites anyone twice.",
   ],
@@ -444,11 +457,37 @@ const CONFIG = {
       ["Strategic",         "sees the patterns and picks the fastest path forward"],
     ],
   },
+  // -------------------------------------------------------
+  // EDIT ME: Projects — swap TODO_URL with your real links.
+  // -------------------------------------------------------
+  projects: [
+    {
+      title:  "PostgreSQL Connection Calculator",
+      stack:  "PostgreSQL · JavaScript",
+      desc:   "Interactive tool that calculates optimal max_connections and shared_buffers settings based on your instance RAM, worker counts, and workload type — so you stop guessing and start tuning.",
+      url:    "https://postgresql-connection-calculator-759014.gitlab.io/",
+      label:  "Open tool →",
+    },
+    {
+      title:  "Convert UTC Bot",
+      stack:  "Deno SDK · GitLab CI",
+      desc:   "A Slack Workflow App that converts any UTC timestamp to the requester's local timezone on demand. Built on Deno SDK and hosted on GitLab, it eliminates the mental overhead of timezone math across distributed teams.",
+      url:    "https://gitlab.com/gitlab-com/support/toolbox/convert-utc-bot",
+      label:  "View on GitLab →",
+    },
+    {
+      title:  "Viggou.net",
+      stack:  "Media · Community · Malaysian Chinese entertainment",
+      desc:   "Side project and passion: I lead and manage a media page covering the Malaysian Chinese entertainment industry — local events, artists, and community coverage. Handles editorial direction, content strategy, and social presence.",
+      url:    "https://viggou.net",
+      label:  "Visit viggou.net →",
+    },
+  ],
   cv:       "https://memilyc.github.io",
   email:    "echangw2010@gmail.com",
   linkedin: "https://linkedin.com/in/memilyc",
-  gitlab:   "https://gitlab.com/emchang",
-  readme:   "https://gitlab.com/emchang#emily-changs-readme",
+  github:   "https://github.com/memilyc",
+  readme:   "https://github.com/memilycgit",
 };
 
 const screen   = document.getElementById('screen');
@@ -494,6 +533,20 @@ function buildReader(){
       </ul>
     </section>
     <section class="r-sec">
+      <h2 class="r-h">Projects</h2>
+      <ul class="r-projects">
+        ${c.projects.map(p => `
+          <li>
+            <div class="r-proj-title">${esc(p.title)}</div>
+            <div class="r-proj-stack">${esc(p.stack)}</div>
+            <div class="r-proj-desc">${esc(p.desc)}</div>
+            ${p.url && p.url !== 'TODO_URL'
+              ? `<div class="r-proj-link"><a class="tlink" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.label)}</a></div>`
+              : `<div class="r-proj-link" style="color:var(--dim);font-size:12px;">// link coming soon</div>`}
+          </li>`).join('')}
+      </ul>
+    </section>
+    <section class="r-sec">
       <h2 class="r-h">Strengths</h2>
       <p class="r-sub">${esc(c.strengths.source)}</p>
       <ol class="r-strengths">
@@ -505,7 +558,7 @@ function buildReader(){
       <ul class="r-links">
         <li><span class="r-lk">Email</span><a class="tlink" href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>
         <li><span class="r-lk">LinkedIn</span><a class="tlink" href="${esc(c.linkedin)}" target="_blank" rel="noopener">${esc(c.linkedin)}</a></li>
-        <li><span class="r-lk">GitLab</span><a class="tlink" href="${esc(c.gitlab)}" target="_blank" rel="noopener">${esc(c.gitlab)}</a></li>
+        <li><span class="r-lk">GitHub</span><a class="tlink" href="${esc(c.github)}" target="_blank" rel="noopener">${esc(c.github)}</a></li>
         <li><span class="r-lk">README</span><a class="tlink" href="${esc(c.readme)}" target="_blank" rel="noopener">my README page</a></li>
       </ul>
     </section>
@@ -514,7 +567,6 @@ function buildReader(){
       <a class="r-cv" href="${esc(c.cv)}" target="_blank" rel="noopener">Read my full CV →</a>
     </section>`;
 }
-buildReader();
 
 /* ---- view toggle (persists when deployed; safe in preview) ---- */
 function applyView(v){
@@ -547,14 +599,14 @@ function print(html, cls){
 function printPromptEcho(cmd){
   print(`<span class="prompt">${CONFIG.user}@${CONFIG.host}</span>:<span class="path">~</span>$ <span class="cmd">${escapeHtml(cmd)}</span>`);
 }
-function escapeHtml(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function blank(){ print('&nbsp;'); }
 
 /* ---- the commands ---- */
 const commands = {
   help(){
     print('Available commands — click a chip, or type one (typos are fine):', 'dim');
-    const names = ['about','skills','strengths','contact','cv','neofetch','credits','theme','clear','help'];
+    const names = ['about','skills','projects','strengths','contact','cv','neofetch','credits','theme','clear','help'];
     const wrap = el('div','line');
     const chips = el('div','chips');
     names.forEach(n => {
@@ -580,6 +632,21 @@ const commands = {
       print(`<span class="yellow b">${k.padEnd(16,' ')}</span><span class="dim">${v}</span>`);
     });
   },
+  projects(){
+    print('<span class="dim">$ ls -la projects/</span>');
+    blank();
+    CONFIG.projects.forEach((p, i) => {
+      print(`<span class="cyan b">[${String(i+1).padStart(2,'0')}]</span> <span class="accent b">${escapeHtml(p.title)}</span>`);
+      print(`<span class="dim">     stack  </span><span class="magenta">${escapeHtml(p.stack)}</span>`);
+      print(`<span class="dim">     desc   </span>${escapeHtml(p.desc)}`);
+      if (p.url && p.url !== 'TODO_URL'){
+        print(`<span class="dim">     link   </span><a class="tlink" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.url)}</a>`);
+      } else {
+        print(`<span class="dim">     link   // coming soon</span>`);
+      }
+      if (i < CONFIG.projects.length - 1) blank();
+    });
+  },
   strengths(){
     print('<span class="dim">$ cat strengths.txt</span>');
     print(`<span class="dim">// ${CONFIG.strengths.source}</span>`);
@@ -591,7 +658,7 @@ const commands = {
     print('<span class="dim">$ cat contact.txt</span>');
     print(`<span class="magenta">email   </span> <a class="tlink" href="mailto:${CONFIG.email}">${CONFIG.email}</a>`);
     print(`<span class="magenta">linkedin</span> <a class="tlink" href="${CONFIG.linkedin}" target="_blank" rel="noopener">${CONFIG.linkedin}</a>`);
-    print(`<span class="magenta">gitlab  </span> <a class="tlink" href="${CONFIG.gitlab}" target="_blank" rel="noopener">${CONFIG.gitlab}</a>`);
+    print(`<span class="magenta">github  </span> <a class="tlink" href="${CONFIG.github}" target="_blank" rel="noopener">${CONFIG.github}</a>`);
     print(`<span class="magenta">readme  </span> <a class="tlink" href="${CONFIG.readme}" target="_blank" rel="noopener">my README page</a>`);
     print(`<span class="magenta">cv      </span> <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`);
   },
@@ -836,6 +903,8 @@ function typeLine(text, cls){
 function wait(ms){ return new Promise(r => setTimeout(r, skip ? 0 : ms)); }
 
 async function boot(){
+  // buildReader needs escapeHtml, which is defined above — safe to call here
+  buildReader();
   const date = new Date().toString().replace(/ GMT.*/, '');
   print(`<span class="dim">Last login: ${date} on ttys001</span>`);
   blank();
