@@ -9,16 +9,13 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  /* =========================================================
-     EDIT ME: Theme palettes. Two terminal color schemes.
-     ========================================================= */
   :root[data-theme="dark"] {
     --bg:        #0b0e14;
     --bg-window: #0e1219;
     --bg-bar:    #161b25;
     --fg:        #c4cbd8;
     --dim:       #5b6675;
-    --prompt:    #58d68d;  /* the $ and user@host */
+    --prompt:    #58d68d;
     --path:      #5fb8e0;
     --accent:    #7ee787;
     --cyan:      #56d4dd;
@@ -60,7 +57,6 @@
     transition: background 0.35s ease, color 0.35s ease;
   }
 
-  /* atmospheric background grid behind the window */
   body {
     min-height: 100%;
     display: flex;
@@ -93,7 +89,6 @@
     to   { opacity: 1; transform: none; }
   }
 
-  /* title bar with traffic-light dots */
   .bar {
     flex: 0 0 auto;
     display: flex;
@@ -134,7 +129,6 @@
   }
   .bar-btn:hover { color: var(--accent); border-color: var(--accent); }
 
-  /* scanline + grain overlay for CRT feel */
   .window::after {
     content: "";
     position: absolute;
@@ -182,7 +176,6 @@
     overflow-x: auto;
   }
 
-  /* clickable command chips */
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; }
   .chip {
     background: transparent;
@@ -197,7 +190,6 @@
   }
   .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--glow); }
 
-  /* input row */
   .input-row {
     flex: 0 0 auto;
     display: flex;
@@ -227,7 +219,7 @@
     font-size: 14px;
     overflow: hidden;
   }
-  .ghost .gt { color: transparent; }   /* typed portion: invisible, just reserves width */
+  .ghost .gt { color: transparent; }
   .hint {
     flex: 0 0 auto;
     color: var(--dim);
@@ -261,7 +253,7 @@
   }
 
   /* =========================================================
-     Reader view — same content (from CONFIG), plain layout
+     Reader view
      ========================================================= */
   .reader {
     flex: 1 1 auto;
@@ -272,7 +264,6 @@
   .reader::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9px; }
   .reader::-webkit-scrollbar-track { background: transparent; }
 
-  /* show exactly one view */
   [data-view="terminal"] .reader { display: none; }
   [data-view="reader"] .screen,
   [data-view="reader"] .input-row { display: none !important; }
@@ -335,7 +326,6 @@
   }
   .r-cv:hover { opacity: 0.9; transform: translateY(-1px); }
 
-  /* projects in reader view */
   .r-projects { list-style: none; }
   .r-projects li {
     padding: 12px 0;
@@ -347,6 +337,47 @@
   .r-proj-desc { font-size: 14px; color: var(--fg); line-height: 1.7; max-width: 62ch; }
   .r-proj-link { font-size: 13px; margin-top: 6px; }
 
+  /* Guestbook in reader view */
+  .r-gb-entries { list-style: none; margin-bottom: 24px; }
+  .r-gb-entries li { padding: 10px 0; border-bottom: 1px dashed var(--border); }
+  .r-gb-entries li:last-child { border-bottom: none; }
+  .r-gb-nick { color: var(--yellow); font-weight: 700; font-size: 14px; }
+  .r-gb-date { color: var(--dim); font-size: 12px; margin-left: 8px; }
+  .r-gb-msg  { color: var(--fg); font-size: 14px; margin-top: 4px; }
+  .r-gb-form { display: flex; flex-direction: column; gap: 10px; max-width: 420px; }
+  .r-gb-form input,
+  .r-gb-form textarea {
+    background: var(--bg-bar);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  .r-gb-form input:focus,
+  .r-gb-form textarea:focus { border-color: var(--accent); }
+  .r-gb-form textarea { min-height: 80px; }
+  .r-gb-btn {
+    background: var(--accent);
+    color: var(--bg-window);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .r-gb-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .r-gb-status { font-size: 13px; color: var(--accent); }
+  .r-gb-status.err { color: var(--red); }
+
   @media (max-width: 600px) {
     .reader { padding: 26px 18px 22px; }
     .r-name { font-size: 30px; }
@@ -354,7 +385,6 @@
     .r-cv { display: block; text-align: center; }
   }
 
-  /* blinking block cursor used during boot typing */
   .cursor {
     display: inline-block;
     width: 8px;
@@ -368,8 +398,10 @@
   .fade-in { animation: fadeIn 0.18s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; } }
 
+  /* =========================================================
+     Mobile — full-screen, keyboard-aware
+     ========================================================= */
   @media (max-width: 600px) {
-    /* full-screen, app-like: no floating card, use every pixel */
     html, body { height: 100dvh; overflow: hidden; }
     body {
       padding: 0;
@@ -379,26 +411,28 @@
     }
     .window {
       width: 100%;
-      height: 100dvh;            /* JS overrides this with the visual-viewport height when the keyboard opens */
+      height: 100dvh;
       max-height: none;
       border: none;
       border-radius: 0;
       box-shadow: none;
       animation: none;
     }
-    .bar { padding: 12px 14px; }
-    .bar .title { font-size: 11px; }
-    /* larger, thumb-friendly tap targets */
-    .bar-btn { font-size: 12px; padding: 7px 11px; }
-    .screen { font-size: 13.5px; padding: 16px 15px 6px; }
-    .chips { gap: 9px; }
-    .chip { font-size: 13.5px; padding: 8px 14px; }
-    .input-row { padding: 12px 15px calc(12px + env(safe-area-inset-bottom)); gap: 8px; }
-    /* 16px input prevents iOS Safari from auto-zooming on focus */
-    #cmdline, .ghost { font-size: 16px; }
-    .ps { font-size: 14px; }
-    .hint { display: none; }     /* free up width on small screens */
-    .credit { padding: 8px 14px calc(8px + env(safe-area-inset-bottom)); }
+    .bar { padding: 8px 12px; gap: 6px; }
+    .bar .title { font-size: 10px; }
+    .dot { width: 10px; height: 10px; }
+    /* Smaller buttons on mobile to save space */
+    .bar-btn { font-size: 10px; padding: 4px 8px; }
+    /* Compact screen output */
+    .screen { font-size: 13px; padding: 12px 13px 4px; line-height: 1.55; }
+    .chips { gap: 7px; }
+    .chip { font-size: 12.5px; padding: 7px 11px; }
+    /* Input row: tight but comfortable, above keyboard */
+    .input-row { padding: 8px 13px calc(8px + env(safe-area-inset-bottom)); gap: 6px; border-top-width: 1px; }
+    #cmdline, .ghost { font-size: 16px; } /* 16px prevents iOS auto-zoom */
+    .ps { font-size: 13px; }
+    .hint { display: none; }
+    .credit { padding: 5px 13px calc(5px + env(safe-area-inset-bottom)); font-size: 10px; }
     pre.ascii { font-size: 9px; }
   }
   .neofetch-container {
@@ -406,22 +440,22 @@
     align-items: flex-start;
     gap: 20px;
     margin-bottom: 10px;
-}
-.neofetch-avatar {
-    width: 100px; /* Adjust size to your preference */
+  }
+  .neofetch-avatar {
+    width: 100px;
     height: auto;
-    image-rendering: pixelated; /* Keeps pixels sharp */
+    image-rendering: pixelated;
     border: 1px solid var(--border);
     padding: 4px;
     background: var(--bg-bar);
-}
-@media (max-width: 600px) {
-  header {
-    flex-direction: column-reverse; /* Puts image above text on mobile */
-    align-items: flex-start !important;
-    gap: 15px !important;
   }
-}
+  @media (max-width: 600px) {
+    header {
+      flex-direction: column-reverse;
+      align-items: flex-start !important;
+      gap: 15px !important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -446,10 +480,6 @@
   </div>
 
 <script>
-/* =========================================================
-   EDIT ME: Your details live in this CONFIG object.
-   Swap in your real name, role, blurb, skills and contacts.
-   ========================================================= */
 const CONFIG = {
   user: "memilyc",
   host: "portfolio",
@@ -479,9 +509,6 @@ const CONFIG = {
       ["Strategic",         "sees the patterns and picks the fastest path forward"],
     ],
   },
-  // -------------------------------------------------------
-  // EDIT ME: Projects — swap TODO_URL with your real links.
-  // -------------------------------------------------------
   projects: [
     {
       title:  "PostgreSQL Connection Calculator",
@@ -510,12 +537,9 @@ const CONFIG = {
   linkedin: "https://linkedin.com/in/memilyc",
   github:   "https://github.com/memilyc",
   readme:   "https://github.com/memilyc",
-  // -------------------------------------------------------
-  // Supabase — anon key is safe to expose; service-role key is server-only
-  // -------------------------------------------------------
   supabase: {
     url:     'https://ugowiqdbpjyaqvtcucqh.supabase.co',
-    anonKey: 'sb_publishable_tD7BWYAuAdbugMzUCPuyxg_PqnvvkMJ',  // <-- paste your anon/public key
+    anonKey: 'sb_publishable_tD7BWYAuAdbugMzUCPuyxg_PqnvvkMJ',
   },
 };
 
@@ -527,7 +551,6 @@ const viewBtn  = document.getElementById('viewBtn');
 const reader   = document.getElementById('reader');
 const root     = document.documentElement;
 
-/* ---- Supabase client (reads are public via anon key + RLS) ---- */
 let sb = null;
 try {
   if (CONFIG.supabase && CONFIG.supabase.anonKey && CONFIG.supabase.anonKey !== 'YOUR_ANON_KEY_HERE') {
@@ -535,7 +558,6 @@ try {
   }
 } catch(e) { console.warn('Supabase init failed', e); }
 
-/* helper: call an edge function */
 async function edgeFn(name, opts = {}) {
   const url = `${CONFIG.supabase.url}/functions/v1/${name}`;
   const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${CONFIG.supabase.anonKey}` };
@@ -543,10 +565,9 @@ async function edgeFn(name, opts = {}) {
   return res.json();
 }
 
-/* ---- Quiz state machine ---- */
 const quizState = {
   active: false,
-  phase: 'idle',       // idle | picking | playing | nickname | message | done
+  phase: 'idle',
   sessionId: null,
   questions: [],
   currentQ: 0,
@@ -554,12 +575,11 @@ const quizState = {
   startTime: 0,
   quizCategory: 'mixed',
   quizDifficulty: 'mixed',
-  // guestbook sign state
   gbNickname: '',
   gbMessage: '',
-  gbStep: 'idle',      // idle | nickname | message
-  // tail -f interval
+  gbStep: 'idle',
   tailInterval: null,
+  resumePrompt: false,
 };
 
 function resetQuizState() {
@@ -574,11 +594,9 @@ function resetQuizState() {
   quizState.quizDifficulty = 'mixed';
 }
 
-/* ---- profanity filter (client-side pre-check, server enforces too) ---- */
 const BLOCKED_RE = /shit|fuck|cunt|dick|bitch|asshole|bastard|whore|slut|nigger|nigga|faggot|retard|pedo|rapist|porn|xxx|sex|dildo|pussy|penis|vagina|cum|orgasm|fetish|nsfw|wank|jizz|cock|twat|wanker|bollocks|masturbat|semen|erection|genital|horny|kys|kill.?yourself|nazi|hitler|racist|bigot|bitcoin|crypto/i;
 function isClean(s){ return !BLOCKED_RE.test(s); }
 
-/* ---- theme (persists when deployed; degrades safely in preview) ---- */
 function applyTheme(t){
   root.setAttribute('data-theme', t);
   themeBtn.textContent = t === 'dark' ? '[ light ]' : '[ dark ]';
@@ -592,22 +610,69 @@ function applyTheme(t){
 themeBtn.addEventListener('click', () =>
   applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
 
-/* ---- reader view: renders the SAME CONFIG as a plain page ---- */
+/* ---- Guestbook reader form helpers ---- */
+function buildReaderGuestbookForm(container) {
+  container.innerHTML = '<p class="r-gb-status dim" id="gb-loading">Loading entries...</p>';
+  // Load entries
+  if (sb) {
+    sb.from('guestbook')
+      .select('nickname, message, created_at')
+      .order('created_at', { ascending: false })
+      .limit(20)
+      .then(({ data, error }) => {
+        let entriesHtml = '';
+        if (!error && data && data.length) {
+          entriesHtml = '<ul class="r-gb-entries">' + data.map(row => {
+            const date = new Date(row.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+            return `<li><span class="r-gb-nick">${escapeHtml(row.nickname)}</span><span class="r-gb-date">${date}</span><div class="r-gb-msg">${escapeHtml(row.message)}</div></li>`;
+          }).join('') + '</ul>';
+        } else {
+          entriesHtml = '<p class="r-gb-status dim" style="margin-bottom:16px;">No entries yet — be the first!</p>';
+        }
+        container.innerHTML = entriesHtml + `
+          <div class="r-gb-form" id="gb-form">
+            <input id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
+            <textarea id="gb-msg" placeholder="Leave a message... (2–300 chars)" maxlength="300"></textarea>
+            <button class="r-gb-btn" id="gb-submit">Sign guestbook →</button>
+            <span class="r-gb-status" id="gb-status" style="display:none;"></span>
+          </div>`;
+        document.getElementById('gb-submit').addEventListener('click', async () => {
+          const nick = (document.getElementById('gb-nick').value || '').trim();
+          const msg  = (document.getElementById('gb-msg').value || '').trim();
+          const statusEl = document.getElementById('gb-status');
+          statusEl.className = 'r-gb-status';
+          statusEl.style.display = '';
+          if (!nick || nick.length < 3 || nick.length > 20 || !/^[a-zA-Z0-9 _-]+$/.test(nick)) {
+            statusEl.textContent = 'Nickname must be 3–20 chars: letters, numbers, spaces, _ or -';
+            statusEl.classList.add('err'); return;
+          }
+          if (!isClean(nick)) { statusEl.textContent = 'That nickname isn\'t allowed.'; statusEl.classList.add('err'); return; }
+          if (!msg || msg.length < 2) { statusEl.textContent = 'Message too short (min 2 chars).'; statusEl.classList.add('err'); return; }
+          if (msg.length > 300) { statusEl.textContent = 'Message too long (max 300 chars).'; statusEl.classList.add('err'); return; }
+          if (!isClean(msg)) { statusEl.textContent = 'That message isn\'t allowed.'; statusEl.classList.add('err'); return; }
+          statusEl.textContent = 'Submitting...';
+          try {
+            const data = await edgeFn('post-guestbook', { method: 'POST', body: JSON.stringify({ nickname: nick, message: msg }) });
+            if (data.error) { statusEl.textContent = 'Error: ' + data.error; statusEl.classList.add('err'); }
+            else { statusEl.textContent = '✓ Message saved! Thanks for signing.'; document.getElementById('gb-nick').value = ''; document.getElementById('gb-msg').value = ''; }
+          } catch(e) { statusEl.textContent = 'Failed: ' + e.message; statusEl.classList.add('err'); }
+        });
+      });
+  } else {
+    container.innerHTML = '<p class="r-gb-status err">Guestbook unavailable (Supabase not configured).</p>';
+  }
+}
+
 function buildReader(){
   const c = CONFIG;
   const esc = escapeHtml;
   reader.innerHTML = `
     <header style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
       <h1 class="r-name">${esc(c.name)}</h1>
-      
       <img src="em.png" style="width: 80px; height: 80px; image-rendering: pixelated; border: 2px solid var(--border); border-radius: 8px;">
-    
-      
     </header>
     <div class="r-role">${esc(c.role)}</div>
     <p class="r-tag">${esc(c.tagline)}</p>
-  <section class="r-sec">
-      </section>
     <section class="r-sec">
       <h2 class="r-h">About</h2>
       <p class="r-body">${c.about.map(esc).join(' ')}</p>
@@ -652,13 +717,18 @@ function buildReader(){
       <h2 class="r-h">Résumé</h2>
       <a class="r-cv" href="${esc(c.cv)}" target="_blank" rel="noopener">Read my full CV →</a>
     </section>
+    <section class="r-sec">
+      <h2 class="r-h">Guestbook</h2>
+      <div id="reader-guestbook"></div>
+    </section>
     <section class="r-sec" style="border: 1px dashed var(--accent); border-radius: 8px; padding: 18px 22px; background: var(--glow);">
       <h2 class="r-h" style="border-bottom: none; margin-bottom: 8px; padding-bottom: 0;">Try the Interactive Terminal</h2>
-      <p class="r-body" style="font-size: 14px;">Switch to <strong>terminal view</strong> (click <em>❯ terminal view</em> top-right) to play a <strong>trivia quiz</strong> with a leaderboard, sign the <strong>guestbook</strong>, and discover hidden <strong>easter egg</strong> commands. Try <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">quiz</code>, <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">guestbook</code>, or <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">resume</code> to get started!</p>
+      <p class="r-body" style="font-size: 14px;">Switch to <strong>terminal view</strong> (click <em>❯ terminal view</em> top-right) to play a <strong>trivia quiz</strong> with a leaderboard, sign the <strong>guestbook</strong>, and discover hidden <strong>easter egg</strong> commands. Try <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">quiz</code>, <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">guestbook</code>, or <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">dadjoke</code> to get started!</p>
     </section>`;
+
+  buildReaderGuestbookForm(document.getElementById('reader-guestbook'));
 }
 
-/* ---- view toggle (persists when deployed; safe in preview) ---- */
 function applyView(v){
   root.setAttribute('data-view', v);
   viewBtn.textContent = v === 'terminal' ? '▤ reader view' : '❯ terminal view';
@@ -673,7 +743,6 @@ function applyView(v){
 viewBtn.addEventListener('click', () =>
   applyView(root.getAttribute('data-view') === 'terminal' ? 'reader' : 'terminal'));
 
-/* ---- output helpers ---- */
 function el(tag, cls, html){
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -692,11 +761,51 @@ function printPromptEcho(cmd){
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function blank(){ print('&nbsp;'); }
 
-/* ---- the commands ---- */
+/* =========================================================
+   Math evaluator — safe subset: + - * / % ( ) and spaces
+   ========================================================= */
+function tryMath(raw) {
+  const expr = raw.trim();
+  // Only allow digits, operators, parens, dots, spaces
+  if (!/^[\d\s\+\-\*\/\%\.\(\)]+$/.test(expr)) return null;
+  // Must contain at least one operator to be treated as math
+  if (!/[\+\-\*\/\%]/.test(expr)) return null;
+  try {
+    // eslint-disable-next-line no-new-func
+    const result = Function('"use strict"; return (' + expr + ')')();
+    if (typeof result === 'number' && isFinite(result)) return result;
+  } catch(e) {}
+  return null;
+}
+
+/* =========================================================
+   Dad jokes
+   ========================================================= */
+const DAD_JOKES = [
+  { setup: "I only know 25 letters of the alphabet.", punchline: "I don't know y." },
+  { setup: "What do you call cheese that isn't yours?", punchline: "Nacho cheese." },
+  { setup: "What do you call a factory that makes okay products?", punchline: "A satisfactory." },
+  { setup: "I'm reading a book about anti-gravity.", punchline: "It's impossible to put down." },
+  { setup: "I told my wife she was drawing her eyebrows too high.", punchline: "She looked surprised." },
+  { setup: "What do you call a fake noodle?", punchline: "An impasta." },
+  { setup: "Why did the math book look sad?", punchline: "It had too many problems." },
+  { setup: "Want to hear a construction joke?", punchline: "I'm still working on it." },
+  { setup: "You: \"I'm back.\"", punchline: "Dad: \"Hi Back, I'm Dad.\"" },
+  { setup: "I'm afraid for the calendar.", punchline: "Its days are numbered." },
+  { setup: "I used to play piano by ear…", punchline: "Now I use my hands." },
+  { setup: "What do you call a bear with no teeth?", punchline: "A gummy bear." },
+  { setup: "Why did the computer go to the doctor?", punchline: "It had a virus." },
+  { setup: "I'm friends with all the electricians.", punchline: "We have good current connections." },
+  { setup: "What do you call a sleeping bull?", punchline: "A bulldozer." },
+  { setup: "I tried to catch fog yesterday.", punchline: "Mist." },
+  { setup: "Why did the coffee file a police report?", punchline: "It got mugged." },
+];
+let lastJokeIdx = -1;
+
 const commands = {
   help(){
     print('Available commands — click a chip, or type one (typos are fine):', 'dim');
-    const names = ['about','skills','projects','strengths','contact','cv','quote','quiz','leaderboard','guestbook','neofetch','credits','theme','clear','help'];
+    const names = ['about','skills','projects','strengths','contact','cv','quote','dadjoke','quiz','leaderboard','guestbook','neofetch','credits','theme','clear','help'];
     const wrap = el('div','line');
     const chips = el('div','chips');
     names.forEach(n => {
@@ -707,6 +816,8 @@ const commands = {
     wrap.appendChild(chips);
     screen.appendChild(wrap);
     screen.scrollTop = screen.scrollHeight;
+    blank();
+    print(`<span class="dim">Still lost? <a class="tlink" href="mailto:${CONFIG.email}?subject=Portfolio%20Enquiry">Open a ticket</a> and I'll get back to you.</span>`);
   },
   about(){
     print(`<span class="accent b">${CONFIG.name}</span> <span class="dim">—</span> <span class="cyan">${CONFIG.role}</span>`);
@@ -771,110 +882,39 @@ const commands = {
       { text: "Don't worry about those who talk behind your back, they're behind you for a reason.", author: "" },
       { text: "Even bad days have happy moments :)", author: "" },
       { text: "Two things define you: Your patience when you have nothing, and your attitude when you have everything.", author: "" },
-      { text: "Two roads diverged in a wood, and I took the one less traveled by, and that has made all the difference.", author: "Robert Frost, \u201cThe Road Not Taken\u201d" },
-      { text: "How do you spell 'love'? // Piglet\nYou don't spell it... you feel it. // Pooh", author: "A.A. Milne" },
-      { text: "The only time you should look down on someone is when you are helping them up.", author: "" },
-      { text: "All we have is all we need. All we need is the awareness of how blessed we really are.", author: "Sarah Ban Breathnach" },
-      { text: "Believe nothing, no matter where you read it, or who said it, no matter if I have said it, unless it agrees with your own reason and your own common sense.", author: "Buddha" },
-      { text: "We make our own fortunes and then call them fate. And what better excuse to choose a path than to insist its our destiny. But at the end of the day, we all have to live with our choices no matter who\u2019s looking over our shoulder.", author: "Gossip Girl, S03E12" },
-      { text: "When I was 5 years old, my mother always told me that happiness was the key to life. When I went to school, they asked me what I wanted to be when I grew up. I wrote down 'happy'. They told me I didn\u2019t understand the assignment, and I told them they didn\u2019t understand life.", author: "John Lennon" },
-      { text: "No matter how hard the past, you can always begin again.", author: "Buddha" },
-      { text: "We are only as strong as we are united, as weak as we are divided.", author: "J.K. Rowling" },
-      { text: "The problem is not the problem. The problem is your attitude about the problem.", author: "Captain Jack Sparrow" },
-      { text: "Luck is what happens when preparation meets opportunity.", author: "Coach Darrel Royal" },
-      { text: "Choose a job you love, and you will never have to work a day in your life.", author: "Confucius" },
-      { text: "As I am, so are others; as others are, so am I. Having thus identified self and others, harm no one nor have them harmed.", author: "Buddha" },
-      { text: "It is better to conquer yourself than to win a thousand battles.", author: "Buddha" },
-      { text: "The two most important days in your life are the day you are born and the day you find out why.", author: "Mark Twain" },
-      { text: "We make a living by what we get, but we make a life by what we give.", author: "Winston Churchill" },
-      { text: "Don't worry about what others think. Most people don't use their brain very often.", author: "Venkat Desireddy" },
-      { text: "Worry about your character and not your reputation, because your character is who you are, and your reputation is only what people think of you.", author: "" },
-      { text: "The richest man is not he who has the most, but he who needs the least.", author: "Unknown" },
-      { text: "What you must become is what you would do for the rest of your life for free.", author: "Jeckov Kanani" },
-      { text: "The meaning of life is to give life meaning.", author: "Ken Hudgins" },
-      { text: "I am better than I was yesterday, but not as good as I will be tomorrow.", author: "" },
-      { text: "Just because life has dealt us one hard blow, there is no reason for us to be unhappy for ever.", author: "Anne Fine" },
-      { text: "We are what we think. All that we are arises with our thoughts, we make the world.", author: "Buddha" },
-      { text: "Life is a journey, take it slow. Enjoy every second of it, before you go.", author: "Joe Brooks" },
-      { text: "Life has 3 C's: Choice, Chance, Change. You have to make the Choice, to take the Chance, if you want anything to Change.", author: "" },
-      { text: "Quality over quantity. Imagination over imitation. Integrity over image. Legacy over latest. Always.", author: "Philip Wang" },
-      { text: "The best things in the world are not things.", author: "" },
-      { text: "Peeing is like a good book in that it is very, very hard to stop once you start.", author: "John Green, Paper Towns" },
-      { text: "A hero can be anyone. Even if they're just putting a coat over the shoulders of a young boy to let him know this isn't the end.", author: "The Dark Knight Rises" },
-      { text: "And I\u2019ve realized that the Beatles got it wrong. Love isn\u2019t all we need\u2014love is all there is.", author: "Morgan Matson, Second Chance Summer" },
-      { text: "To enjoy the rainbow, first enjoy the rain.", author: "Paulo Coelho" },
-      { text: "Victory is always possible for the person who refuses to stop fighting.", author: "Napoleon Hill" },
-      { text: "The difference between school and life? In school, you're taught a lesson and then given a test. In life, you're given a test that teaches you a lesson.", author: "Tom Bodett" },
-      { text: "There are three phases to awareness: to look, to see, and to perceive. A camera looks. A mind sees. A heart perceives.", author: "Unknown" },
-      { text: "The secret of success is constancy of purpose.", author: "Benjamin Disraeli" },
-      { text: "Happiness is an attitude. We either make ourselves miserable, or happy and strong. The amount of work is the same.", author: "Francesca Reigler" },
+      { text: "Two roads diverged in a wood, and I took the one less traveled by, and that has made all the difference.", author: "Robert Frost" },
       { text: "The only way around is through.", author: "Robert Frost" },
-      { text: "Great dancers are not great because of their technique, they are great because of their passion.", author: "Martha Graham" },
-      { text: "We don't stop playing because we grow old, we grow old because we stop playing.", author: "" },
-      { text: "I cry because people are stupid and that makes me sad.", author: "Dr. Sheldon Cooper" },
-      { text: "Suffering produces character, and character produces hope, and hope does not disappoint us.", author: "Jeremy Lin" },
-      { text: "Take care of your body. It's the only place you have to live.", author: "Jim Rohn" },
-      { text: "I'd rather be hated for who I am, than loved for who I am not.", author: "Kurt Cobain" },
-      { text: "The only disability in life is a bad attitude.", author: "Scott Hamilton" },
-      { text: "Earth provides enough to satisfy every man's needs, but not every man's greed.", author: "Mahatma Gandhi" },
-      { text: "There is no such thing as failure. There are only results.", author: "Tony Robbins" },
-      { text: "We have two options, medically & emotionally: give up, or Fight Like Hell.", author: "Lance Armstrong" },
-      { text: "Learn from yesterday, live for today, & hope for tomorrow.", author: "" },
-      { text: "A decision is made with the brain. A commitment is made with the heart. Therefore, a commitment is much deeper and more binding than a decision.", author: "Nido Qubein" },
-      { text: "Be who you are and say what you feel because those who mind don't matter and those who matter don't mind.", author: "Dr. Seuss" },
-      { text: "There is a real magic in enthusiasm. It spells the difference between mediocrity & accomplishment.", author: "Norman Vincent Peale" },
-      { text: "Sometimes the hardest thing in life is to know which bridge to cross and which to burn.", author: "The International (2009)" },
-      { text: "Faith is taking the first step...even when you don't see the whole staircase.", author: "Martin Luther King, Jr." },
-      { text: "Twenty years from now you will be more disappointed by the things that you didn't do than by the ones you did do. So throw off the bowlines. Sail away from the safe harbor. Catch the trade winds in your sails. Explore. Dream. Discover.", author: "Mark Twain" },
-      { text: "Strength does not come from physical capacity. It comes from an indomitable will.", author: "Mahatma Gandhi" },
-      { text: "All we have to decide is what to do with the time that is given us.", author: "J.R.R. Tolkien, The Fellowship of the Ring" },
-      { text: "I'm selfish, impatient and a little insecure. I make mistakes, I am out of control and at times hard to handle. But if you can't handle me at my worst, then you sure as hell don't deserve me at my best.", author: "Marilyn Monroe" },
-      { text: "You've gotta dance like there's nobody watching, Love like you'll never be hurt, Sing like there's nobody listening, And live like it's heaven on earth.", author: "William W. Purkey" },
-      { text: "Insanity is doing the same thing, over and over again, but expecting different results.", author: "Albert Einstein" },
-      { text: "Don't walk behind me; I may not lead. Don't walk in front of me; I may not follow. Just walk beside me and be my friend.", author: "Albert Camus" },
-      { text: "You only live once, but if you do it right, once is enough.", author: "Mae West" },
-      { text: "Darkness cannot drive out darkness; only light can do that. Hate cannot drive out hate; only love can do that.", author: "Martin Luther King Jr." },
-      { text: "Here's to the crazy ones. The misfits. The rebels. The troublemakers. The round pegs in the square holes. The ones who see things differently. They're not fond of rules. And they have no respect for the status quo. You can quote them, disagree with them, glorify or vilify them. About the only thing you can't do is ignore them. Because they change things. They push the human race forward. And while some may see them as the crazy ones, we see genius. Because the people who are crazy enough to think they can change the world, are the ones who do.", author: "Apple Inc." },
-      { text: "Always forgive your enemies; nothing annoys them so much.", author: "Oscar Wilde" },
-      { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", author: "Mahatma Gandhi" },
-      { text: "In three words I can sum up everything I've learned about life: it goes on.", author: "Robert Frost" },
-      { text: "If you tell the truth, you don't have to remember anything.", author: "Mark Twain" },
-      { text: "Friendship is born at that moment when one person says to another: What! You too? I thought I was the only one.", author: "C.S. Lewis" },
       { text: "Be yourself; everyone else is already taken.", author: "Oscar Wilde" },
       { text: "Be the change that you wish to see in the world.", author: "Mahatma Gandhi" },
-      { text: "Two things are infinite: the universe and human stupidity; and I'm not sure about the universe.", author: "Albert Einstein" },
-      { text: "Don't cry because it's over, smile because it happened.", author: "Dr. Seuss" },
-      { text: "If you love two people at the same time, choose the second one. Because if you truly loved the first one, you wouldn\u2019t love another. There are four questions of value in life\u2026 What is sacred? Of what is the spirit made? What is worth living for, and what is worth dying for? The answer to each is the same. Only love.", author: "Johnny Depp" },
-      { text: "Study as if you are motivated for the outcome of your hard work.", author: "" },
-      { text: "Having a role model in life is a great thing to have; one who provides us with direction and inspiration. However, we will forever be restricted by that person's limitations if we live within their boundaries. Be influenced, but set your own standards and develop your own principals, if you are ever to live beyond someone else's dreams.", author: "" },
-      { text: "Happiness is not something you postpone for the future; it is something you design for the present.", author: "Jim Rohn" },
-      { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
-      { text: "The first and best victory is to conquer self.", author: "Plato" },
-      { text: "Monsters are real, so are ghosts. They live inside of us, and they even take control of us sometimes.", author: "Stephen King" },
-      { text: "Love is funny. Makes you happy, sad and makes you do all sorts of things you never thought you'd do before.", author: "I Love You Phillip Morris (2009)" },
-      { text: "When you see the present, you see the future. By understanding the present you understand the past.", author: "Ajahn Chah" },
-      { text: "The best and most beautiful things in the world cannot be seen or even touched. They must be felt with the heart.", author: "Helen Keller" },
-      { text: "There are only two ways to live; one is live as though nothing is a miracle; the other is live as though everything is a miracle.", author: "Albert Einstein" },
-      { text: "When life gives you a hundred reasons to cry, show life that you have a thousand reasons to smile.", author: "Unknown" },
-      { text: "Life is not measured by the number of breaths we take, but by the moments that take our breath away.", author: "Maya Angelou" },
-      { text: "When one door closes, another opens; but we often look so long and so regretfully upon the closed door that we do not see the one that has opened for us.", author: "Alexander Graham Bell" },
-      { text: "Again, you can't connect the dots looking forward; you can only connect them looking backwards. So you have to trust that the dots will somehow connect in your future. You have to trust in something - your gut, destiny, life, karma, whatever. This approach has never let me down, and it has made all the difference in my life.", author: "Steve Jobs" },
-      { text: "Time you enjoy wasting, was not wasted.", author: "John Lennon" },
-      { text: "Do not dwell in the past, do not dream of the future, concentrate the mind on the present moment.", author: "Buddha" },
-      { text: "A creative man is motivated by the desire to achieve, not by the desire to beat others.", author: "Ayn Rand" },
-      { text: "The only reason we don\u2019t have what we want in life is the reasons we create why we can\u2019t have them.", author: "Tony Robbins" },
+      { text: "In three words I can sum up everything I've learned about life: it goes on.", author: "Robert Frost" },
       { text: "A person who never made a mistake never tried anything new.", author: "Albert Einstein" },
-      { text: "If we wait for the moment when absolutely everything is ready, we shall never begin.", author: "Ivan Turgenev" },
-      { text: "The real heroes anyway aren\u2019t the people doing things; the real heroes are the people noticing things, paying attention.", author: "John Green, The Fault in Our Stars" },
-      { text: "Take calculated risks. That is quite different from being rash.", author: "George S. Patton" },
-      { text: "I think the saddest people always try their hardest to make people happy because they know what it feels like to feel alone.", author: "" },
+      { text: "Life is not measured by the number of breaths we take, but by the moments that take our breath away.", author: "Maya Angelou" },
+      { text: "All we have to decide is what to do with the time that is given us.", author: "J.R.R. Tolkien" },
+      { text: "Again, you can't connect the dots looking forward; you can only connect them looking backwards.", author: "Steve Jobs" },
+      { text: "Victory is always possible for the person who refuses to stop fighting.", author: "Napoleon Hill" },
+      { text: "Faith is taking the first step even when you don't see the whole staircase.", author: "Martin Luther King, Jr." },
     ];
     const q = quotes[Math.floor(Math.random() * quotes.length)];
     print('<span class="dim">$ fortune</span>');
     blank();
-    // Wrap long quotes nicely
-    print(`<span class=\"accent\">${escapeHtml(q.text)}</span>`);
-    if (q.author) print(`<span class=\"dim\">  \u2014 ${escapeHtml(q.author)}</span>`);
+    print(`<span class="accent">${escapeHtml(q.text)}</span>`);
+    if (q.author) print(`<span class="dim">  — ${escapeHtml(q.author)}</span>`);
+  },
+  dadjoke(){
+    // Pick a joke different from the last one
+    let idx;
+    do { idx = Math.floor(Math.random() * DAD_JOKES.length); } while (idx === lastJokeIdx && DAD_JOKES.length > 1);
+    lastJokeIdx = idx;
+    const joke = DAD_JOKES[idx];
+    print('<span class="dim">$ dadjoke</span>');
+    blank();
+    print(`<span class="yellow">${escapeHtml(joke.setup)}</span>`);
+    setTimeout(() => {
+      print(`<span class="accent b">${escapeHtml(joke.punchline)}</span>`);
+      blank();
+      print('<span class="dim">( groan )</span>');
+      screen.scrollTop = screen.scrollHeight;
+    }, 700);
   },
   clear(){ screen.innerHTML = ''; },
   credits(){
@@ -890,18 +930,6 @@ const commands = {
   },
   whoami(){ print(CONFIG.user); },
   neofetch(){
-    const art = [
-"        a:::::a         ",
-"       a::::::a         ",
-"      a::::::::a        ",
-"     a:::::::::::a      ",
-"    a::::::aa:::::a     ",
-"   a::::::a   a:::::a   ",
-"  a:::::::aaaa::::::a   ",
-" a:::::::::::::::::::a  ",
-" aa::::::aaaaa::::::aa  ",
-"   aaaaaa     aaaaaa   ",
-    ];
     const info = [
       `<span class="accent b">${CONFIG.user}</span>@<span class="accent b">${CONFIG.host}</span>`,
       `<span class="dim">-----------------</span>`,
@@ -911,65 +939,37 @@ const commands = {
       `<span class="yellow">Uptime</span>:  always on-call`,
       `<span class="yellow">CV</span>:      <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`,
     ];
-    // Create the container
     const container = el('div', 'neofetch-container');
-    
-    // Create the image element
     const img = document.createElement('img');
-    img.src = 'em.png'; // Make sure this path is correct relative to your HTML
+    img.src = 'em.png';
     img.className = 'neofetch-avatar';
-    
-    // Create the text wrapper
     const infoWrap = document.createElement('div');
     infoWrap.innerHTML = info.join('<br>');
-    
     container.appendChild(img);
     container.appendChild(infoWrap);
-    
-    // Add to screen
     screen.appendChild(container);
     screen.scrollTop = screen.scrollHeight;
-
-    const rows = Math.max(art.length, info.length);
-    let out = '';
-    for (let i=0;i<rows;i++){
-      const a = (art[i]||'').padEnd(26,' ');
-      out += `<span class="accent">${a}</span>${info[i]||''}\n`;
-    }
-    //print(out);
   },
-
-  /* =========================================================
-     INTERACTIVE COMMANDS: quiz, leaderboard, guestbook
-     ========================================================= */
 
   async quiz(args){
     if (!sb) { print('<span class="red">Supabase not configured. Set your anon key in CONFIG.</span>'); return; }
     if (quizState.active) { print('<span class="yellow">Quiz already in progress!</span> Type <span class="accent">quit</span> to abandon.'); return; }
-
-    // Direct shortcut: quiz easy / quiz medium / quiz hard / quiz emily
     const sub = (args || '').trim().toLowerCase();
-    if (sub) {
-      return commands._startQuiz(sub);
-    }
-
-    // Interactive menu
+    if (sub) { return commands._startQuiz(sub); }
     blank();
     print('<span class="accent b">Trivia Quiz</span> <span class="dim">— pick a mode:</span>');
     blank();
     const modes = [
-      { key: '1', label: 'Easy',       args: 'easy',  desc: 'Beginner-friendly questions' },
-      { key: '2', label: 'Medium',     args: 'medium', desc: 'A balanced mix' },
-      { key: '3', label: 'Hard',       args: 'hard',  desc: 'For the experts' },
-      { key: '4', label: 'Mixed',      args: 'mixed', desc: 'All difficulties, random' },
-      { key: '5', label: 'Emily',      args: 'emily', desc: 'Exclusive Emily lore' },
+      { key: '1', label: 'Easy',   args: 'easy',   desc: 'Beginner-friendly questions' },
+      { key: '2', label: 'Medium', args: 'medium', desc: 'A balanced mix' },
+      { key: '3', label: 'Hard',   args: 'hard',   desc: 'For the experts' },
+      { key: '4', label: 'Mixed',  args: 'mixed',  desc: 'All difficulties, random' },
+      { key: '5', label: 'Emily',  args: 'emily',  desc: 'Exclusive Emily lore' },
     ];
     modes.forEach(m => {
       print(`  <span class="yellow b">${m.key})</span> <span class="accent b">${m.label}</span> <span class="dim">— ${m.desc}</span>`);
     });
     blank();
-
-    // Make mode chips clickable
     const wrap = el('div','line');
     const chips = el('div','chips');
     modes.forEach(m => {
@@ -980,103 +980,57 @@ const commands = {
     wrap.appendChild(chips);
     screen.appendChild(wrap);
     screen.scrollTop = screen.scrollHeight;
-
     print('<span class="dim">Or type 1–5 / easy / medium / hard / emily:</span>');
     quizState.phase = 'picking';
   },
 
   async _startQuiz(sub){
-    let category   = null;
-    let difficulty = null;
-    let label      = 'Mixed';
-
-    if (sub === 'emily') {
-      category = 'emily';
-      label    = 'Emily (exclusive)';
-    } else if (sub === 'easy' || sub === 'medium' || sub === 'hard') {
-      difficulty = sub;
-      label      = sub.charAt(0).toUpperCase() + sub.slice(1);
-    } else if (sub === 'mixed' || sub === '4') {
-      label = 'Mixed';
-    } else if (sub === '1') { difficulty = 'easy';   label = 'Easy'; }
-      else if (sub === '2') { difficulty = 'medium'; label = 'Medium'; }
-      else if (sub === '3') { difficulty = 'hard';   label = 'Hard'; }
-      else if (sub === '5') { category = 'emily';    label = 'Emily (exclusive)'; }
-    else if (sub && sub !== '') {
-      category = sub;
-      label    = sub.charAt(0).toUpperCase() + sub.slice(1);
-    }
-
-    print(`<span class="dim">$ starting trivia quiz${difficulty ? ' [' + difficulty + ']' : ''}${category ? ' [' + category + ']' : ''}...</span>`);
+    let category = null, difficulty = null, label = 'Mixed';
+    if (sub === 'emily') { category = 'emily'; label = 'Emily (exclusive)'; }
+    else if (sub === 'easy' || sub === 'medium' || sub === 'hard') { difficulty = sub; label = sub.charAt(0).toUpperCase() + sub.slice(1); }
+    else if (sub === 'mixed' || sub === '4') { label = 'Mixed'; }
+    else if (sub === '1') { difficulty = 'easy';   label = 'Easy'; }
+    else if (sub === '2') { difficulty = 'medium'; label = 'Medium'; }
+    else if (sub === '3') { difficulty = 'hard';   label = 'Hard'; }
+    else if (sub === '5') { category = 'emily';    label = 'Emily (exclusive)'; }
+    else if (sub) { category = sub; label = sub.charAt(0).toUpperCase() + sub.slice(1); }
+    print(`<span class="dim">$ starting trivia quiz...</span>`);
     print('<span class="dim">Fetching questions from database...</span>');
-
     try {
       let url = 'start-quiz';
       const params = [];
-      if (category)   params.push(`category=${encodeURIComponent(category)}`);
-      if (difficulty)  params.push(`difficulty=${encodeURIComponent(difficulty)}`);
+      if (category)  params.push(`category=${encodeURIComponent(category)}`);
+      if (difficulty) params.push(`difficulty=${encodeURIComponent(difficulty)}`);
       if (params.length) url += '?' + params.join('&');
-
       const data = await edgeFn(url, { method: 'POST' });
       if (data.error) { print(`<span class="red">Error: ${escapeHtml(data.error)}</span>`); return; }
-
-      quizState.active = true;
-      quizState.phase = 'playing';
-      quizState.sessionId = data.sessionId;
-      quizState.questions = data.questions;
-      quizState.currentQ = 0;
-      quizState.answers = [];
-      quizState.startTime = Date.now();
+      quizState.active = true; quizState.phase = 'playing';
+      quizState.sessionId = data.sessionId; quizState.questions = data.questions;
+      quizState.currentQ = 0; quizState.answers = []; quizState.startTime = Date.now();
       quizState.quizCategory = data.category || category || 'mixed';
       quizState.quizDifficulty = data.difficulty || difficulty || 'mixed';
-
       blank();
       print(`<span class="accent b">Trivia Quiz</span> <span class="dim">— ${data.questions.length} questions | ${label}</span>`);
       print('<span class="dim">Type a, b, c, or d to answer. Type quit to abandon.</span>');
       blank();
       showQuizQuestion();
-    } catch(e) {
-      print(`<span class="red">Failed to start quiz: ${escapeHtml(e.message)}</span>`);
-    }
+    } catch(e) { print(`<span class="red">Failed to start quiz: ${escapeHtml(e.message)}</span>`); }
   },
 
   async leaderboard(args){
     if (!sb) { print('<span class="red">Supabase not configured.</span>'); return; }
-
-    // Parse filter: leaderboard easy, leaderboard emily, leaderboard hard, etc.
     const filter = (args || '').trim().toLowerCase();
-    let diffFilter  = null;
-    let catFilter   = null;
-    let label       = 'All';
-
-    if (filter === 'easy' || filter === 'medium' || filter === 'hard') {
-      diffFilter = filter;
-      label      = filter.charAt(0).toUpperCase() + filter.slice(1);
-    } else if (filter) {
-      catFilter = filter;
-      label     = filter.charAt(0).toUpperCase() + filter.slice(1);
-    }
-
+    let diffFilter = null, catFilter = null, label = 'All';
+    if (filter === 'easy' || filter === 'medium' || filter === 'hard') { diffFilter = filter; label = filter.charAt(0).toUpperCase() + filter.slice(1); }
+    else if (filter) { catFilter = filter; label = filter.charAt(0).toUpperCase() + filter.slice(1); }
     print(`<span class="dim">$ cat leaderboard.txt${filter ? ' | filter: ' + filter : ''}</span>`);
-
     try {
-      let query = sb
-        .from('leaderboard')
-        .select('nickname, score, total_questions, duration_seconds, category, difficulty, created_at')
-        .order('score', { ascending: false })
-        .order('duration_seconds', { ascending: true });
-
+      let query = sb.from('leaderboard').select('nickname, score, total_questions, duration_seconds, category, difficulty, created_at').order('score', { ascending: false }).order('duration_seconds', { ascending: true });
       if (diffFilter) query = query.eq('difficulty', diffFilter);
       if (catFilter)  query = query.eq('category', catFilter);
-
       const { data, error } = await query.limit(10);
-
       if (error) throw error;
-      if (!data.length) {
-        print(`<span class="dim">No scores${filter ? ' for ' + escapeHtml(filter) : ''} yet. Be the first — type <span class="accent">quiz</span>!</span>`);
-        return;
-      }
-
+      if (!data.length) { print(`<span class="dim">No scores yet. Be the first — type <span class="accent">quiz</span>!</span>`); return; }
       blank();
       print(`<span class="accent b">  #  Nickname          Score   Time    Diff     Category</span>`);
       print('<span class="dim">  ───────────────────────────────────────────────────────</span>');
@@ -1092,15 +1046,11 @@ const commands = {
       });
       blank();
       print('<span class="dim">Type <span class="accent">quiz</span> to compete! Filters: <span class="accent">leaderboard easy</span> | <span class="accent">leaderboard emily</span></span>');
-    } catch(e) {
-      print(`<span class="red">Error loading leaderboard: ${escapeHtml(e.message)}</span>`);
-    }
+    } catch(e) { print(`<span class="red">Error loading leaderboard: ${escapeHtml(e.message)}</span>`); }
   },
 
   async guestbook(args){
     if (!sb) { print('<span class="red">Supabase not configured.</span>'); return; }
-
-    // guestbook sign — start the signing flow
     if (args === 'sign') {
       if (quizState.gbStep !== 'idle') { print('<span class="yellow">Already signing guestbook!</span>'); return; }
       quizState.gbStep = 'nickname';
@@ -1110,20 +1060,11 @@ const commands = {
       print('Enter your nickname (3–20 chars):');
       return;
     }
-
-    // default: show guestbook
     print('<span class="dim">$ cat guestbook.txt</span>');
-
     try {
-      const { data, error } = await sb
-        .from('guestbook')
-        .select('nickname, message, created_at')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
+      const { data, error } = await sb.from('guestbook').select('nickname, message, created_at').order('created_at', { ascending: false }).limit(20);
       if (error) throw error;
       if (!data.length) { print('<span class="dim">Guestbook is empty. Type <span class="accent">guestbook sign</span> to be the first!</span>'); return; }
-
       blank();
       data.forEach(row => {
         const date = new Date(row.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
@@ -1132,14 +1073,9 @@ const commands = {
       });
       blank();
       print('<span class="dim">Type <span class="accent">guestbook sign</span> to leave a message!</span>');
-    } catch(e) {
-      print(`<span class="red">Error loading guestbook: ${escapeHtml(e.message)}</span>`);
-    }
+    } catch(e) { print(`<span class="red">Error loading guestbook: ${escapeHtml(e.message)}</span>`); }
   },
 
-  /* =========================================================
-     EASTER EGGS — Tier 1: Commands recruiters will discover
-     ========================================================= */
   resume(){
     print('<span class="dim">Loading resume...</span>');
     const bar = print('');
@@ -1179,33 +1115,21 @@ const commands = {
       ['Actually writes documentation', true],
     ];
     checks.forEach(([label, ok]) => {
-      const mark = ok ? '<span class="accent">\u2714</span>' : '<span class="red">\u2718</span>';
+      const mark = ok ? '<span class="accent">✔</span>' : '<span class="red">✘</span>';
       print(`${mark} ${label}`);
     });
     blank();
-    print('Risk assessment:');
-    print('  <span class="accent b">LOW</span>');
-    blank();
-    print('Recommendation:');
-    print('  <span class="accent b">Strong hire.</span>');
+    print('Recommendation: <span class="accent b">Strong hire.</span>');
   },
 
   uptime(){
     print('<span class="accent b">System uptime:</span> 9 years');
     blank();
-    print('Incidents survived:');
-    print('  <span class="yellow b">1247</span>');
+    print('Incidents survived: <span class="yellow b">1247</span>');
     blank();
-    print('Production outages:');
-    print('  <span class="red">too many</span>');
-    blank();
-    print('Lessons learned:');
-    print('  <span class="accent b">all of them</span>');
+    print('Lessons learned: <span class="accent b">all of them</span>');
   },
 
-  /* =========================================================
-     EASTER EGGS — Tier 2: Support engineer jokes
-     ========================================================= */
   'tail -f'(){
     if (quizState.tailInterval) { clearInterval(quizState.tailInterval); quizState.tailInterval = null; }
     print('<span class="dim">$ tail -f production.log</span>');
@@ -1214,16 +1138,13 @@ const commands = {
     const messages = [
       { level: 'INFO',  text: 'customer issue resolved' },
       { level: 'INFO',  text: 'customer issue resolved' },
-      { level: 'INFO',  text: 'customer issue resolved' },
       { level: 'ERROR', text: 'typo in documentation' },
-      { level: 'INFO',  text: 'customer issue resolved' },
       { level: 'INFO',  text: 'customer issue resolved' },
       { level: 'WARN',  text: 'connection pool nearing limit' },
       { level: 'INFO',  text: 'customer issue resolved' },
       { level: 'ERROR', text: 'DNS resolution timeout' },
       { level: 'INFO',  text: 'customer issue resolved' },
       { level: 'INFO',  text: 'runbook executed successfully' },
-      { level: 'INFO',  text: 'customer issue resolved' },
     ];
     let idx = 0;
     quizState.tailInterval = setInterval(() => {
@@ -1236,21 +1157,12 @@ const commands = {
   },
 
   'systemctl status emily'(){
-    print('<span class="accent b">\u25CF emily.service</span> - Senior Support Engineer');
+    print('<span class="accent b">● emily.service</span> - Senior Support Engineer');
     blank();
-    print('  Loaded: <span class="accent">yes</span>');
     print('  Active: <span class="accent b">active (running)</span>');
-    blank();
-    print('  Status:');
-    print('    - debugging production');
-    print('    - helping customers');
-    print('    - documenting solutions');
-    blank();
-    print('  Memory usage:');
-    print('    <span class="yellow">Coffee-dependent</span>');
-    blank();
-    print('  Restart policy:');
-    print('    <span class="accent b">Always</span>');
+    print('  Status: debugging production · helping customers · documenting solutions');
+    print('  Memory: <span class="yellow">Coffee-dependent</span>');
+    print('  Restart: <span class="accent b">Always</span>');
   },
 
   journalctl(){
@@ -1265,112 +1177,66 @@ const commands = {
     print(`<span class="dim">${ts(0)}</span> <span class="accent b">Future incident prevented.</span>`);
   },
 
-  /* =========================================================
-     EASTER EGGS — Tier 3: GitLab-specific
-     ========================================================= */
   'git blame'(){
     print('<span class="dim">$ git blame outage.txt</span>');
     blank();
-    print('Commit: <span class="yellow">9f8d1a2</span>');
-    print('Author:  <span class="red b">DNS</span>');
-    print('Date:    Every Single Time');
+    print('Author: <span class="red b">DNS</span>');
+    print('Date:   Every Single Time');
     blank();
-    print('Summary:');
-    print('  <span class="red b">It\'s always DNS.</span>');
+    print('<span class="red b">It\'s always DNS.</span>');
   },
 
   pipeline(){
     const fail = Math.random() < 0.2;
     print('<span class="dim">Pipeline Status</span>');
     blank();
-    print('<span class="accent">\u2714</span> build');
-    print('<span class="accent">\u2714</span> test');
-    print('<span class="accent">\u2714</span> deploy');
+    print('<span class="accent">✔</span> build');
+    print('<span class="accent">✔</span> test');
+    print('<span class="accent">✔</span> deploy');
     if (fail) {
-      print('<span class="red">\u2716</span> customer happy');
+      print('<span class="red">✘</span> customer happy');
       blank();
       print('<span class="red">Pipeline completed with failures.</span>');
     } else {
-      print('<span class="accent">\u2714</span> customer happy');
+      print('<span class="accent">✔</span> customer happy');
       blank();
       print('<span class="accent b">Pipeline completed successfully.</span>');
     }
   },
 
-  /* =========================================================
-     EASTER EGGS — Tier 4: Hidden recruiter commands
-     ========================================================= */
   'recruiter-mode'(){
     print('<span class="accent b">Recruiter mode enabled.</span>');
     blank();
-    print('Recommended commands:');
+    print('Recommended commands: resume · whyhireme · projects · strengths · salary');
     blank();
-    print('  <span class="cyan">resume</span>');
-    print('  <span class="cyan">whyhireme</span>');
-    print('  <span class="cyan">projects</span>');
-    print('  <span class="cyan">strengths</span>');
-    print('  <span class="cyan">salary</span>');
-    blank();
-    print('<span class="red">Permission denied.</span>');
-    blank();
-    print('<span class="dim">Nice try.</span>');
+    print('<span class="red">Permission denied.</span> <span class="dim">Nice try.</span>');
   },
 
-  references(){
-    print('References available upon <span class="accent">successful deployment</span>.');
-  },
+  references(){ print('References available upon <span class="accent">successful deployment</span>.'); },
+  salary(){ print('<span class="red">Permission denied.</span> <span class="dim">Nice try.</span>'); },
 
-  salary(){
-    print('<span class="red">Permission denied.</span>');
-    blank();
-    print('<span class="dim">Nice try.</span>');
-  },
-
-  /* =========================================================
-     EASTER EGGS — Tier 5: Linux classics
-     ========================================================= */
   top(){
-    const hours = String(new Date().getHours()).padStart(2,'0');
-    const mins  = String(new Date().getMinutes()).padStart(2,'0');
-    const secs  = String(new Date().getSeconds()).padStart(2,'0');
-    print(`top - ${hours}:${mins}:${secs} up 9 years, 3 months, load average: <span class="accent">manageable</span>`);
+    const d = new Date();
+    const t = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+    print(`top - ${t} up 9 years, load average: <span class="accent">manageable</span>`);
     blank();
     print('Tasks: <span class="accent">127 total</span>, 126 sleeping, 1 debugging');
     blank();
-    print('%CPU(s):  <span class="cyan">15.0</span> solving_problems');
-    print('          <span class="cyan">12.0</span> customer_support');
-    print('           <span class="cyan">8.0</span> documentation');
-    print('           <span class="cyan">5.0</span> mentoring');
-    print('          <span class="yellow b">60.0</span> coffee');
+    print('  <span class="cyan">15%</span> solving_problems  <span class="cyan">12%</span> customer_support  <span class="yellow b">60%</span> coffee');
     blank();
-    print('<span class="dim">PID   USER     %CPU  %MEM  COMMAND</span>');
-    print('  1   emily     22.0   8.1  <span class="cyan">solve-production-issue</span>');
-    print(' 42   emily     18.2   3.4  <span class="accent">investigate-root-cause</span>');
-    print(' 84   emily     12.7   2.8  <span class="green">build-internal-tools</span>');
-    print('128   emily      8.3   1.1  <span class="yellow">answer-customer</span>');
-    print('256   emily      5.6   0.9  <span class="dim">improve-process</span>');
-    print('999   coffee    64.0   0.0  <span class="red b">keep-everything-running</span>');
-    blank();
-    const tips = [
-      'Tip: Have you checked the logs?',
-      'Current bottleneck: Meeting bandwidth.',
-      'Tip: The root cause is always DNS.',
-      'Load Average: 1m = calm, 5m = manageable, 15m = somebody said "urgent"',
-      'Tip: Coffee reserves at 23%. Refill recommended.',
-    ];
-    print(`<span class="dim">${tips[Math.floor(Math.random() * tips.length)]}</span>`);
+    print('<span class="dim">PID   USER     %CPU  COMMAND</span>');
+    print('  1   emily     22.0  <span class="cyan">solve-production-issue</span>');
+    print(' 42   emily     18.2  <span class="accent">investigate-root-cause</span>');
+    print('999   coffee    64.0  <span class="red b">keep-everything-running</span>');
   },
 
   'free -m'(){
     print('<span class="dim">              total   used   free</span>');
     print('RAM            <span class="accent">16384</span>   8192   8192');
-    print('Technical Skill   <span class="accent">100</span>     92      8');
-    print('Curiosity         <span class="accent">100</span>     98      2');
-    print('Problem Solving   <span class="accent">100</span>     95      5');
+    print('Problem Solving  <span class="accent">100</span>     95      5');
     print('Optimism       <span class="accent">4096</span>    512   <span class="green b">3584</span>');
     blank();
-    print('<span class="accent b">Recommendation:</span>');
-    print('  <span class="green b">Resources available for immediate hire.</span>');
+    print('<span class="green b">Resources available for immediate hire.</span>');
   },
 
   htop(){
@@ -1380,98 +1246,56 @@ const commands = {
     print('│ PostgreSQL      <span class="cyan">████████████</span> <span class="accent b">95%</span>      │');
     print('│ Linux           <span class="cyan">██████████</span>   <span class="accent b">88%</span>      │');
     print('│ Docker          <span class="cyan">█████████</span>    <span class="accent b">82%</span>      │');
-    print('│ AWS             <span class="cyan">████████</span>     <span class="accent b">75%</span>      │');
     print('│ Customer Empathy<span class="green">███████████</span> <span class="green b">99%</span>      │');
     print('│ Coffee          <span class="yellow">████████████</span> <span class="yellow b">100%</span>     │');
     print('└───────────────────────────────────────┘');
-    blank();
-    const loads = [
-      { m: '1m ', v: 'calm' },
-      { m: '5m ', v: 'manageable' },
-      { m: '15m', v: 'somebody said "urgent"' },
-    ];
-    print('<span class="dim">Load Average:</span>');
-    loads.forEach(l => {
-      const cls = l.v === 'calm' ? 'green' : l.v === 'manageable' ? 'accent' : 'red';
-      print(`  ${l.m}  = <span class="${cls}">${l.v}</span>`);
-    });
   },
 
-  'sudo'(){
-    print('<span class="dim">Mandatory.</span>');
-    blank();
-    print('Okay.');
-    blank();
-    print('\uD83E\uDD6A');  // sandwich emoji
-  },
-
+  'sudo'(){ print('Mandatory.\n\nOkay.\n\n🥪'); },
   'cat /etc/motd'(){
     print('<span class="accent b">Welcome to EmilyOS</span>');
     blank();
-    print('Current mission:');
-    print('  Help customers.');
-    print('  Solve problems.');
-    print('  <span class="accent b">Leave things better documented.</span>');
+    print('Help customers. Solve problems. <span class="accent b">Leave things better documented.</span>');
   },
-
   'ps aux'(){
     print('<span class="dim">USER     PID  CPU  MEM COMMAND</span>');
     blank();
     print('emily      1   12    8  <span class="cyan">solve-problems</span>');
     print('emily    101    5    2  <span class="accent">write-docs</span>');
-    print('emily    242    4    3  <span class="yellow">customer-support</span>');
     print('coffee   999   65    0  <span class="red b">keep-everything-running</span>');
   },
 
-  /* =========================================================
-     EASTER EGGS — Tier 6: The favorite one
-     ========================================================= */
   'find'(){
     print('<span class="dim">$ find / -name root_cause</span>');
     blank();
-    const searchLines = ['Searching...', 'Searching...', 'Searching...', 'Searching...'];
     let i = 0;
     const iv = setInterval(() => {
-      if (i < searchLines.length) {
-        print(`<span class="dim">${searchLines[i]}</span>`);
-        screen.scrollTop = screen.scrollHeight;
-        i++;
-      } else {
+      if (i < 4) { print(`<span class="dim">Searching...</span>`); screen.scrollTop = screen.scrollHeight; i++; }
+      else {
         clearInterval(iv);
         blank();
-        print('<span class="accent b">Found:</span>');
-        print('  /var/logs');
-        print('  /customer_comments');
-        print('  /postmortem.md');
-        print('  /documentation');
+        print('<span class="accent b">Found:</span> /var/logs · /customer_comments · /postmortem.md · /documentation');
         blank();
-        print('<span class="accent b">Root cause documented.</span>');
-        print('<span class="yellow b">Future engineer saved.</span>');
+        print('<span class="accent b">Root cause documented.</span> <span class="yellow b">Future engineer saved.</span>');
       }
     }, 600);
   },
 
-  /* =========================================================
-     ULTRA-HIDDEN: rm -rf /
-     ========================================================= */
   'rm -rf'(){
     let count = 0;
     try { count = parseInt(localStorage.getItem('rmrf-count') || '0', 10); } catch(e){}
     count++;
     try { localStorage.setItem('rmrf-count', String(count)); } catch(e){}
-
     const responses = [
       'Nice try.\nThis isn\'t production.',
       'Seriously?',
       'Security has been notified.',
       'Opening Jira issue...\n\n  Priority: Highest\n  Summary: User keeps trying to delete portfolio.',
     ];
-    const msg = responses[Math.min(count - 1, responses.length - 1)];
-    msg.split('\n').forEach(line => print(line));
+    responses[Math.min(count - 1, responses.length - 1)].split('\n').forEach(line => print(line));
   },
 };
 
-/* ---- Multi-word easter egg command lookup ---- */
 const EASTER_EGGS = {
   'tail -f production.log': 'tail -f',
   'tail -f':               'tail -f',
@@ -1500,17 +1324,14 @@ const EASTER_EGGS = {
   'top':                    'top',
   'free -m':                'free -m',
   'htop':                   'htop',
+  'dadjoke':                'dadjoke',
+  'dad joke':               'dadjoke',
 };
 
-/* ---- run a command (echo + execute), used by chips, input & boot ---- */
-/* =========================================================
-   Quiz helpers
-   ========================================================= */
 function showQuizQuestion(){
   const q = quizState.questions[quizState.currentQ];
   if (!q) return;
-  const num = quizState.currentQ + 1;
-  const total = quizState.questions.length;
+  const num = quizState.currentQ + 1, total = quizState.questions.length;
   blank();
   print(`<span class="cyan b">Question ${num}/${total}</span> <span class="dim">[${q.category || 'mixed'} | ${q.difficulty || 'medium'}]</span>`);
   print(escapeHtml(q.question));
@@ -1524,16 +1345,10 @@ function showQuizQuestion(){
 }
 
 async function submitQuizAnswer(answer){
-  const q = quizState.questions[quizState.currentQ];
   quizState.answers.push(answer);
-  const correct = answer === 'a' || answer === 'b' || answer === 'c' || answer === 'd';
-  if (correct) {
-    print(`  <span class="accent">You chose: ${answer})</span>`);
-  }
+  print(`  <span class="accent">You chose: ${answer})</span>`);
   quizState.currentQ++;
-
   if (quizState.currentQ >= quizState.questions.length) {
-    // Quiz done — ask for nickname
     quizState.phase = 'nickname';
     blank();
     print('<span class="accent b">Quiz complete!</span>');
@@ -1548,64 +1363,29 @@ async function submitQuizAnswer(answer){
 async function finishQuiz(nickname){
   const duration = Math.round((Date.now() - quizState.startTime) / 1000);
   print('<span class="dim">Submitting score...</span>');
-
   try {
-    const data = await edgeFn('submit-quiz', {
-      method: 'POST',
-      body: JSON.stringify({
-        sessionId: quizState.sessionId,
-        answers: quizState.answers,
-        nickname: nickname,
-        duration: duration,
-      }),
-    });
-
-    if (data.error) {
-      print(`<span class="red">Error: ${escapeHtml(data.error)}</span>`);
-      resetQuizState();
-      return;
-    }
-
+    const data = await edgeFn('submit-quiz', { method: 'POST', body: JSON.stringify({ sessionId: quizState.sessionId, answers: quizState.answers, nickname, duration }) });
+    if (data.error) { print(`<span class="red">Error: ${escapeHtml(data.error)}</span>`); resetQuizState(); return; }
     blank();
     print('<span class="accent b">═══════════════════════════════════</span>');
     print(`<span class="accent b">  Score: ${data.score}/${data.total}</span>`);
     const pct = Math.round((data.score / data.total) * 100);
-    const emoji = pct >= 80 ? '\uD83C\uDF89' : pct >= 50 ? '\uD83D\uDC4D' : '\uD83D\uDE22';
-    print(`  ${emoji}  ${pct}%`);
+    print(`  ${pct >= 80 ? '🎉' : pct >= 50 ? '👍' : '😢'}  ${pct}%`);
     print('<span class="accent b">═══════════════════════════════════</span>');
     blank();
     print('<span class="dim">Type <span class="accent">leaderboard</span> to see the rankings!</span>');
-  } catch(e) {
-    print(`<span class="red">Failed to submit: ${escapeHtml(e.message)}</span>`);
-  }
+  } catch(e) { print(`<span class="red">Failed to submit: ${escapeHtml(e.message)}</span>`); }
   resetQuizState();
 }
 
 async function submitGuestbook(){
   print('<span class="dim">Submitting...</span>');
-
   try {
-    const data = await edgeFn('post-guestbook', {
-      method: 'POST',
-      body: JSON.stringify({
-        nickname: quizState.gbNickname,
-        message: quizState.gbMessage,
-      }),
-    });
-
-    if (data.error) {
-      print(`<span class="red">Error: ${escapeHtml(data.error)}</span>`);
-    } else {
-      blank();
-      print('<span class="accent b">Message saved!</span> Thanks for signing the guestbook.');
-    }
-  } catch(e) {
-    print(`<span class="red">Failed: ${escapeHtml(e.message)}</span>`);
-  }
-
-  quizState.gbStep = 'idle';
-  quizState.gbNickname = '';
-  quizState.gbMessage = '';
+    const data = await edgeFn('post-guestbook', { method: 'POST', body: JSON.stringify({ nickname: quizState.gbNickname, message: quizState.gbMessage }) });
+    if (data.error) { print(`<span class="red">Error: ${escapeHtml(data.error)}</span>`); }
+    else { blank(); print('<span class="accent b">Message saved!</span> Thanks for signing the guestbook.'); }
+  } catch(e) { print(`<span class="red">Failed: ${escapeHtml(e.message)}</span>`); }
+  quizState.gbStep = 'idle'; quizState.gbNickname = ''; quizState.gbMessage = '';
 }
 
 /* =========================================================
@@ -1615,7 +1395,6 @@ const COMMANDS = Object.keys(commands);
 const ghost = document.getElementById('ghost');
 const hint  = document.getElementById('hint');
 
-/* subsequence fuzzy score; -1 means the query isn't even a subsequence */
 function fuzzyScore(query, target){
   query = query.toLowerCase(); target = target.toLowerCase();
   if (!query) return 0;
@@ -1623,18 +1402,16 @@ function fuzzyScore(query, target){
   for (let ti = 0; ti < target.length && qi < query.length; ti++){
     if (target[ti] === query[qi]){
       score += 1;
-      if (ti === 0) score += 6;          // matches first char
-      if (ti === prev + 1) score += 4;   // consecutive run
-      prev = ti;
-      qi++;
+      if (ti === 0) score += 6;
+      if (ti === prev + 1) score += 4;
+      prev = ti; qi++;
     }
   }
-  if (qi < query.length) return -1;       // leftover query chars => no match
-  score -= (target.length - query.length) * 0.15; // prefer tighter matches
+  if (qi < query.length) return -1;
+  score -= (target.length - query.length) * 0.15;
   return score;
 }
 
-/* ranked matches: prefix matches first, then by score */
 function getMatches(input){
   const q = (input || '').trim().toLowerCase();
   if (!q) return [];
@@ -1644,12 +1421,10 @@ function getMatches(input){
     .sort((a, b) => (b.prefix - a.prefix) || (b.score - a.score) || (a.name.length - b.name.length));
 }
 
-/* inline ghost suffix for prefix matches; right-side hint for fuzzy typos */
 function updateGhost(){
   const v = cmdline.value;
   const m = getMatches(v);
-  ghost.innerHTML = '';
-  hint.innerHTML = '';
+  ghost.innerHTML = ''; hint.innerHTML = '';
   if (!v.trim() || !m.length) return;
   const best = m[0];
   if (best.prefix && best.name !== v.trim().toLowerCase()){
@@ -1660,7 +1435,6 @@ function updateGhost(){
   }
 }
 
-/* tab cycles through all candidates (prefix-first) */
 let tab = { active: false, list: [], idx: -1 };
 function onTab(){
   if (!tab.active){
@@ -1673,29 +1447,22 @@ function onTab(){
   updateGhost();
 }
 
-/* resolve a typed command to a real one (exact, else easter egg, else first-word, else best fuzzy) */
 function resolve(raw){
   const v = (raw || '').trim().toLowerCase();
   if (!v) return null;
-
-  // 1. Check easter egg multi-word commands first (longest match)
+  // Check math first
+  const mathResult = tryMath(v);
+  if (mathResult !== null) return { name: '__math__', result: mathResult };
+  // Easter egg multi-word commands (longest match first)
   const easterKeys = Object.keys(EASTER_EGGS).sort((a,b) => b.length - a.length);
   for (const ek of easterKeys) {
     if (v === ek || v.startsWith(ek + ' ')) {
       return { name: EASTER_EGGS[ek], corrected: false, easter: true };
     }
   }
-
-  // 2. Exact match in commands object
   if (commands[v]) return { name: v, corrected: false };
-
-  // 3. First-word match (e.g. "guestbook sign" → command "guestbook" with args)
   const firstWord = v.split(/\s+/)[0];
-  if (firstWord !== v && commands[firstWord]) {
-    return { name: firstWord, corrected: false, hasArgs: true };
-  }
-
-  // 4. Fuzzy match
+  if (firstWord !== v && commands[firstWord]) return { name: firstWord, corrected: false, hasArgs: true };
   const m = getMatches(v);
   return m.length ? { name: m[0].name, corrected: true } : null;
 }
@@ -1704,157 +1471,90 @@ function runCommand(raw){
   const cmd = (raw || '').trim();
   printPromptEcho(cmd);
   if (!cmd) return;
-
-  // Stop tail -f animation if running
-  if (quizState.tailInterval) {
-    clearInterval(quizState.tailInterval);
-    quizState.tailInterval = null;
-  }
+  if (quizState.tailInterval) { clearInterval(quizState.tailInterval); quizState.tailInterval = null; }
 
   const r = resolve(cmd);
   if (r){
-    if (r.corrected) print(`<span class="dim">≈ assuming <span class="accent">${escapeHtml(r.name)}</span></span>`);
-    const cmdName = r.name;
-    const cmdFn = commands[cmdName];
-    if (cmdFn) {
-      // Extract args after the first word for commands like "guestbook sign"
-      const args = cmd.toLowerCase().replace(new RegExp('^' + cmdName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*'), '');
-      cmdFn(args || undefined);
+    if (r.name === '__math__') {
+      // Format result: remove trailing .0 for whole numbers
+      const val = Number.isInteger(r.result) ? r.result : parseFloat(r.result.toPrecision(12));
+      print(`<span class="accent">${escapeHtml(String(val))}</span>`);
+    } else {
+      if (r.corrected) print(`<span class="dim">≈ assuming <span class="accent">${escapeHtml(r.name)}</span></span>`);
+      const cmdFn = commands[r.name];
+      if (cmdFn) {
+        const args = cmd.toLowerCase().replace(new RegExp('^' + r.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*'), '');
+        cmdFn(args || undefined);
+      }
     }
   } else {
-    print(`<span class="red">command not found: ${escapeHtml(cmd)}</span> — type <span class="accent">help</span>`, '');
+    print(`<span class="red">command not found: ${escapeHtml(cmd)}</span> — type <span class="accent">help</span>`);
   }
   blank();
 }
 
-/* ---- command input: history + enter ---- */
 const history = []; let hi = -1;
 cmdline.addEventListener('input', () => { tab.active = false; updateGhost(); });
 cmdline.addEventListener('keydown', e => {
-  if (e.key === 'Tab'){
-    e.preventDefault();
-    onTab();
-    return;
-  }
-  // Right arrow at end of line accepts the inline ghost suggestion
+  if (e.key === 'Tab'){ e.preventDefault(); onTab(); return; }
   if (e.key === 'ArrowRight' && cmdline.selectionStart === cmdline.value.length){
     const m = getMatches(cmdline.value);
     if (m.length && m[0].prefix && m[0].name !== cmdline.value.trim().toLowerCase()){
-      e.preventDefault();
-      cmdline.value = m[0].name;
-      tab.active = false;
-      updateGhost();
-      return;
+      e.preventDefault(); cmdline.value = m[0].name; tab.active = false; updateGhost(); return;
     }
   }
   if (e.key === 'Enter'){
     const v = cmdline.value;
-    cmdline.value = '';
-    tab.active = false;
-    updateGhost();
+    cmdline.value = ''; tab.active = false; updateGhost();
 
-    // ─── Resume prompt: Y/n ───
     if (quizState.resumePrompt) {
       const ans = v.trim().toLowerCase();
       printPromptEcho(ans);
       quizState.resumePrompt = false;
-      if (ans === '' || ans === 'y' || ans === 'yes') {
-        print('<span class="accent b">Opening resume...</span>');
-        window.open('https://memilyc.github.io', '_blank', 'noopener');
-      } else {
-        print('<span class="dim">Cancelled.</span>');
-      }
+      if (ans === '' || ans === 'y' || ans === 'yes') { print('<span class="accent b">Opening resume...</span>'); window.open('https://memilyc.github.io', '_blank', 'noopener'); }
+      else { print('<span class="dim">Cancelled.</span>'); }
       return;
     }
 
-    // ─── Quiz: picking phase (mode selection) ───
     if (quizState.phase === 'picking') {
       const pick = v.trim().toLowerCase();
       printPromptEcho(pick);
-      if (['1','2','3','4','5','easy','medium','hard','mixed','emily'].includes(pick)) {
-        quizState.phase = 'idle';
-        commands._startQuiz(pick);
-      } else if (pick === 'quit' || pick === 'cancel') {
-        quizState.phase = 'idle';
-        print('<span class="dim">Cancelled.</span>');
-      } else {
-        print('<span class="yellow">Pick 1–5, or type easy / medium / hard / mixed / emily</span>');
-      }
+      if (['1','2','3','4','5','easy','medium','hard','mixed','emily'].includes(pick)) { quizState.phase = 'idle'; commands._startQuiz(pick); }
+      else if (pick === 'quit' || pick === 'cancel') { quizState.phase = 'idle'; print('<span class="dim">Cancelled.</span>'); }
+      else { print('<span class="yellow">Pick 1–5, or type easy / medium / hard / mixed / emily</span>'); }
       return;
     }
 
-    // ─── Quiz: playing phase ───
     if (quizState.phase === 'playing') {
       const ans = v.trim().toLowerCase();
-      if (ans === 'quit') {
-        printPromptEcho('quit');
-        print('<span class="yellow">Quiz abandoned.</span>');
-        resetQuizState();
-        blank();
-      } else if (['a','b','c','d'].includes(ans)) {
-        printPromptEcho(ans);
-        submitQuizAnswer(ans);
-      } else {
-        printPromptEcho(v);
-        print('<span class="yellow">Type a, b, c, or d to answer. Type quit to abandon.</span>');
-      }
+      if (ans === 'quit') { printPromptEcho('quit'); print('<span class="yellow">Quiz abandoned.</span>'); resetQuizState(); blank(); }
+      else if (['a','b','c','d'].includes(ans)) { printPromptEcho(ans); submitQuizAnswer(ans); }
+      else { printPromptEcho(v); print('<span class="yellow">Type a, b, c, or d to answer. Type quit to abandon.</span>'); }
       return;
     }
 
-    // ─── Quiz: nickname phase ───
     if (quizState.phase === 'nickname') {
-      const nick = v.trim();
-      printPromptEcho(nick);
-      if (!nick || nick.length < 3 || nick.length > 20 || !/^[a-zA-Z0-9 _-]+$/.test(nick)) {
-        print('<span class="yellow">Nickname must be 3–20 chars: letters, numbers, spaces, _ or -</span>');
-        return;
-      }
-      if (!isClean(nick)) {
-        print('<span class="yellow">That nickname isn\'t allowed. Please choose something appropriate.</span>');
-        return;
-      }
-      finishQuiz(nick);
-      return;
+      const nick = v.trim(); printPromptEcho(nick);
+      if (!nick || nick.length < 3 || nick.length > 20 || !/^[a-zA-Z0-9 _-]+$/.test(nick)) { print('<span class="yellow">Nickname must be 3–20 chars: letters, numbers, spaces, _ or -</span>'); return; }
+      if (!isClean(nick)) { print('<span class="yellow">That nickname isn\'t allowed.</span>'); return; }
+      finishQuiz(nick); return;
     }
 
-    // ─── Guestbook: signing flow ───
     if (quizState.gbStep === 'nickname') {
-      const nick = v.trim();
-      printPromptEcho(nick);
-      if (!nick || nick.length < 3 || nick.length > 20 || !/^[a-zA-Z0-9 _-]+$/.test(nick)) {
-        print('<span class="yellow">Nickname must be 3–20 chars: letters, numbers, spaces, _ or -</span>');
-        return;
-      }
-      if (!isClean(nick)) {
-        print('<span class="yellow">That nickname isn\'t allowed. Please choose something appropriate.</span>');
-        return;
-      }
-      quizState.gbNickname = nick;
-      quizState.gbStep = 'message';
-      print('Enter your message (2–300 chars):');
-      return;
+      const nick = v.trim(); printPromptEcho(nick);
+      if (!nick || nick.length < 3 || nick.length > 20 || !/^[a-zA-Z0-9 _-]+$/.test(nick)) { print('<span class="yellow">Nickname must be 3–20 chars: letters, numbers, spaces, _ or -</span>'); return; }
+      if (!isClean(nick)) { print('<span class="yellow">That nickname isn\'t allowed.</span>'); return; }
+      quizState.gbNickname = nick; quizState.gbStep = 'message';
+      print('Enter your message (2–300 chars):'); return;
     }
     if (quizState.gbStep === 'message') {
-      const msg = v.trim();
-      printPromptEcho(msg);
-      if (!msg || msg.length < 2) {
-        print('<span class="yellow">Message too short (min 2 chars).</span>');
-        return;
-      }
-      if (msg.length > 300) {
-        print('<span class="yellow">Message too long (max 300 chars).</span>');
-        return;
-      }
-      if (!isClean(msg)) {
-        print('<span class="yellow">That message isn\'t allowed. Please keep it appropriate.</span>');
-        return;
-      }
-      quizState.gbMessage = msg;
-      submitGuestbook();
-      return;
+      const msg = v.trim(); printPromptEcho(msg);
+      if (!msg || msg.length < 2) { print('<span class="yellow">Message too short (min 2 chars).</span>'); return; }
+      if (msg.length > 300) { print('<span class="yellow">Message too long (max 300 chars).</span>'); return; }
+      if (!isClean(msg)) { print('<span class="yellow">That message isn\'t allowed.</span>'); return; }
+      quizState.gbMessage = msg; submitGuestbook(); return;
     }
 
-    // ─── Normal command ───
     if (v.trim()) { history.push(v); hi = history.length; }
     runCommand(v);
   } else if (e.key === 'ArrowUp'){
@@ -1865,17 +1565,16 @@ cmdline.addEventListener('keydown', e => {
     tab.active = false; updateGhost();
   }
 });
+
 const win = document.getElementById('window');
 win.addEventListener('click', e => {
   if (root.getAttribute('data-view') !== 'terminal') return;
-  if (e.target.closest('a, button, input')) return;
+  if (e.target.closest('a, button, input, textarea')) return;
   cmdline.focus();
 });
 
 /* =========================================================
-   Mobile keyboard handling — keep the input above the keyboard.
-   On phones the visual viewport shrinks when the keyboard opens
-   (vh/dvh do not on iOS), so we size the window to it directly.
+   Mobile keyboard handling
    ========================================================= */
 const vv = window.visualViewport;
 function fitToViewport(){
@@ -1883,7 +1582,7 @@ function fitToViewport(){
   if (window.innerWidth <= 600){
     win.style.height = vv.height + 'px';
   } else {
-    win.style.height = '';   // desktop: let CSS own the height
+    win.style.height = '';
   }
   if (root.getAttribute('data-view') === 'terminal') screen.scrollTop = screen.scrollHeight;
 }
@@ -1895,14 +1594,12 @@ window.addEventListener('resize', fitToViewport);
 window.addEventListener('orientationchange', () => setTimeout(fitToViewport, 200));
 fitToViewport();
 
-/* when the input gains focus, make sure the latest output is in view */
 cmdline.addEventListener('focus', () => {
   setTimeout(() => { fitToViewport(); screen.scrollTop = screen.scrollHeight; }, 250);
 });
 
 /* =========================================================
-   Boot sequence — typewriter intro, then auto-run a couple
-   of commands so content shows without any typing required.
+   Boot sequence
    ========================================================= */
 let skip = false;
 function typeLine(text, cls){
@@ -1911,7 +1608,6 @@ function typeLine(text, cls){
     const cursor = el('span','cursor');
     node.appendChild(cursor);
     let i = 0;
-    const speed = 16;
     (function step(){
       if (skip){ node.innerHTML = text; res(); return; }
       if (i <= text.length){
@@ -1919,18 +1615,14 @@ function typeLine(text, cls){
         node.appendChild(cursor);
         screen.scrollTop = screen.scrollHeight;
         i++;
-        setTimeout(step, speed);
-      } else {
-        node.innerHTML = text;
-        res();
-      }
+        setTimeout(step, 16);
+      } else { node.innerHTML = text; res(); }
     })();
   });
 }
 function wait(ms){ return new Promise(r => setTimeout(r, skip ? 0 : ms)); }
 
 async function boot(){
-  // buildReader needs escapeHtml, which is defined above — safe to call here
   buildReader();
   const date = new Date().toString().replace(/ GMT.*/, '');
   print(`<span class="dim">Last login: ${date} on ttys001</span>`);
@@ -1943,71 +1635,40 @@ async function boot(){
   await wait(180);
   commands.about();
   blank();
-  print('<span class="dim">Tip: type a command (<span class="accent">Tab</span> to autocomplete, <span class="accent">→</span> to accept), or just click below ↓</span>');
+  print('<span class="dim">Tip: type a command (<span class="accent">Tab</span> to autocomplete, <span class="accent">→</span> to accept), or click a chip below ↓</span>');
   print('<span class="dim">New to terminals? Click <span class="accent">▤ reader view</span> (top-right) for a plain page.</span>');
   commands.help();
   blank();
-  // reveal the live prompt
   inputRow.style.display = 'flex';
   fitToViewport();
-  if (window.innerWidth > 600) cmdline.focus();  // avoid popping the keyboard on phones
+  if (window.innerWidth > 600) cmdline.focus();
 }
 
-/* let the visitor skip the typing animation */
 function armSkip(){
   const onSkip = () => { skip = true; };
   window.addEventListener('keydown', onSkip, { once:true });
   screen.addEventListener('click', onSkip, { once:true });
 }
 
-/* ---- DevTools / Inspect Element easter egg ---- */
+/* DevTools easter egg */
 (function(){
   let devtoolsOpen = false;
   const threshold = 160;
-
   function onDevToolsOpen(){
     if (devtoolsOpen) return;
     devtoolsOpen = true;
     blank();
     print('<span class="green b">Hello World!</span>');
-    print('<span class="dim">I see you\u2019re peeking into my code. \u{1F575}\uFE0F</span>');
+    print('<span class="dim">I see you\'re peeking into my code. 🕵️</span>');
     blank();
-    console.log(
-      '%cHello World! \u{1F44B}\n%cI see you\'re peeking into my code.\n\nIf you\'re a developer, I\'d love to chat!\nhttps://linkedin.com/in/memilyc',
-      'color:#7ec699;font-size:24px;font-weight:bold;',
-      'color:#e6b450;font-size:14px;'
-    );
+    console.log('%cHello World! 👋\n%cI see you\'re peeking into my code.\n\nIf you\'re a developer, I\'d love to chat!\nhttps://linkedin.com/in/memilyc', 'color:#7ec699;font-size:24px;font-weight:bold;', 'color:#e6b450;font-size:14px;');
   }
-
-  // Method 1: Window size discrepancy (detects docked DevTools)
-  function checkSize(){
-    const widthDiff = window.outerWidth - window.innerWidth;
-    const heightDiff = window.outerHeight - window.innerHeight;
-    if (widthDiff > threshold || heightDiff > threshold) onDevToolsOpen();
-  }
-
-  // Poll size check (non-intrusive, works for docked DevTools)
+  function checkSize(){ if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) onDevToolsOpen(); }
   setInterval(checkSize, 1000);
-
-  // Keyboard shortcuts: Ctrl+Shift+I / Cmd+Opt+I / F12
-  document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'I') {
-      setTimeout(onDevToolsOpen, 500);
-    }
-    if (e.key === 'F12') {
-      setTimeout(onDevToolsOpen, 500);
-    }
-  });
-
-  // Also listen for right-click -> Inspect
-  document.addEventListener('contextmenu', () => {
-    setTimeout(() => {
-      if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
-        onDevToolsOpen();
-      }
-    }, 800);
-  });
+  document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'I') setTimeout(onDevToolsOpen, 500); if (e.key === 'F12') setTimeout(onDevToolsOpen, 500); });
+  document.addEventListener('contextmenu', () => { setTimeout(() => { if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) onDevToolsOpen(); }, 800); });
 })();
+
 armSkip();
 boot();
 </script>
