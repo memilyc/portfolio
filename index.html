@@ -455,17 +455,17 @@ const CONFIG = {
   host: "portfolio",
   name: "M. Emily Chang",
   role: "Former Senior Support Engineer @ GitLab",
-  tagline: "I turn messy production problems into clean root causes — and the docs that keep them solved.",
+  tagline: "Engineer, troubleshooter, and translator between customers, business needs, and complex systems.",
   about: [
     "I have 9+ years helping enterprise customers debug complex issues across PostgreSQL, Linux, Docker, and multi-cloud environments (AWS, GCP, Azure).",
-    "Before GitLab I worked in system administration and software engineering — maintaining 99.95% uptime across Linux/Windows, and building financial products like loan management and credit-scoring platforms.",
+    "Before GitLab, I worked in system administration and software engineering — maintaining 99.95% uptime across Linux/Windows, and building financial products like loan management and credit-scoring platforms.",
     "I run on a 24/7 on-call rotation, lead cross-regional pairing sessions, and build internal tools and documentation so the same problem never bites anyone twice.",
   ],
   skills: [
-    ["Support",   "customer & SaaS support · incident mgmt · 24/7 on-call"],
+    ["Support",   "customer & SaaS support · incident mgmt · 24/7 on-call log · analysis"],
     ["Systems",   "Linux admin · Docker · Kubernetes · Bash · PowerShell"],
     ["Cloud",     "AWS · GCP · Azure · Terraform · Ansible"],
-    ["Databases", "PostgreSQL · MySQL · MongoDB · log analysis"],
+    ["Databases", "PostgreSQL · MySQL · MongoDB "],
     ["Code",      "Ruby · Python · JavaScript / Node · PHP · Git & CI/CD"],
     ["Tooling",   "Zendesk · Jira · Confluence · technical documentation"],
   ],
@@ -486,21 +486,21 @@ const CONFIG = {
     {
       title:  "PostgreSQL Connection Calculator",
       stack:  "PostgreSQL · JavaScript",
-      desc:   "Interactive tool that calculates optimal max_connections and shared_buffers settings based on your instance RAM, worker counts, and workload type — so you stop guessing and start tuning.",
+      desc:   "Interactive tool that calculates optimal max_connections and shared_buffers settings based on your GitLab configuration so you can skip calculation and start tuning.",
       url:    "https://postgresql-connection-calculator-759014.gitlab.io/",
       label:  "Open tool →",
     },
     {
       title:  "Convert UTC Bot",
       stack:  "Deno · Slack Workflow SDK · GitLab CI",
-      desc:   "A Slack Workflow App that converts any UTC timestamp to the requester's local timezone on demand. Built on Deno SDK and hosted on GitLab, it eliminates the mental overhead of timezone math across distributed teams.",
+      desc:   "A Slack Workflow App that converts any timestamp to UTC with a link for every user to view the time in their local timezone. Built on Deno SDK and hosted on GitLab, it eliminates the mental overhead of timezone math across distributed teams.",
       url:    "https://gitlab.com/gitlab-com/support/toolbox/convert-utc-bot",
       label:  "View on GitLab →",
     },
     {
       title:  "Viggou.net",
-      stack:  "Media · Community · Malaysian Chinese entertainment",
-      desc:   "Side project and passion: I lead and manage a media page covering the Malaysian Chinese entertainment industry — local events, artists, and community coverage. Handles editorial direction, content strategy, and social presence.",
+      stack:  "Media · Community · Chinese entertainment",
+      desc:   "Side project and passion: I lead and manage a media page covering the Chinese entertainment industry — local events, artists, and community coverage. Handles editorial direction, content strategy, and social presence.",
       url:    "https://viggou.net",
       label:  "Visit viggou.net →",
     },
@@ -575,7 +575,7 @@ function resetQuizState() {
 }
 
 /* ---- profanity filter (client-side pre-check, server enforces too) ---- */
-const BLOCKED_RE = /shit|fuck|cunt|dick|bitch|asshole|bastard|whore|slut|nigger|nigga|faggot|retard|pedo|rapist|porn|xxx|sex|dildo|pussy|penis|vagina|cum|orgasm|fetish|nsfw|wank|jizz|cock|twat|wanker|bollocks|masturbat|semen|erection|genital|horny|kys|kill.?yourself|nazi|hitler|racist|bigot/i;
+const BLOCKED_RE = /shit|fuck|cunt|dick|bitch|asshole|bastard|whore|slut|nigger|nigga|faggot|retard|pedo|rapist|porn|xxx|sex|dildo|pussy|penis|vagina|cum|orgasm|fetish|nsfw|wank|jizz|cock|twat|wanker|bollocks|masturbat|semen|erection|genital|horny|kys|kill.?yourself|nazi|hitler|racist|bigot|bitcoin|crypto/i;
 function isClean(s){ return !BLOCKED_RE.test(s); }
 
 /* ---- theme (persists when deployed; degrades safely in preview) ---- */
@@ -1346,7 +1346,7 @@ const commands = {
     print('<span class="dim">PID   USER     %CPU  %MEM  COMMAND</span>');
     print('  1   emily     22.0   8.1  <span class="cyan">solve-production-issue</span>');
     print(' 42   emily     18.2   3.4  <span class="accent">investigate-root-cause</span>');
-    print(' 84   emily     12.7   2.8  <span class="green">write-runbook</span>');
+    print(' 84   emily     12.7   2.8  <span class="green">build-internal-tools</span>');
     print('128   emily      8.3   1.1  <span class="yellow">answer-customer</span>');
     print('256   emily      5.6   0.9  <span class="dim">improve-process</span>');
     print('999   coffee    64.0   0.0  <span class="red b">keep-everything-running</span>');
@@ -1367,7 +1367,6 @@ const commands = {
     print('Technical Skill   <span class="accent">100</span>     92      8');
     print('Curiosity         <span class="accent">100</span>     98      2');
     print('Problem Solving   <span class="accent">100</span>     95      5');
-    print('Ego               <span class="accent">100</span>     12     <span class="green b">88</span>');
     print('Optimism       <span class="accent">4096</span>    512   <span class="green b">3584</span>');
     blank();
     print('<span class="accent b">Recommendation:</span>');
