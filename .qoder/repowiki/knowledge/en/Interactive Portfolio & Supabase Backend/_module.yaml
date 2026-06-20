@@ -1,0 +1,12 @@
+schema_version: 1
+module_path: ""
+title: Interactive Portfolio & Supabase Backend
+scope:
+    - .gitignore
+    - README.md
+    - index.html
+    - supabase/
+    - em.png
+source_files: []
+depends_on: []
+related_to: []

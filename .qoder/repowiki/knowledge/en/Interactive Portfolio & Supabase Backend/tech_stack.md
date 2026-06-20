@@ -1,0 +1,1 @@
+Supabase Platform (PostgreSQL, Auth, Storage), Deno Edge Functions (via `std/http/server`), Vanilla JavaScript (ES6+), CSS3 Variables for theming.
