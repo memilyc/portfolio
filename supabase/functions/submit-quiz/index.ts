@@ -91,9 +91,27 @@ serve(async (req) => {
 
   // Build lookup map ordered by session question order
   const answerMap = Object.fromEntries(questions.map(q => [q.id, q.correct_answer]));
+  const questionLookup = Object.fromEntries(questions.map(q => [q.id, q]));
   let score = 0;
+  const wrong: Array<{ question: string; your_answer: string; correct_answer: string; option_a: string; option_b: string; option_c: string; option_d: string }> = [];
   for (let i = 0; i < questionIds.length; i++) {
-    if (answers[i] === answerMap[questionIds[i]]) score++;
+    const q = questionLookup[questionIds[i]];
+    const userAnswer = answers[i];
+    const correct = answerMap[questionIds[i]];
+    if (userAnswer === correct) {
+      score++;
+    } else {
+      // Fetch full question details for review
+      wrong.push({
+        question: q.question,
+        your_answer: userAnswer,
+        correct_answer: correct,
+        option_a: q.option_a,
+        option_b: q.option_b,
+        option_c: q.option_c,
+        option_d: q.option_d,
+      });
+    }
   }
 
   // Determine category label
@@ -122,7 +140,7 @@ serve(async (req) => {
     .update({ completed: true, score, answers })
     .eq("id", sessionId);
 
-  return new Response(JSON.stringify({ score, total: questionIds.length, category, difficulty }), {
+  return new Response(JSON.stringify({ score, total: questionIds.length, category, difficulty, wrong }), {
     headers: { ...CORS, "Content-Type": "application/json" },
   });
 });

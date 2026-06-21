@@ -531,14 +531,14 @@ const CONFIG = {
     {
       title:  "PostgreSQL Connection Calculator",
       stack:  "PostgreSQL · JavaScript",
-      desc:   "Interactive tool that calculates optimal max_connections and shared_buffers settings based on your GitLab configuration so you can skip calculation and start tuning.",
+      desc:   "An interactive tool to quickly calculate PostgreSQL connection requirements for your GitLab instance.",
       url:    "https://postgresql-connection-calculator-759014.gitlab.io/",
       label:  "Open tool →",
     },
     {
       title:  "Convert UTC Bot",
-      stack:  "Deno · Slack Workflow SDK · GitLab CI",
-      desc:   "A Slack Workflow App that converts any timestamp to UTC with a link for every user to view the time in their local timezone. Built on Deno SDK and hosted on GitLab, it eliminates the mental overhead of timezone math across distributed teams.",
+      stack:  "Deno SDK · Slack Workflow · GitLab CI",
+      desc:   "Slack Workflow App (Deno SDK) that reacts to :convertutc: emoji and replies with UTC-converted times and shareable timezone links.Built on Deno SDK and hosted on GitLab, it eliminates the mental overhead of timezone math across distributed teams.",
       url:    "https://gitlab.com/gitlab-com/support/toolbox/convert-utc-bot",
       label:  "View on GitLab →",
     },
@@ -593,6 +593,7 @@ const quizState = {
   startTime: 0,
   quizCategory: 'mixed',
   quizDifficulty: 'mixed',
+  quizWrong: [],        // wrong answers for review
   gbNickname: '',
   gbMessage: '',
   gbStep: 'idle',
@@ -610,6 +611,7 @@ function resetQuizState() {
   quizState.startTime = 0;
   quizState.quizCategory = 'mixed';
   quizState.quizDifficulty = 'mixed';
+  quizState.quizWrong = [];
 }
 
 const BLOCKED_RE = /shit|fuck|cunt|dick|bitch|asshole|bastard|whore|slut|nigger|nigga|faggot|retard|pedo|rapist|porn|xxx|sex|dildo|pussy|penis|vagina|cum|orgasm|fetish|nsfw|wank|jizz|cock|twat|wanker|bollocks|masturbat|semen|erection|genital|horny|kys|kill.?yourself|nazi|hitler|racist|bigot|bitcoin|crypto/i;
@@ -740,7 +742,7 @@ function buildReader(){
     </section>
     <section class="r-sec" style="border: 1px dashed var(--accent); border-radius: 8px; padding: 18px 22px; background: var(--glow);">
       <h2 class="r-h" style="border-bottom: none; margin-bottom: 8px; padding-bottom: 0;">Try the Interactive Terminal</h2>
-      <p class="r-body" style="font-size: 14px;">Switch to <strong>terminal view</strong> (click <em>❯ terminal view</em> top-right) to play a <strong>trivia quiz</strong> with a leaderboard, sign the <strong>guestbook</strong>, and discover hidden <strong>easter egg</strong> commands. Try <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">quiz</code>, <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">guestbook</code>, or <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">dadjoke</code> to get started!</p>
+      <p class="r-body" style="font-size: 14px;">Switch to <strong>terminal view</strong> (click <em>❯ terminal view</em> top-right) to play a <strong>trivia quiz</strong> with a leaderboard and discover hidden <strong>easter egg</strong> commands. Try <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">quiz</code>, <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">guestbook</code>, or <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">dadjoke</code> to get started!</p>
     </section>`;
 
   buildReaderGuestbookForm(document.getElementById('reader-guestbook'));
@@ -880,7 +882,7 @@ const commands = {
   },
   cv(){
     print(`Opening résumé → <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`, 'cyan');
-    window.open(CONFIG.cv, '_blank', 'noopener');
+    window.location.href = CONFIG.cv;
   },
   theme(){
     applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
@@ -1358,6 +1360,30 @@ function showQuizQuestion(){
   print('<span class="dim">Your answer (a/b/c/d):</span>');
 }
 
+function showWrongAnswers(){
+  if (!quizState.quizWrong || quizState.quizWrong.length === 0) return;
+  blank();
+  print('<span class="accent b">═══════════════════════════════════</span>');
+  print('<span class="accent b">  Review: Questions You Missed</span>');
+  print('<span class="accent b">═══════════════════════════════════</span>');
+  blank();
+
+  quizState.quizWrong.forEach((w, i) => {
+    print(`<span class="cyan b">${i + 1}.</span> ${escapeHtml(w.question)}`);
+    blank();
+    print(`  <span class="yellow b">a)</span> ${escapeHtml(w.option_a)}`);
+    print(`  <span class="yellow b">b)</span> ${escapeHtml(w.option_b)}`);
+    print(`  <span class="yellow b">c)</span> ${escapeHtml(w.option_c)}`);
+    print(`  <span class="yellow b">d)</span> ${escapeHtml(w.option_d)}`);
+    blank();
+    print(`  <span class="red">Your answer: ${w.your_answer})</span>`);
+    print(`  <span class="green b">Correct answer: ${w.correct_answer})</span>`);
+    blank();
+  });
+
+  print('<span class="dim">Type <span class="accent">leaderboard</span> to see the rankings!</span>');
+}
+
 async function submitQuizAnswer(answer){
   quizState.answers.push(answer);
   print(`  <span class="accent">You chose: ${answer})</span>`);
@@ -1387,9 +1413,22 @@ async function finishQuiz(nickname){
     print(`  ${pct >= 80 ? '🎉' : pct >= 50 ? '👍' : '😢'}  ${pct}%`);
     print('<span class="accent b">═══════════════════════════════════</span>');
     blank();
-    print('<span class="dim">Type <span class="accent">leaderboard</span> to see the rankings!</span>');
-  } catch(e) { print(`<span class="red">Failed to submit: ${escapeHtml(e.message)}</span>`); }
-  resetQuizState();
+
+    // Store wrong answers for potential review
+    quizState.quizWrong = data.wrong || [];
+
+    if (quizState.quizWrong.length > 0) {
+      print(`<span class="dim">You got ${quizState.quizWrong.length} question(s) wrong.</span>`);
+      blank();
+      print('Want to review the correct answers? <span class="accent b">[Y/n]</span>');
+      quizState.phase = 'review';
+    } else {
+      print('<span class="accent b">Perfect score! 🏆</span>');
+      blank();
+      print('<span class="dim">Type <span class="accent">leaderboard</span> to see the rankings!</span>');
+      resetQuizState();
+    }
+  } catch(e) { print(`<span class="red">Failed to submit: ${escapeHtml(e.message)}</span>`); resetQuizState(); }
 }
 
 async function submitGuestbook(){
@@ -1549,6 +1588,21 @@ cmdline.addEventListener('keydown', e => {
       if (!nick || nick.length < 3 || nick.length > 20 || !/^[a-zA-Z0-9 _-]+$/.test(nick)) { print('<span class="yellow">Nickname must be 3–20 chars: letters, numbers, spaces, _ or -</span>'); return; }
       if (!isClean(nick)) { print('<span class="yellow">That nickname isn\'t allowed.</span>'); return; }
       finishQuiz(nick); return;
+    }
+
+    if (quizState.phase === 'review') {
+      const ans = v.trim().toLowerCase();
+      printPromptEcho(ans);
+      if (ans === '' || ans === 'y' || ans === 'yes') {
+        showWrongAnswers();
+      } else {
+        print('<span class="dim">Skipping review.</span>');
+        blank();
+        print('<span class="dim">Type <span class="accent">leaderboard</span> to see the rankings!</span>');
+      }
+      quizState.phase = 'done';
+      resetQuizState();
+      return;
     }
 
     if (quizState.gbStep === 'nickname') {
@@ -1741,10 +1795,6 @@ function armSkip(){
   function onDevToolsOpen(){
     if (devtoolsOpen) return;
     devtoolsOpen = true;
-    blank();
-    print('<span class="green b">Hello World!</span>');
-    print('<span class="dim">I see you\'re peeking into my code. 🕵️</span>');
-    blank();
     console.log('%cHello World! 👋\n%cI see you\'re peeking into my code.\n\nIf you\'re a developer, I\'d love to chat!\nhttps://linkedin.com/in/memilyc', 'color:#7ec699;font-size:24px;font-weight:bold;', 'color:#e6b450;font-size:14px;');
   }
   function checkSize(){ if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) onDevToolsOpen(); }
