@@ -402,37 +402,55 @@
      Mobile — full-screen, keyboard-aware
      ========================================================= */
   @media (max-width: 600px) {
-    html, body { height: 100dvh; overflow: hidden; }
+    html { height: 100%; }
     body {
+      height: 100%;
       padding: 0;
       align-items: stretch;
       justify-content: flex-start;
       background-size: 100% 100%, 30px 30px, 30px 30px;
+      overflow: hidden;
     }
     .window {
       width: 100%;
-      height: 100dvh;
-      max-height: none;
+      /* JS will pin this to vv.height via position:fixed so the window
+         shrinks exactly when the on-screen keyboard opens */
       border: none;
       border-radius: 0;
       box-shadow: none;
       animation: none;
     }
-    .bar { padding: 8px 12px; gap: 6px; }
+    .bar { padding: 8px 12px; gap: 6px; flex-shrink: 0; }
     .bar .title { font-size: 10px; }
     .dot { width: 10px; height: 10px; }
-    /* Smaller buttons on mobile to save space */
     .bar-btn { font-size: 10px; padding: 4px 8px; }
-    /* Compact screen output */
-    .screen { font-size: 13px; padding: 12px 13px 4px; line-height: 1.55; }
+    /* Screen fills remaining flex space and scrolls internally */
+    .screen {
+      font-size: 13px;
+      padding: 12px 13px 4px;
+      line-height: 1.55;
+      flex: 1 1 0;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .reader {
+      flex: 1 1 0;
+      min-height: 0;
+    }
     .chips { gap: 7px; }
     .chip { font-size: 12.5px; padding: 7px 11px; }
-    /* Input row: tight but comfortable, above keyboard */
-    .input-row { padding: 8px 13px calc(8px + env(safe-area-inset-bottom)); gap: 6px; border-top-width: 1px; }
+    /* Input row pinned at bottom, above safe area notch */
+    .input-row {
+      padding: 8px 13px env(safe-area-inset-bottom, 8px);
+      gap: 6px;
+      border-top-width: 1px;
+      flex-shrink: 0;
+    }
     #cmdline, .ghost { font-size: 16px; } /* 16px prevents iOS auto-zoom */
     .ps { font-size: 13px; }
     .hint { display: none; }
-    .credit { padding: 5px 13px calc(5px + env(safe-area-inset-bottom)); font-size: 10px; }
+    .credit { padding: 4px 13px env(safe-area-inset-bottom, 4px); font-size: 10px; flex-shrink: 0; }
     pre.ascii { font-size: 9px; }
   }
   .neofetch-container {
@@ -613,7 +631,6 @@ themeBtn.addEventListener('click', () =>
 /* ---- Guestbook reader form helpers ---- */
 function buildReaderGuestbookForm(container) {
   container.innerHTML = '<p class="r-gb-status dim" id="gb-loading">Loading entries...</p>';
-  // Load entries
   if (sb) {
     sb.from('guestbook')
       .select('nickname, message, created_at')
@@ -766,9 +783,7 @@ function blank(){ print('&nbsp;'); }
    ========================================================= */
 function tryMath(raw) {
   const expr = raw.trim();
-  // Only allow digits, operators, parens, dots, spaces
   if (!/^[\d\s\+\-\*\/\%\.\(\)]+$/.test(expr)) return null;
-  // Must contain at least one operator to be treated as math
   if (!/[\+\-\*\/\%]/.test(expr)) return null;
   try {
     // eslint-disable-next-line no-new-func
@@ -901,7 +916,6 @@ const commands = {
     if (q.author) print(`<span class="dim">  — ${escapeHtml(q.author)}</span>`);
   },
   dadjoke(){
-    // Pick a joke different from the last one
     let idx;
     do { idx = Math.floor(Math.random() * DAD_JOKES.length); } while (idx === lastJokeIdx && DAD_JOKES.length > 1);
     lastJokeIdx = idx;
@@ -1450,10 +1464,8 @@ function onTab(){
 function resolve(raw){
   const v = (raw || '').trim().toLowerCase();
   if (!v) return null;
-  // Check math first
   const mathResult = tryMath(v);
   if (mathResult !== null) return { name: '__math__', result: mathResult };
-  // Easter egg multi-word commands (longest match first)
   const easterKeys = Object.keys(EASTER_EGGS).sort((a,b) => b.length - a.length);
   for (const ek of easterKeys) {
     if (v === ek || v.startsWith(ek + ' ')) {
@@ -1476,7 +1488,6 @@ function runCommand(raw){
   const r = resolve(cmd);
   if (r){
     if (r.name === '__math__') {
-      // Format result: remove trailing .0 for whole numbers
       const val = Number.isInteger(r.result) ? r.result : parseFloat(r.result.toPrecision(12));
       print(`<span class="accent">${escapeHtml(String(val))}</span>`);
     } else {
@@ -1574,34 +1585,76 @@ win.addEventListener('click', e => {
 });
 
 /* =========================================================
-   Mobile keyboard handling
+   Mobile keyboard handling — visual viewport pinning
+   =========================================================
+   Problem: when the on-screen keyboard opens, browsers either
+   (a) shrink the layout viewport (Chrome/Android) or
+   (b) keep the layout viewport and shift it (Safari/iOS).
+   In both cases window.visualViewport reflects the true
+   visible area. We pin the .window to that rectangle so it
+   always fills exactly the available space, and we scroll
+   the .screen to the bottom so the latest output stays in view.
    ========================================================= */
 const vv = window.visualViewport;
-function fitToViewport(){
-  if (!vv) return;
-  if (window.innerWidth <= 600){
-    win.style.height = vv.height + 'px';
-  } else {
-    win.style.height = '';
+
+function fitToViewport() {
+  if (window.innerWidth > 600) {
+    /* Desktop: let CSS handle sizing, clear any JS overrides */
+    win.style.position = '';
+    win.style.top      = '';
+    win.style.left     = '';
+    win.style.width    = '';
+    win.style.height   = '';
+    return;
   }
-  if (root.getAttribute('data-view') === 'terminal') screen.scrollTop = screen.scrollHeight;
+
+  if (vv) {
+    /* Pin window to the visual viewport's current position and size.
+       This handles both shrink-viewport (Chrome) and shift-viewport
+       (Safari) keyboard behaviours in one shot. */
+    win.style.position = 'fixed';
+    win.style.top      = vv.offsetTop  + 'px';
+    win.style.left     = vv.offsetLeft + 'px';
+    win.style.width    = vv.width      + 'px';
+    win.style.height   = vv.height     + 'px';
+  } else {
+    /* Fallback for browsers without visualViewport API */
+    win.style.position = 'fixed';
+    win.style.top      = '0';
+    win.style.left     = '0';
+    win.style.width    = '100%';
+    win.style.height   = window.innerHeight + 'px';
+  }
+
+  /* Always keep latest terminal output visible */
+  if (root.getAttribute('data-view') === 'terminal') {
+    screen.scrollTop = screen.scrollHeight;
+  }
 }
-if (vv){
+
+if (vv) {
   vv.addEventListener('resize', fitToViewport);
   vv.addEventListener('scroll', fitToViewport);
 }
-window.addEventListener('resize', fitToViewport);
-window.addEventListener('orientationchange', () => setTimeout(fitToViewport, 200));
+window.addEventListener('resize',            fitToViewport);
+window.addEventListener('orientationchange', () => setTimeout(fitToViewport, 300));
 fitToViewport();
 
 cmdline.addEventListener('focus', () => {
-  setTimeout(() => { fitToViewport(); screen.scrollTop = screen.scrollHeight; }, 250);
+  /* Two-pass: fire once immediately (for browsers that resize before focus
+     completes) and again after the keyboard animation finishes (~300–400 ms). */
+  setTimeout(() => { fitToViewport(); screen.scrollTop = screen.scrollHeight; }, 100);
+  setTimeout(() => { fitToViewport(); screen.scrollTop = screen.scrollHeight; }, 420);
 });
 
 /* =========================================================
    Boot sequence
    ========================================================= */
 let skip = false;
+const isMobile = () => window.innerWidth <= 600;
+/* Typing speed per character — comfortably readable on mobile */
+const CHAR_MS = () => isMobile() ? 55 : 16;
+
 function typeLine(text, cls){
   return new Promise(res => {
     const node = print('', cls);
@@ -1615,12 +1668,21 @@ function typeLine(text, cls){
         node.appendChild(cursor);
         screen.scrollTop = screen.scrollHeight;
         i++;
-        setTimeout(step, 16);
+        setTimeout(step, CHAR_MS());
       } else { node.innerHTML = text; res(); }
     })();
   });
 }
 function wait(ms){ return new Promise(r => setTimeout(r, skip ? 0 : ms)); }
+
+/* Print a line then pause so the reader can absorb it before the next appears.
+   Optional `pause` arg overrides the default mobile delay. */
+function printLine(html, cls, pause){
+  print(html, cls);
+  screen.scrollTop = screen.scrollHeight;
+  const ms = pause !== undefined ? pause : (isMobile() ? 1000 : 0);
+  return ms > 0 ? wait(ms) : Promise.resolve();
+}
 
 async function boot(){
   buildReader();
@@ -1628,15 +1690,37 @@ async function boot(){
   print(`<span class="dim">Last login: ${date} on ttys001</span>`);
   blank();
   await typeLine(`${CONFIG.user}@${CONFIG.host}:~$ whoami`, '');
-  await wait(180);
+  await wait(isMobile() ? 500 : 180);
   commands.whoami();
   blank();
+  await wait(isMobile() ? 600 : 0);
   await typeLine(`${CONFIG.user}@${CONFIG.host}:~$ ./welcome.sh`, '');
-  await wait(180);
-  commands.about();
+  await wait(isMobile() ? 500 : 180);
+
+  /* On mobile: print each about line individually with a generous pause so
+     the screen doesn't flood and the user can read one chunk at a time.
+     On desktop: keep the original instant render. */
+  if (isMobile()) {
+    await printLine(`<span class="accent b">${CONFIG.name}</span> <span class="dim">—</span> <span class="cyan">${CONFIG.role}</span>`, '', 700);
+    await printLine(`<span class="dim">// ${CONFIG.tagline}</span>`, '', 1100);
+    blank();
+    for (const line of CONFIG.about) {
+      await printLine(line, '', 1300);
+    }
+    await wait(500);
+    blank();
+    print(`Type <span class="accent">cv</span> to read my full résumé, or <span class="accent">contact</span> to reach me.`, 'dim');
+  } else {
+    commands.about();
+  }
+
   blank();
-  print('<span class="dim">Tip: type a command (<span class="accent">Tab</span> to autocomplete, <span class="accent">→</span> to accept), or click a chip below ↓</span>');
-  print('<span class="dim">New to terminals? Click <span class="accent">▤ reader view</span> (top-right) for a plain page.</span>');
+  await wait(isMobile() ? 700 : 0);
+  print('<span class="dim">Tip: tap a chip below, or type a command ↓</span>');
+  if (!isMobile()) {
+    print('<span class="dim">New to terminals? Click <span class="accent">▤ reader view</span> (top-right) for a plain page.</span>');
+  }
+  await wait(isMobile() ? 500 : 0);
   commands.help();
   blank();
   inputRow.style.display = 'flex';
