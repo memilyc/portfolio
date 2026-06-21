@@ -649,7 +649,6 @@ const quizState = {
   gbMessage: '',
   gbStep: 'idle',
   tailInterval: null,
-  resumePrompt: false,
 };
 
 function resetQuizState() {
@@ -878,6 +877,22 @@ function el(tag, cls, html){
   if (html != null) e.innerHTML = html;
   return e;
 }
+
+const CHIP_NAMES = ['about','skills','projects','strengths','contact','cv','quote','dadjoke','testimonials','quiz','leaderboard','guestbook','neofetch','credits','theme','clear','help'];
+
+/* ponytail: single source of truth for chips — boot + help both call this */
+function renderChips(){
+  const wrap = el('div','line');
+  const chips = el('div','chips');
+  CHIP_NAMES.forEach(n => {
+    const b = el('button','chip', n);
+    b.onclick = () => runCommand(n);
+    chips.appendChild(b);
+  });
+  wrap.appendChild(chips);
+  screen.appendChild(wrap);
+}
+
 function print(html, cls){
   const d = el('div', 'line fade-in' + (cls ? ' ' + cls : ''), html);
   screen.appendChild(d);
@@ -897,13 +912,13 @@ function printPromptEcho(cmd){
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-/* Generate testimonial CTA HTML for terminal or reader view */
+/* ponytail: one template, class switches between terminal/reader */
 function testimonialCTA(forReader = false){
-  const esc = escapeHtml;
-  if (forReader) {
-    return `<p class="r-test-cta">Worked with Emily and want to add your testimonial? <a class="tlink" href="${esc(CONFIG.linkedin)}" target="_blank" rel="noopener">Add a LinkedIn recommendation</a> or <a class="tlink" href="mailto:${esc(CONFIG.email)}?subject=Add%20testimonial%20to%20Emily's%20portfolio">email me</a>.</p>`;
-  }
-  return '<span class="dim">Worked with Emily and want to add your testimonial?</span> <a class="tlink" href="' + esc(CONFIG.linkedin) + '" target="_blank" rel="noopener">Add LinkedIn recommendation</a> <span class="dim">or</span> <a class="tlink" href="mailto:' + esc(CONFIG.email) + '?subject=Add%20testimonial%20to%20Emily%27s%20portfolio">email me</a><span class="dim">.</span>';
+  const cls = forReader ? 'r-test-cta' : 'dim';
+  const tag = forReader ? 'p' : 'span';
+  const or = ' or';
+  const dot = forReader ? '' : '<span class="dim">.</span>';
+  return `<${tag} class="${cls}">Worked with Emily and want to add your testimonial? <a class="tlink" href="${escapeHtml(CONFIG.linkedin)}" target="_blank" rel="noopener">Add a LinkedIn recommendation</a>${or} <a class="tlink" href="mailto:${escapeHtml(CONFIG.email)}?subject=Add%20testimonial%20to%20Emily's%20portfolio">email me</a>${dot}</${tag}>`;
 }
 
 /* Sanitize guestbook messages: strip URLs and obfuscate domain patterns */
@@ -961,10 +976,6 @@ let helpCount = 0;
 let commandHistory = [];
 let historyIndex = -1;
 let currentDir = '/home/emily/portfolio';
-
-// Alias for backward compatibility with cmdline keydown handler
-const history = commandHistory;
-let hi = historyIndex;
 
 const commands = {
   help(){
@@ -1491,9 +1502,11 @@ const commands = {
   },
   ls(args){
     const argv = (args || '').trim().split(/\s+/).filter(Boolean);
-    const showAll = argv.includes('-a') || argv.includes('-al') || argv.includes('-la') || argv.includes('-alh') || argv.includes('-ahl') || argv.includes('-hal') || argv.includes('-hla') || argv.includes('-lah') || argv.includes('-lha');
-    const longFormat = argv.includes('-l') || argv.includes('-al') || argv.includes('-la') || argv.includes('-alh') || argv.includes('-ahl') || argv.includes('-hal') || argv.includes('-hla') || argv.includes('-lah') || argv.includes('-lha');
-    const humanReadable = argv.includes('-h') || argv.includes('-alh') || argv.includes('-ahl') || argv.includes('-hal') || argv.includes('-hla') || argv.includes('-lah') || argv.includes('-lha');
+    const joined = argv.join('');
+    // ponytail: check flags by character presence, not full permutation
+    const showAll = joined.includes('a');
+    const longFormat = joined.includes('l');
+    const humanReadable = joined.includes('h');
 
     // Directory contents based on current directory
     const dirContents = {
@@ -1875,30 +1888,8 @@ const commands = {
   },
 
   resume(){
-    print('<span class="dim">Loading resume...</span>');
-    const bar = print('');
-    let progress = 0;
-    const iv = setInterval(() => {
-      progress += Math.random() * 15 + 5;
-      if (progress > 100) progress = 100;
-      const filled = Math.round(progress / 2.5);
-      const empty = 40 - filled;
-      bar.innerHTML = `<span class="accent">${'█'.repeat(filled)}</span><span class="dim">${'░'.repeat(empty)}</span> <span class="accent b">${Math.round(progress)}%</span>`;
-      screen.scrollTop = screen.scrollHeight;
-      if (progress >= 100) {
-        clearInterval(iv);
-        blank();
-        print('<span class="yellow b">Warning:</span>');
-        print('Resume contains excessive amounts of:');
-        print('  - <span class="red">troubleshooting</span>');
-        print('  - <span class="red">documentation</span>');
-        print('  - <span class="red">PostgreSQL</span>');
-        print('  - <span class="red">customer empathy</span>');
-        blank();
-        print('<span class="dim">Proceed anyway? [Y/n]</span>');
-        quizState.resumePrompt = true;
-      }
-    }, 80);
+    print(`Opening résumé → <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`, 'cyan');
+    window.location.href = CONFIG.cv;
   },
 
   whyhireme(){
@@ -2354,15 +2345,6 @@ cmdline.addEventListener('keydown', e => {
     const v = cmdline.value;
     cmdline.value = ''; tab.active = false; updateGhost();
 
-    if (quizState.resumePrompt) {
-      const ans = v.trim().toLowerCase();
-      printPromptEcho(ans);
-      quizState.resumePrompt = false;
-      if (ans === '' || ans === 'y' || ans === 'yes') { print('<span class="accent b">Opening resume...</span>'); window.open('https://memilyc.github.io', '_blank', 'noopener'); }
-      else { print('<span class="dim">Cancelled.</span>'); }
-      return;
-    }
-
     if (quizState.phase === 'picking') {
       const pick = v.trim().toLowerCase();
       printPromptEcho(pick);
@@ -2417,13 +2399,13 @@ cmdline.addEventListener('keydown', e => {
       quizState.gbMessage = msg; submitGuestbook(); return;
     }
 
-    if (v.trim()) { commandHistory.push(v); historyIndex = commandHistory.length; hi = historyIndex; }
+    if (v.trim()) { commandHistory.push(v); historyIndex = commandHistory.length; }
     runCommand(v);
   } else if (e.key === 'ArrowUp'){
-    if (historyIndex > 0){ historyIndex--; cmdline.value = commandHistory[historyIndex]; hi = historyIndex; tab.active = false; updateGhost(); e.preventDefault(); }
+    if (historyIndex > 0){ historyIndex--; cmdline.value = commandHistory[historyIndex]; tab.active = false; updateGhost(); e.preventDefault(); }
   } else if (e.key === 'ArrowDown'){
-    if (historyIndex < commandHistory.length-1){ historyIndex++; cmdline.value = commandHistory[historyIndex]; hi = historyIndex; }
-    else { historyIndex = commandHistory.length; hi = historyIndex; cmdline.value = ''; }
+    if (historyIndex < commandHistory.length-1){ historyIndex++; cmdline.value = commandHistory[historyIndex]; }
+    else { historyIndex = commandHistory.length; cmdline.value = ''; }
     tab.active = false; updateGhost();
   }
 });
