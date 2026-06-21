@@ -446,6 +446,12 @@
   .r-gb-btn:hover { opacity: 0.88; transform: translateY(-1px); }
   .r-gb-status { font-size: 13px; color: var(--accent); }
   .r-gb-status.err { color: var(--red); }
+  .r-gb-cta {
+    font-size: 14px;
+    color: var(--dim);
+    margin-bottom: 16px;
+    font-style: italic;
+  }
 
   @media (max-width: 600px) {
     .reader { padding: 26px 18px 22px; }
@@ -645,6 +651,30 @@ try {
   }
 } catch(e) { console.warn('Supabase init failed', e); }
 
+// ── Page View Tracker ──────────────────────────────────────
+async function trackPageView() {
+  if (!CONFIG.supabase || !CONFIG.supabase.url) return;
+  
+  try {
+    const payload = {
+      path: window.location.pathname + window.location.hash,
+      referrer: document.referrer || null
+    };
+    
+    // Fire and forget - don't block page load
+    const url = `${CONFIG.supabase.url}/functions/v1/track-page-view`;
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {
+    // Silently fail - tracking shouldn't break the site
+    console.debug('Page view tracking failed:', e);
+  }
+}
+
 async function edgeFn(name, opts = {}) {
   const url = `${CONFIG.supabase.url}/functions/v1/${name}`;
   const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${CONFIG.supabase.anonKey}` };
@@ -716,7 +746,7 @@ function expandTestimonialText(idx){
   const btn = el.nextElementSibling;
   const fullText = TESTIMONIALS[idx].text;
   if (el.dataset.expanded === 'true') {
-    el.textContent = fullText.substring(0, 250) + '...';
+    el.textContent = truncateAtWord(fullText, 250);
     el.dataset.expanded = 'false';
     btn.textContent = 'read more';
   } else {
@@ -764,6 +794,7 @@ function buildReaderGuestbookForm(container) {
           entriesHtml = '<p class="r-gb-status dim" style="margin-bottom:16px;">No entries yet — be the first!</p>';
         }
         container.innerHTML = entriesHtml + `
+          <p class="r-gb-cta">Leave a little note before you go — add your digital footprint to this tiny corner of the internet 🌱</p>
           <div class="r-gb-form" id="gb-form">
             <input id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
             <textarea id="gb-msg" placeholder="Leave a message... (2–300 chars)" maxlength="300"></textarea>
@@ -842,8 +873,8 @@ function buildReader(){
       <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
       <ul class="r-testimonials" id="reader-testimonials">
         ${TESTIMONIALS.slice(0, 2).map((t, idx) => {
-          const truncated = t.text.length > 250;
-          const displayText = truncated ? t.text.substring(0, 250) + '...' : t.text;
+          const displayText = truncateAtWord(t.text, 250);
+          const truncated = displayText.endsWith('...');
           return `
           <li>
             <div class="r-test-name">${esc(t.name)} <span class="r-test-rel">${esc(t.relationship)}</span></div>
@@ -857,8 +888,8 @@ function buildReader(){
         <ul class="r-testimonials">
           ${TESTIMONIALS.slice(2).map((t, idx) => {
           const realIdx = idx + 2;
-          const truncated = t.text.length > 250;
-          const displayText = truncated ? t.text.substring(0, 250) + '...' : t.text;
+          const displayText = truncateAtWord(t.text, 250);
+          const truncated = displayText.endsWith('...');
           return `
             <li>
               <div class="r-test-name">${esc(t.name)} <span class="r-test-rel">${esc(t.relationship)}</span></div>
@@ -951,6 +982,13 @@ function printPromptEcho(cmd){
   print(`<span class="prompt">${CONFIG.user}@${CONFIG.host}</span>:<span class="path">${escapeHtml(displayPath)}</span>$ <span class="cmd">${escapeHtml(cmd)}</span>`);
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ponytail: truncate at ~250 chars but break at next space to avoid mid-word cuts */
+function truncateAtWord(s, maxLen){
+  if (s.length <= maxLen) return s;
+  const cutoff = s.lastIndexOf(' ', maxLen);
+  return cutoff > maxLen * 0.7 ? s.substring(0, cutoff) + '...' : s.substring(0, maxLen) + '...';
+}
 
 /* ponytail: one template, class switches between terminal/reader */
 function testimonialCTA(forReader = false){
@@ -1376,8 +1414,8 @@ const commands = {
       print('<span class="accent b">═══════════════════════════════════════</span>');
       blank();
       TESTIMONIALS.forEach((t, i) => {
-        const truncated = t.text.length > 250;
-        const preview = truncated ? t.text.substring(0, 250) + '...' : t.text;
+        const preview = truncateAtWord(t.text, 250);
+        const truncated = preview.endsWith('...');
         print('<span class="cyan b">[' + (i + 1) + ']</span> <span class="accent b">' + escapeHtml(t.name) + '</span>');
         print('     <span class="dim">(' + escapeHtml(t.relationship) + ')</span>');
         print('     "' + escapeHtml(preview) + '"');
@@ -1445,8 +1483,8 @@ const commands = {
     const showCount = Math.min(2, TESTIMONIALS.length);
     for (let i = 0; i < showCount; i++) {
       const t = TESTIMONIALS[i];
-      const truncated = t.text.length > 250;
-      const preview = truncated ? t.text.substring(0, 250) + '...' : t.text;
+      const preview = truncateAtWord(t.text, 250);
+      const truncated = preview.endsWith('...');
       print('<span class="cyan b">[' + (i + 1) + ']</span> <span class="accent b">' + escapeHtml(t.name) + '</span>');
       print('     <span class="dim">(' + escapeHtml(t.relationship) + ')</span>');
       print('     "' + escapeHtml(preview) + '"');
@@ -1912,11 +1950,13 @@ const commands = {
       return;
     }
     print('<span class="dim">$ cat guestbook.txt</span>');
+    blank();
+    print('You\'ve reached the guestbook. Leave a message, say hello, and make your mark on this little corner of the internet.');
+    blank();
     try {
       const { data, error } = await sb.from('guestbook').select('nickname, message, created_at').order('created_at', { ascending: false }).limit(20);
       if (error) throw error;
       if (!data.length) { print('<span class="dim">Guestbook is empty. Type <span class="accent">guestbook sign</span> to be the first!</span>'); return; }
-      blank();
       data.forEach(row => {
         const date = new Date(row.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
         print(`<span class="yellow b">${escapeHtml(row.nickname)}</span> <span class="dim">${date}</span>`);
@@ -2627,6 +2667,9 @@ function armSkip(){
 
 armSkip();
 boot();
+
+/* Track page view */
+trackPageView();
 
 /* Scroll to section if URL has hash */
 if (window.location.hash && root.getAttribute('data-view') === 'reader') {
