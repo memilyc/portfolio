@@ -7,6 +7,7 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
 * **Dual View Modes:**
     * **Terminal View:** A fully functional, interactive CLI environment with command history, autocomplete, and fuzzy-matching for commands.
     * **Reader View:** A clean, accessible, and readable layout for users who prefer standard web navigation.
+* **macOS Window Controls:** Functional traffic light buttons (🔴 close, 🟡 minimize, 🟢 maximize) with smooth animations, keyboard shortcuts (Esc, ⌘+M, ⌘+F), and state persistence via localStorage.
 * **Interactive Trivia Quiz:**
     * Select difficulty interactively or specify: `quiz easy`, `quiz medium`, `quiz hard`, `quiz emily`
     * Questions stored in Supabase, server-side scoring via edge functions
@@ -153,13 +154,40 @@ Your analytics are well within the free tier:
 - ✅ **Cost**: $0 (even at 100K visitors/month, you'd only use 28% of free tier)
 - ✅ **After free tier**: $2 per 1 Million additional invocations
 
-### Privacy Features
+### Privacy Features & Legal Compliance
 
-- ✅ No cookies required (GDPR-friendly)
-- ✅ IP addresses are hashed (SHA-256, truncated to 16 chars)
-- ✅ No personal data stored
-- ✅ Row Level Security enabled (public can only insert, not read)
-- ✅ Fire-and-forget tracking (doesn't block page load)
+This analytics implementation is designed to comply with GDPR, CCPA, and other privacy regulations:
+
+- ✅ **No cookies required** - Uses localStorage only for opt-out preference
+- ✅ **No personal data collected** - Only technical metadata (referrer, path, user agent)
+- ✅ **IP addresses are hashed** - SHA-256 hashed and truncated to 16 chars (not reversible)
+- ✅ **User opt-out mechanism** - One-click disable button in the footer
+- ✅ **Privacy notice displayed** - Footer informs users about analytics
+- ✅ **No third-party data sharing** - Data stays in your Supabase project
+- ✅ **Fire-and-forget tracking** - Doesn't block page load or affect UX
+- ✅ **Row Level Security** - Public can only insert, not read analytics data
+
+**Users can opt out by:**
+1. Scrolling to the footer in reader view
+2. Clicking "Disable analytics tracking" button
+3. Preference is saved in localStorage and respected on all future visits
+
+**What tracked data looks like:**
+```
+path: "/#projects"
+referrer: "https://www.linkedin.com/feed/"
+ip_hash: "a3f8c92d1e5b7f4a"  (hashed, not real IP)
+user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X...)"
+country: "US"
+```
+
+**What is NOT tracked:**
+- ❌ Names or email addresses
+- ❌ Cookies or session identifiers
+- ❌ Mouse movements or clicks
+- ❌ Time spent on page
+- ❌ Scroll behavior
+- ❌ Screen recordings
 
 ## Customization
 

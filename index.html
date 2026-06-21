@@ -269,6 +269,104 @@
   [data-view="reader"] .screen,
   [data-view="reader"] .input-row { display: none !important; }
 
+  /* ── Window State Behaviors ─────────────────────────────── */
+  .window {
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                border-radius 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                margin 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* 🔴 CLOSED: Hide terminal completely */
+  .window.closed {
+    transform: scale(0.9);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  /* 🟡 MINIMIZED: Show only title bar (collapse screen + input) */
+  .window.minimized .screen,
+  .window.minimized .input-row,
+  .window.minimized .credit,
+  .window.minimized .reader {
+    display: none !important;
+  }
+
+  .window.minimized {
+    height: 43px !important;
+    min-height: 43px !important;
+    max-height: 43px !important;
+    overflow: hidden;
+  }
+
+  .window.minimized .bar {
+    cursor: pointer; /* click to restore */
+  }
+
+  /* 🟢 MAXIMIZED: Fill entire viewport */
+  .window.maximized {
+    width: 100vw !important;
+    height: 100vh !important;
+    min-width: 100vw !important;
+    min-height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0;
+    margin: 0 !important;
+  }
+
+  /* Mobile: maximized is default anyway */
+  @media (max-width: 768px) {
+    .window.maximized {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  /* Hover effects for dots (macOS style) */
+  .dot {
+    cursor: pointer;
+    transition: filter 0.15s ease;
+    position: relative;
+  }
+  .dot:hover {
+    filter: brightness(1.2);
+  }
+  .dot:active {
+    filter: brightness(0.9);
+  }
+
+  /* Show icons on hover (macOS style) */
+  .dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+  }
+
+  .dot.r::after { content: '✕'; color: #4a0002; }
+  .dot.y::after { content: '−'; color: #995700; }
+  .dot.g::after { content: '+'; color: #006500; }
+
+  .dot:hover::after {
+    opacity: 1;
+  }
+
+  /* Focus indicator for accessibility */
+  .dot:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
   .r-name {
     font-size: clamp(28px, 5vw, 40px);
     font-weight: 700;
@@ -554,7 +652,9 @@
 <body>
   <div class="window" id="window">
     <div class="bar">
-      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <button class="dot r" id="dotClose" aria-label="Close terminal" title="Hide (Esc)"></button>
+      <button class="dot y" id="dotMinimize" aria-label="Minimize" title="Minimize to title bar"></button>
+      <button class="dot g" id="dotMaximize" aria-label="Maximize" title="Fill screen"></button>
       <span class="title">memilyc@portfolio: ~</span>
       <button class="bar-btn" id="viewBtn" aria-label="Switch view">▤ reader view</button>
       <button class="bar-btn" id="themeBtn" aria-label="Toggle theme">[ light ]</button>
@@ -652,8 +752,15 @@ try {
 } catch(e) { console.warn('Supabase init failed', e); }
 
 // ── Page View Tracker ──────────────────────────────────────
+// Privacy-first analytics with user opt-out support
 async function trackPageView() {
   if (!CONFIG.supabase || !CONFIG.supabase.url) return;
+  
+  // Respect user opt-out
+  if (localStorage.getItem('analytics-opt-out') === 'true') {
+    console.debug('[Tracking] User opted out - skipping');
+    return;
+  }
   
   try {
     const payload = {
@@ -676,6 +783,33 @@ async function trackPageView() {
     // Silently fail - tracking shouldn't break the site
     console.debug('Page view tracking failed:', e);
   }
+}
+
+// ── Analytics Opt-Out Management ───────────────────────────
+function toggleAnalyticsOptOut() {
+  const current = localStorage.getItem('analytics-opt-out') === 'true';
+  const newVal = !current;
+  localStorage.setItem('analytics-opt-out', String(newVal));
+  updateAnalyticsOptOutButton();
+  
+  if (newVal) {
+    console.log('[Analytics] You have opted out of analytics tracking');
+    alert('Analytics tracking disabled. You will no longer be tracked on this site.');
+  } else {
+    console.log('[Analytics] You have opted in to analytics tracking');
+    alert('Analytics tracking enabled. Thank you for helping improve this site!');
+  }
+}
+
+function updateAnalyticsOptOutButton() {
+  const btn = document.getElementById('analytics-optout-btn');
+  if (!btn) return;
+  
+  const optedOut = localStorage.getItem('analytics-opt-out') === 'true';
+  btn.textContent = optedOut ? 'Enable analytics tracking' : 'Disable analytics tracking';
+  btn.title = optedOut 
+    ? 'Click to enable anonymous analytics tracking' 
+    : 'Click to disable analytics tracking';
 }
 
 async function edgeFn(name, opts = {}) {
@@ -924,9 +1058,14 @@ function buildReader(){
     <section class="r-sec" style="border: 1px dashed var(--accent); border-radius: 8px; padding: 18px 22px; background: var(--glow);">
       <h2 class="r-h" style="border-bottom: none; margin-bottom: 8px; padding-bottom: 0;">Try the Interactive Terminal</h2>
       <p class="r-body" style="font-size: 14px;">Switch to <strong>terminal view</strong> (click <em>❯ terminal view</em> top-right) to play a <strong>trivia quiz</strong> with a leaderboard and discover hidden <strong>easter egg</strong> commands. Try <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">quiz</code>, <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">guestbook</code>, or <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">dadjoke</code> to get started!</p>
-    </section>`;
+    </section>
+    <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; color: var(--dim); font-size: 12px;">
+      <p style="margin-bottom: 8px;">This portfolio uses privacy-friendly analytics to understand visitor sources (no cookies, no personal data).</p>
+      <p><button onclick="toggleAnalyticsOptOut()" id="analytics-optout-btn" style="background: none; border: 1px solid var(--border); color: var(--dim); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-family: inherit;">Disable analytics tracking</button></p>
+    </footer>`;
 
   buildReaderGuestbookForm(document.getElementById('reader-guestbook'));
+  updateAnalyticsOptOutButton();
 }
 
 function applyView(v){
@@ -944,6 +1083,61 @@ function applyView(v){
 })();
 viewBtn.addEventListener('click', () =>
   applyView(root.getAttribute('data-view') === 'terminal' ? 'reader' : 'terminal'));
+
+// ── Window State Management ──────────────────────────────
+let windowState = 'normal'; // 'normal' | 'minimized' | 'maximized' | 'closed'
+
+function setWindowState(state) {
+  windowState = state;
+  const win = document.getElementById('window');
+  win.classList.remove('minimized', 'maximized', 'closed');
+  if (state !== 'normal') win.classList.add(state);
+  try { localStorage.setItem('window-state', state); } catch(e) {}
+}
+
+function restoreWindow() {
+  setWindowState('normal');
+  document.body.style.cursor = '';
+  document.body.title = '';
+  document.body.style.pointerEvents = '';
+}
+
+// 🔴 CLOSE: Hide window completely (shows blank page)
+document.getElementById('dotClose').addEventListener('click', (e) => {
+  e.stopPropagation();
+  setWindowState('closed');
+  // Show a subtle "click to restore" message on body
+  document.body.style.cursor = 'pointer';
+  document.body.title = 'Click anywhere to restore terminal';
+  // Add click listener to body with setTimeout to avoid immediate trigger
+  setTimeout(() => {
+    document.body.addEventListener('click', restoreWindow, { once: true });
+  }, 100);
+});
+
+// 🟡 MINIMIZE: Collapse to title bar only
+document.getElementById('dotMinimize').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (windowState === 'minimized') {
+    restoreWindow();
+  } else {
+    setWindowState('minimized');
+    // Click bar to restore
+    setTimeout(() => {
+      document.querySelector('.bar').addEventListener('click', restoreWindow, { once: true });
+    }, 100);
+  }
+});
+
+// 🟢 MAXIMIZE: Fill screen
+document.getElementById('dotMaximize').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (windowState === 'maximized') {
+    setWindowState('normal'); // toggle back
+  } else {
+    setWindowState('maximized');
+  }
+});
 
 function el(tag, cls, html){
   const e = document.createElement(tag);
@@ -1504,6 +1698,68 @@ const commands = {
     print(testimonialCTA());
   },
   clear(){ screen.innerHTML = ''; },
+  privacy(args){
+    print('<span class="dim">$ privacy' + (args ? ' ' + args : '') + '</span>');
+    
+    // Handle subcommands
+    if (args === 'disable' || args === 'opt-out' || args === 'optout') {
+      localStorage.setItem('analytics-opt-out', 'true');
+      blank();
+      print('<span class="accent">✓ Analytics tracking DISABLED</span>');
+      print('');
+      print('You will no longer be tracked on this site.');
+      print('To re-enable, type: <span class="cyan">privacy enable</span>');
+      return;
+    }
+    
+    if (args === 'enable' || args === 'opt-in' || args === 'optin') {
+      localStorage.setItem('analytics-opt-out', 'false');
+      blank();
+      print('<span class="accent">✓ Analytics tracking ENABLED</span>');
+      print('');
+      print('Thank you for helping improve this site!');
+      print('To disable, type: <span class="cyan">privacy disable</span>');
+      return;
+    }
+    
+    // Show full privacy info (no subcommand)
+    blank();
+    print('<span class="accent b">Privacy & Analytics</span>');
+    blank();
+    print('This portfolio uses privacy-friendly analytics to understand');
+    print('where visitors come from (LinkedIn, Twitter, Google, etc.)');
+    blank();
+    print('<span class="yellow b">What we track:</span>');
+    print('  • Referrer URL (where you clicked from)');
+    print('  • Page path (which section you viewed)');
+    print('  • Anonymized IP (SHA-256 hashed, not reversible)');
+    print('  • Browser type and country');
+    blank();
+    print('<span class="yellow b">What we DON\'T track:</span>');
+    print('  • Names, emails, or personal data');
+    print('  • Cookies or session identifiers');
+    print('  • Mouse movements, clicks, or scroll behavior');
+    print('  • Time spent on page');
+    blank();
+    print('<span class="yellow b">Your rights:</span>');
+    print('  • GDPR, CCPA, LGPD, PIPEDA compliant');
+    print('  • No consent banner needed (no cookies/personal data)');
+    print('  • You can opt out anytime');
+    blank();
+    
+    const optedOut = localStorage.getItem('analytics-opt-out') === 'true';
+    if (optedOut) {
+      print('<span class="accent">✓ Analytics tracking is currently DISABLED</span>');
+      print('');
+      print('To re-enable, type: <span class="cyan">privacy enable</span>');
+    } else {
+      print('Analytics tracking is currently <span class="accent">ENABLED</span>');
+      print('');
+      print('To disable, type: <span class="cyan">privacy disable</span>');
+    }
+    blank();
+    print('<span class="dim">Full details: PRIVACY_COMPLIANCE.md in the GitHub repo</span>');
+  },
   credits(){
     print('<span class="dim">$ cat credits.txt</span>');
     blank();
@@ -2642,9 +2898,29 @@ async function boot(){
   renderChips();
 
   blank();
+  
+  // Privacy notice for terminal view (GDPR/CCPA compliant)
+  print('<span class="dim" style="font-size: 11px;">🔒 Privacy: This site uses anonymous analytics (no cookies, no personal data). Type <span class="accent">privacy</span> to learn more or opt out.</span>');
+  
   inputRow.style.display = 'flex';
   fitToViewport();
   if (window.innerWidth > 600) cmdline.focus();
+  
+  // Restore window state from localStorage
+  const savedState = localStorage.getItem('window-state');
+  if (savedState && ['minimized', 'maximized'].includes(savedState)) {
+    setWindowState(savedState);
+    
+    // If minimized, add click handler to bar
+    if (savedState === 'minimized') {
+      document.querySelector('.bar').addEventListener('click', restoreWindow, { once: true });
+    }
+  }
+  
+  // Mobile: hide maximize button (already full-screen)
+  if (window.innerWidth <= 768) {
+    document.getElementById('dotMaximize').style.display = 'none';
+  }
 }
 
 function armSkip(){
@@ -2665,6 +2941,46 @@ function armSkip(){
   function checkSize(){ if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) onDevToolsOpen(); }
   setInterval(checkSize, 1000);
   document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'I') setTimeout(onDevToolsOpen, 500); if (e.key === 'F12') setTimeout(onDevToolsOpen, 500); });
+  
+  // Window control keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    // Esc = toggle close/restore (only when not typing)
+    if (e.key === 'Escape' && !cmdline.matches(':focus')) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (windowState === 'normal') {
+        setWindowState('closed');
+        document.body.style.cursor = 'pointer';
+        document.body.title = 'Click anywhere to restore terminal';
+        setTimeout(() => {
+          document.body.addEventListener('click', restoreWindow, { once: true });
+        }, 100);
+      } else {
+        restoreWindow();
+      }
+    }
+    
+    // Cmd/Ctrl + M = minimize
+    if ((e.metaKey || e.ctrlKey) && e.key === 'm' && !e.shiftKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (windowState === 'minimized') {
+        restoreWindow();
+      } else {
+        setWindowState('minimized');
+        setTimeout(() => {
+          document.querySelector('.bar').addEventListener('click', restoreWindow, { once: true });
+        }, 100);
+      }
+    }
+    
+    // Cmd/Ctrl + F = fullscreen/maximize
+    if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+      e.preventDefault();
+      e.stopPropagation();
+      setWindowState(windowState === 'maximized' ? 'normal' : 'maximized');
+    }
+  });
   document.addEventListener('contextmenu', () => { setTimeout(() => { if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) onDevToolsOpen(); }, 800); });
 })();
 
