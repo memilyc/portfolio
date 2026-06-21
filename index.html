@@ -287,7 +287,25 @@
     margin-bottom: 14px;
     padding-bottom: 8px;
     border-bottom: 1px solid var(--border);
+    position: relative;
   }
+  .r-h .copy-link {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    cursor: pointer;
+    color: var(--dim);
+    font-size: 14px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: opacity 0.15s ease, color 0.15s ease;
+    user-select: none;
+  }
+  .r-h:hover .copy-link { opacity: 1; }
+  .r-h .copy-link:hover { color: var(--accent); background: var(--bg-bar); }
+  .r-h .copy-link.copied { color: var(--accent); }
   .r-body { font-size: 15px; line-height: 1.8; color: var(--fg); max-width: 66ch; }
   .r-skills, .r-links { list-style: none; }
   .r-skills li {
@@ -708,6 +726,26 @@ function expandTestimonialText(idx){
   }
 }
 
+/* ponytail: generate copy link icon for section headers */
+function sectionCopyIcon(section){
+  return `<span class="copy-link" onclick="copySectionLink('${section}', event)" title="Copy link to this section">🔗</span>`;
+}
+
+/* Copy section URL to clipboard */
+function copySectionLink(section, e){
+  e.stopPropagation();
+  const url = window.location.origin + window.location.pathname + '#' + section;
+  navigator.clipboard.writeText(url).then(() => {
+    const icon = e.target;
+    icon.textContent = '✓';
+    icon.classList.add('copied');
+    setTimeout(() => {
+      icon.textContent = '🔗';
+      icon.classList.remove('copied');
+    }, 1500);
+  });
+}
+
 function buildReaderGuestbookForm(container) {
   container.innerHTML = '<p class="r-gb-status dim" id="gb-loading">Loading entries...</p>';
   if (sb) {
@@ -769,18 +807,18 @@ function buildReader(){
     </header>
     <div class="r-role">${esc(c.role)}</div>
     <p class="r-tag">${esc(c.tagline)}</p>
-    <section class="r-sec">
-      <h2 class="r-h">About</h2>
+    <section class="r-sec" id="about">
+      <h2 class="r-h" data-section="about">About ${sectionCopyIcon('about')}</h2>
       <p class="r-body">${c.about.map(esc).join(' ')}</p>
     </section>
-    <section class="r-sec">
-      <h2 class="r-h">Skills</h2>
+    <section class="r-sec" id="skills">
+      <h2 class="r-h" data-section="skills">Skills ${sectionCopyIcon('skills')}</h2>
       <ul class="r-skills">
         ${c.skills.map(([k,v]) => `<li><span class="r-k">${esc(k)}</span><span class="r-v">${esc(v)}</span></li>`).join('')}
       </ul>
     </section>
-    <section class="r-sec">
-      <h2 class="r-h">Projects</h2>
+    <section class="r-sec" id="projects">
+      <h2 class="r-h" data-section="projects">Projects ${sectionCopyIcon('projects')}</h2>
       <ul class="r-projects">
         ${c.projects.map(p => `
           <li>
@@ -793,15 +831,15 @@ function buildReader(){
           </li>`).join('')}
       </ul>
     </section>
-    <section class="r-sec">
-      <h2 class="r-h">Strengths</h2>
+    <section class="r-sec" id="strengths">
+      <h2 class="r-h" data-section="strengths">Strengths ${sectionCopyIcon('strengths')}</h2>
       <p class="r-sub">${esc(c.strengths.source)}</p>
       <ol class="r-strengths">
         ${c.strengths.themes.map(([t,d]) => `<li><span class="r-st">${esc(t)}</span><span class="r-sd">${esc(d)}</span></li>`).join('')}
       </ol>
     </section>
-    <section class="r-sec">
-      <h2 class="r-h">Testimonials</h2>
+    <section class="r-sec" id="testimonials">
+      <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
       <ul class="r-testimonials" id="reader-testimonials">
         ${TESTIMONIALS.slice(0, 2).map((t, idx) => {
           const truncated = t.text.length > 250;
@@ -832,8 +870,8 @@ function buildReader(){
       </div>
       ${testimonialCTA(true)}
     </section>
-    <section class="r-sec">
-      <h2 class="r-h">Contact</h2>
+    <section class="r-sec" id="contact">
+      <h2 class="r-h" data-section="contact">Contact ${sectionCopyIcon('contact')}</h2>
       <ul class="r-links">
         <li><span class="r-lk">Email</span><a class="tlink" href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>
         <li><span class="r-lk">LinkedIn</span><a class="tlink" href="${esc(c.linkedin)}" target="_blank" rel="noopener">${esc(c.linkedin)}</a></li>
@@ -841,12 +879,12 @@ function buildReader(){
         <li><span class="r-lk">README</span><a class="tlink" href="${esc(c.readme)}" target="_blank" rel="noopener">my README page</a></li>
       </ul>
     </section>
-    <section class="r-sec">
-      <h2 class="r-h">Résumé</h2>
+    <section class="r-sec" id="resume">
+      <h2 class="r-h" data-section="resume">Résumé ${sectionCopyIcon('resume')}</h2>
       <a class="r-cv" href="${esc(c.cv)}" target="_blank" rel="noopener">Read my full CV →</a>
     </section>
-    <section class="r-sec">
-      <h2 class="r-h">Guestbook</h2>
+    <section class="r-sec" id="guestbook">
+      <h2 class="r-h" data-section="guestbook">Guestbook ${sectionCopyIcon('guestbook')}</h2>
       <div id="reader-guestbook"></div>
     </section>
     <section class="r-sec" style="border: 1px dashed var(--accent); border-radius: 8px; padding: 18px 22px; background: var(--glow);">
@@ -2589,6 +2627,14 @@ function armSkip(){
 
 armSkip();
 boot();
+
+/* Scroll to section if URL has hash */
+if (window.location.hash && root.getAttribute('data-view') === 'reader') {
+  setTimeout(() => {
+    const el = document.querySelector(window.location.hash);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
 </script>
 </body>
 </html>
