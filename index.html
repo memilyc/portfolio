@@ -663,12 +663,15 @@ async function trackPageView() {
     
     // Fire and forget - don't block page load
     const url = `${CONFIG.supabase.url}/functions/v1/track-page-view`;
-    await fetch(url, {
+    const response = await fetch(url, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
+    
+    // Log result for debugging (remove after confirmed working)
+    const result = await response.json();
+    console.debug('[Tracking]', result.success ? '✓ tracked' : '✗ failed', result);
   } catch(e) {
     // Silently fail - tracking shouldn't break the site
     console.debug('Page view tracking failed:', e);
