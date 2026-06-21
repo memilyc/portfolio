@@ -831,7 +831,7 @@ function buildReader(){
         }).join('')}
         </ul>
       </div>
-      <p class="r-test-cta">Worked with Emily and want to add your testimonial? <a class="tlink" href="${esc(c.linkedin)}" target="_blank" rel="noopener">Add a LinkedIn recommendation</a> or <a class="tlink" href="mailto:${esc(c.email)}?subject=Add%20testimonial%20to%20Emily's%20portfolio">email me</a>.</p>
+      ${testimonialCTA(true)}
     </section>
     <section class="r-sec">
       <h2 class="r-h">Contact</h2>
@@ -885,9 +885,26 @@ function print(html, cls){
   return d;
 }
 function printPromptEcho(cmd){
-  print(`<span class="prompt">${CONFIG.user}@${CONFIG.host}</span>:<span class="path">~</span>$ <span class="cmd">${escapeHtml(cmd)}</span>`);
+  // Show shortened path in prompt
+  let displayPath = currentDir;
+  if (displayPath.startsWith('/home/emily/portfolio')) {
+    displayPath = '~' + displayPath.substring('/home/emily/portfolio'.length);
+  } else if (displayPath.startsWith('/home/emily')) {
+    displayPath = '~' + displayPath.substring('/home/emily'.length);
+  }
+  if (!displayPath) displayPath = '~';
+  print(`<span class="prompt">${CONFIG.user}@${CONFIG.host}</span>:<span class="path">${escapeHtml(displayPath)}</span>$ <span class="cmd">${escapeHtml(cmd)}</span>`);
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* Generate testimonial CTA HTML for terminal or reader view */
+function testimonialCTA(forReader = false){
+  const esc = escapeHtml;
+  if (forReader) {
+    return `<p class="r-test-cta">Worked with Emily and want to add your testimonial? <a class="tlink" href="${esc(CONFIG.linkedin)}" target="_blank" rel="noopener">Add a LinkedIn recommendation</a> or <a class="tlink" href="mailto:${esc(CONFIG.email)}?subject=Add%20testimonial%20to%20Emily's%20portfolio">email me</a>.</p>`;
+  }
+  return '<span class="dim">Worked with Emily and want to add your testimonial?</span> <a class="tlink" href="' + esc(CONFIG.linkedin) + '" target="_blank" rel="noopener">Add LinkedIn recommendation</a> <span class="dim">or</span> <a class="tlink" href="mailto:' + esc(CONFIG.email) + '?subject=Add%20testimonial%20to%20Emily%27s%20portfolio">email me</a><span class="dim">.</span>';
+}
 
 /* Sanitize guestbook messages: strip URLs and obfuscate domain patterns */
 function sanitizeGuestbook(s){
@@ -943,6 +960,7 @@ let lastJokeIdx = -1;
 let helpCount = 0;
 let commandHistory = [];
 let historyIndex = -1;
+let currentDir = '/home/emily/portfolio';
 
 // Alias for backward compatibility with cmdline keydown handler
 const history = commandHistory;
@@ -996,16 +1014,7 @@ const commands = {
     }
 
     // Also render clickable chips
-    const wrap = el('div','line');
-    const chips = el('div','chips');
-    const names = ['about','skills','projects','strengths','contact','cv','quote','dadjoke','testimonials','quiz','leaderboard','guestbook','neofetch','credits','theme','clear','help'];
-    names.forEach(n => {
-      const b = el('button','chip', n);
-      b.onclick = () => runCommand(n);
-      chips.appendChild(b);
-    });
-    wrap.appendChild(chips);
-    screen.appendChild(wrap);
+    renderChips();
     screen.scrollTop = screen.scrollHeight;
   },
   about(){
@@ -1327,7 +1336,7 @@ const commands = {
         if (i < TESTIMONIALS.length - 1) blank();
       });
       blank();
-      print('<span class="dim">Worked with Emily and want to add your testimonial?</span> <a class="tlink" href="' + CONFIG.linkedin + '" target="_blank" rel="noopener">Add LinkedIn recommendation</a> <span class="dim">or</span> <a class="tlink" href="mailto:' + CONFIG.email + '?subject=Add%20testimonial%20to%20Emily%27s%20portfolio">email me</a><span class="dim">.</span>');
+      print(testimonialCTA());
       return;
     }
 
@@ -1400,7 +1409,7 @@ const commands = {
     if (TESTIMONIALS.length > 2) {
       print('<span class="dim">(' + (TESTIMONIALS.length - 2) + ' more — type</span> <span class="accent">testimonials all</span> <span class="dim">to see all)</span>');
     }
-    print('<span class="dim">WWorked with Emily and want to add your testimonial?</span> <a class="tlink" href="' + CONFIG.linkedin + '" target="_blank" rel="noopener">Add LinkedIn recommendation</a> <span class="dim">or</span> <a class="tlink" href="mailto:' + CONFIG.email + '?subject=Add%20testimonial%20to%20Emily%27s%20portfolio">email me</a><span class="dim">.</span>');
+    print(testimonialCTA());
   },
   clear(){ screen.innerHTML = ''; },
   credits(){
@@ -1424,30 +1433,106 @@ const commands = {
       print(CONFIG.user);
     }
   },
-  pwd(){ print('/home/emily/portfolio'); },
+  pwd(){ print(currentDir); },
+  cd(args){
+    const argv = (args || '').trim().split(/\s+/).filter(Boolean);
+    const target = argv[0] || '~';
+    
+    // Handle special cases
+    if (target === '~' || target === '$HOME') {
+      currentDir = '/home/emily/portfolio';
+      return;
+    }
+    if (target === '-') {
+      print('<span class="yellow">cd: OLDPWD not set</span>');
+      return;
+    }
+    if (target === '..') {
+      if (currentDir === '/home/emily/portfolio') {
+        currentDir = '/home/emily';
+      } else if (currentDir === '/home/emily') {
+        currentDir = '/home';
+      } else if (currentDir === '/home') {
+        currentDir = '/';
+      }
+      return;
+    }
+    
+    // Directory structure
+    const dirs = {
+      '/home/emily/portfolio': ['projects', 'skills', 'experience', 'quotes', 'dadjokes'],
+      '/home/emily/portfolio/projects': ['terminal-portfolio', 'postgresql-calculator', 'convert-utc-bot'],
+      '/home/emily': ['emily'],
+      '/home': ['emily'],
+      '/': ['home', 'etc', 'var', 'tmp'],
+    };
+    
+    // Handle relative paths
+    let newPath;
+    if (target.startsWith('/')) {
+      newPath = target;
+    } else if (target === '.' || target === './') {
+      return;
+    } else {
+      newPath = currentDir === '/' ? '/' + target : currentDir + '/' + target;
+    }
+    
+    // Normalize path (remove trailing slashes, handle double slashes)
+    newPath = newPath.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+    
+    // Check if directory exists
+    if (dirs[newPath] || target === '..') {
+      currentDir = newPath;
+    } else if (dirs[currentDir] && dirs[currentDir].includes(target)) {
+      currentDir = currentDir === '/' ? '/' + target : currentDir + '/' + target;
+    } else {
+      print(`<span class="yellow">cd: ${escapeHtml(target)}: No such directory</span>`);
+    }
+  },
   ls(args){
     const argv = (args || '').trim().split(/\s+/).filter(Boolean);
     const showAll = argv.includes('-a') || argv.includes('-al') || argv.includes('-la') || argv.includes('-alh') || argv.includes('-ahl') || argv.includes('-hal') || argv.includes('-hla') || argv.includes('-lah') || argv.includes('-lha');
     const longFormat = argv.includes('-l') || argv.includes('-al') || argv.includes('-la') || argv.includes('-alh') || argv.includes('-ahl') || argv.includes('-hal') || argv.includes('-hla') || argv.includes('-lah') || argv.includes('-lha');
     const humanReadable = argv.includes('-h') || argv.includes('-alh') || argv.includes('-ahl') || argv.includes('-hal') || argv.includes('-hla') || argv.includes('-lah') || argv.includes('-lha');
 
-    const files = [
-      { name: 'about.md', type: 'file', size: '2.3K' },
-      { name: 'resume.pdf', type: 'file', size: '128K' },
-      { name: 'projects', type: 'dir', size: '4.0K' },
-      { name: 'skills', type: 'dir', size: '4.0K' },
-      { name: 'experience', type: 'dir', size: '4.0K' },
-      { name: 'recommendations', type: 'file', size: '8.1K' },
-      { name: 'contact.txt', type: 'file', size: '512' },
-      { name: 'quotes', type: 'dir', size: '4.0K' },
-      { name: 'dadjokes', type: 'dir', size: '4.0K' },
-    ];
+    // Directory contents based on current directory
+    const dirContents = {
+      '/home/emily/portfolio': [
+        { name: 'about.md', type: 'file', size: '2.3K' },
+        { name: 'resume.pdf', type: 'file', size: '128K' },
+        { name: 'projects', type: 'dir', size: '4.0K' },
+        { name: 'skills', type: 'dir', size: '4.0K' },
+        { name: 'experience', type: 'dir', size: '4.0K' },
+        { name: 'recommendations', type: 'file', size: '8.1K' },
+        { name: 'contact.txt', type: 'file', size: '512' },
+        { name: 'quotes', type: 'dir', size: '4.0K' },
+        { name: 'dadjokes', type: 'dir', size: '4.0K' },
+      ],
+      '/home/emily/portfolio/projects': [
+        { name: 'terminal-portfolio', type: 'dir', size: '4.0K' },
+        { name: 'postgresql-calculator', type: 'dir', size: '4.0K' },
+        { name: 'convert-utc-bot', type: 'dir', size: '4.0K' },
+      ],
+      '/home/emily': [
+        { name: 'portfolio', type: 'dir', size: '4.0K' },
+      ],
+      '/home': [
+        { name: 'emily', type: 'dir', size: '4.0K' },
+      ],
+      '/': [
+        { name: 'home', type: 'dir', size: '4.0K' },
+        { name: 'etc', type: 'dir', size: '4.0K' },
+        { name: 'var', type: 'dir', size: '4.0K' },
+        { name: 'tmp', type: 'dir', size: '4.0K' },
+      ],
+    };
 
     const hidden = [
       { name: '.config', type: 'dir', size: '4.0K' },
       { name: '.secrets', type: 'file', size: '64' },
     ];
 
+    const files = dirContents[currentDir] || [];
     const allFiles = showAll ? [...hidden, ...files] : files;
 
     if (longFormat) {
@@ -1487,11 +1572,13 @@ const commands = {
   cat(args){
     const argv = (args || '').trim().split(/\s+/).filter(Boolean);
     const file = argv[0];
+    
+    // Easter egg: just "cat" prints a cat emoji
     if (!file) {
-      print('<span class="yellow">cat: missing file operand</span>');
-      print('Usage: <span class="accent">cat &lt;file&gt;</span>');
+      print('🐱');
       return;
     }
+    
     if (file === 'about.md' || file === './about.md') {
       print('Hi, I\'m Emily 👋');
       blank();
@@ -1509,20 +1596,33 @@ const commands = {
     }
   },
   tree(){
-    print('.');
-    print('├── <span class="cyan b">about.md</span>');
-    print('├── <span class="cyan b">projects</span>');
-    print('│   ├── terminal-portfolio');
-    print('│   ├── postgresql-calculator');
-    print('│   └── convert-utc-bot');
-    print('├── <span class="cyan b">skills</span>');
-    print('├── <span class="cyan b">experience</span>');
-    print('├── recommendations');
-    print('├── <span class="cyan b">contact.txt</span>');
-    print('├── <span class="cyan b">quotes</span>');
-    print('└── <span class="cyan b">dadjokes</span>');
-    blank();
-    print('<span class="dim">8 directories, 15 files</span>');
+    if (currentDir === '/home/emily/portfolio') {
+      print('.');
+      print('├── <span class="cyan b">about.md</span>');
+      print('├── <span class="cyan b">projects</span>');
+      print('│   ├── terminal-portfolio');
+      print('│   ├── postgresql-calculator');
+      print('│   └── convert-utc-bot');
+      print('├── <span class="cyan b">skills</span>');
+      print('├── <span class="cyan b">experience</span>');
+      print('├── recommendations');
+      print('├── <span class="cyan b">contact.txt</span>');
+      print('├── <span class="cyan b">quotes</span>');
+      print('└── <span class="cyan b">dadjokes</span>');
+      blank();
+      print('<span class="dim">8 directories, 15 files</span>');
+    } else if (currentDir === '/home/emily/portfolio/projects') {
+      print('.');
+      print('├── terminal-portfolio');
+      print('├── postgresql-calculator');
+      print('└── convert-utc-bot');
+      blank();
+      print('<span class="dim">3 directories, 0 files</span>');
+    } else {
+      print('.');
+      blank();
+      print('<span class="dim">0 directories, 0 files</span>');
+    }
   },
   man(args){
     const argv = (args || '').trim().split(/\s+/).filter(Boolean);
@@ -2474,16 +2574,7 @@ async function boot(){
   await wait(isMobile() ? 500 : 0);
 
   // Show chips only (no help output on first run)
-  const wrap = el('div','line');
-  const chips = el('div','chips');
-  const names = ['about','skills','projects','strengths','contact','cv','quote','dadjoke','testimonials','quiz','leaderboard','guestbook','neofetch','credits','theme','clear','help'];
-  names.forEach(n => {
-    const b = el('button','chip', n);
-    b.onclick = () => runCommand(n);
-    chips.appendChild(b);
-  });
-  wrap.appendChild(chips);
-  screen.appendChild(wrap);
+  renderChips();
 
   blank();
   inputRow.style.display = 'flex';
