@@ -8,17 +8,17 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
     * **Terminal View:** A fully functional, interactive CLI environment with command history, autocomplete, and fuzzy-matching for commands.
     * **Reader View:** A clean, accessible, and readable layout for users who prefer standard web navigation.
 * **Interactive Trivia Quiz:**
-    * Difficulty levels: `quiz easy`, `quiz medium`, `quiz hard`
-    * Exclusive Emily quiz: `quiz emily`
+    * Select difficulty interactively or specify: `quiz easy`, `quiz medium`, `quiz hard`, `quiz emily`
     * Questions stored in Supabase, server-side scoring via edge functions
+    * Post-quiz review of incorrect answers
 * **Leaderboard:** Filter by difficulty or category — `leaderboard easy`, `leaderboard emily`
-* **Guestbook:** Sign and read messages — `guestbook` / `guestbook sign`
-* **Quote Command:** Random inspirational quotes — `quote`
-* **Easter Eggs:** 15+ hidden commands to discover (`resume`, `whyhireme`, `uptime`, `tail -f production.log`, `sudo make me a sandwich`, and more)
-* **Command Line Experience:**
-    * Supports familiar commands like `help`, `about`, `skills`, `projects`, `contact`, `neofetch`.
-    * Fuzzy-matching logic handles typos gracefully.
-    * Tab-completion for faster interaction.
+* **Guestbook:** Sign and read messages — `guestbook` / `guestbook sign` (with profanity filtering and link sanitization)
+* **Testimonials:** LinkedIn recommendations displayed with progressive expansion — `testimonials`, `testimonials all`
+* **Quote Command:** Random inspirational quotes with options — `quote -n 5`, `quote --all`
+* **Dad Jokes:** Terrible jokes with options — `dadjoke -n 3`, `dadjoke --all`
+* **Linux Commands:** Authentic terminal experience with `ls`, `pwd`, `whoami`, `id`, `uname`, `cat`, `tree`, `man`, and more
+* **Command History:** Arrow keys to cycle through history, `!!` to repeat last command, `history` to view
+* **Easter Eggs:** 20+ hidden commands to discover (`resume`, `whyhireme`, `uptime`, `tail -f production.log`, `sudo make me a sandwich`, `salary`, and more)
 * **Themes:** Dark and Light mode support with persistence via `localStorage`.
 * **Responsive Design:** Fully fluid layout that adjusts from desktop terminals to mobile device touch targets.
 * **Performance:** Zero frontend dependencies (Supabase JS client loaded via CDN), lightning-fast loading, no build process required.
@@ -63,6 +63,8 @@ Everything is configured via a single `CONFIG` object inside the `script` tag.
 
 Once in the Terminal View, users can type the following:
 
+### Core Commands
+
 | Command | Description |
 | :--- | :--- |
 | `help` | Displays all available commands. |
@@ -70,22 +72,62 @@ Once in the Terminal View, users can type the following:
 | `skills` | Lists your technical stack and expertise. |
 | `projects` | Displays your portfolio highlights. |
 | `strengths` | Shows your CliftonStrengths. |
+| `testimonials` | View colleague recommendations (shows 2, expand with `testimonials all`). |
 | `contact` | Lists your contact methods and links. |
-| `cv` | Triggers a download/view of your CV. |
-| `quiz` | Start a trivia quiz (mixed difficulty). |
-| `quiz easy` / `medium` / `hard` | Start a quiz at a specific difficulty. |
-| `quiz emily` | Exclusive Emily personal lore quiz. |
-| `leaderboard` | View top quiz scores. |
-| `leaderboard easy` / `emily` | Filter leaderboard by difficulty or category. |
-| `guestbook` | Read recent guestbook entries. |
-| `guestbook sign` | Sign the guestbook. |
-| `quote` | Show a random inspirational quote. |
+| `cv` | Opens your CV in a new tab. |
 | `neofetch` | System info in ASCII art. |
 | `credits` | Show who built this. |
 | `theme` | Toggles between Dark and Light mode. |
 | `clear` | Clears the terminal screen. |
 
-Plus 15+ hidden easter egg commands — try typing Linux commands 😉
+### Interactive Features
+
+| Command | Description |
+| :--- | :--- |
+| `quiz` | Start a trivia quiz (interactive difficulty selection). |
+| `leaderboard` | View top quiz scores (filter: `leaderboard easy`, `leaderboard emily`). |
+| `guestbook` | Read recent guestbook entries. |
+| `guestbook sign` | Sign the guestbook. |
+| `quote` | Show a random inspirational quote. |
+| `quote -n 5` | Show 5 random quotes. |
+| `quote --all` | Show all quotes. |
+| `quote -h` | Show quote command help. |
+| `dadjoke` | Tell a terrible dad joke. |
+| `dadjoke -n 3` | Tell 3 jokes. |
+| `dadjoke --all` | Tell all jokes. |
+| `dadjoke -h` | Show dadjoke command help. |
+| `testimonials` | View colleague recommendations. |
+| `testimonials all` | Show all testimonials. |
+| `testimonials <number>` | Read specific testimonial. |
+
+### Linux Commands
+
+| Command | Description |
+| :--- | :--- |
+| `pwd` | Print working directory (`/home/emily/portfolio`). |
+| `ls` | List portfolio contents. |
+| `ls -a` | Show hidden files (`.config`, `.secrets`). |
+| `ls -l` | Long format with permissions. |
+| `ls -alh` | Human-readable sizes with all files. |
+| `whoami` | Display current user. |
+| `whoami -v` | Verbose mode with title. |
+| `id` | Show user ID and groups. |
+| `uname -a` | System information. |
+| `cat <file>` | Read file contents (`about.md`, `contact.txt`). |
+| `tree` | Display directory structure. |
+| `man <cmd>` | Show manual page (`man quote`, `man ls`). |
+
+### Command History
+
+| Command | Description |
+| :--- | :--- |
+| `history` | View last 20 commands. |
+| `!!` | Repeat last command. |
+| `↑` / `↓` | Arrow keys to cycle through history. |
+
+### Hidden Easter Eggs
+
+Plus 20+ hidden commands — try typing Linux commands like `uptime`, `tail -f production.log`, `sudo make me a sandwich`, `salary`, `top`, `free -m`, `htop`, and more!
 
 ## Usage
 
