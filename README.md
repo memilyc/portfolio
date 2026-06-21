@@ -22,6 +22,7 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
 * **Themes:** Dark and Light mode support with persistence via `localStorage`.
 * **Responsive Design:** Fully fluid layout that adjusts from desktop terminals to mobile device touch targets.
 * **Performance:** Zero frontend dependencies (Supabase JS client loaded via CDN), lightning-fast loading, no build process required.
+* **Analytics:** Built-in privacy-friendly visitor tracking with referrer analysis (no cookies, no third-party services).
 
 ## Tech Stack
 
@@ -44,6 +45,121 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
    supabase functions deploy post-guestbook --no-verify-jwt
    ```
 4. Set your Supabase anon key in `CONFIG.supabase.anonKey` inside `index.html`
+5. Deploy the page view tracker:
+   ```bash
+   supabase functions deploy track-page-view --no-verify-jwt
+   ```
+
+## Analytics & Visitor Tracking
+
+This portfolio includes a lightweight, privacy-friendly analytics system powered by Supabase Edge Functions. It tracks where your visitors come from without cookies or third-party services.
+
+### What Gets Tracked
+
+- **Referrer URL**: Where visitors clicked from (LinkedIn, Twitter, Google, etc.)
+- **Page Path**: Which section they viewed
+- **Geolocation**: Country/city (if available from CDN headers)
+- **User Agent**: Browser/device information
+- **Unique Visitors**: Anonymized via SHA-256 IP hashing
+
+### Query Your Analytics
+
+Go to [Supabase Dashboard → SQL Editor](https://supabase.com/dashboard/project/ugowiqdbpjyaqvtcucqh/sql) and run these queries:
+
+#### Top Referrer Sources
+
+```sql
+-- See where your visitors are coming from
+SELECT 
+  referrer,
+  COUNT(*) as visits,
+  COUNT(DISTINCT ip_hash) as unique_visitors
+FROM page_views
+WHERE referrer IS NOT NULL AND referrer != ''
+GROUP BY referrer
+ORDER BY visits DESC
+LIMIT 20;
+```
+
+#### Traffic by Platform
+
+```sql
+-- Group referrers by platform (LinkedIn, Twitter, Google, etc.)
+SELECT 
+  CASE 
+    WHEN referrer LIKE '%linkedin.com%' THEN 'LinkedIn'
+    WHEN referrer LIKE '%twitter.com%' OR referrer LIKE '%x.com%' THEN 'Twitter/X'
+    WHEN referrer LIKE '%google.%' THEN 'Google'
+    WHEN referrer LIKE '%github.com%' THEN 'GitHub'
+    WHEN referrer LIKE '%reddit.com%' THEN 'Reddit'
+    WHEN referrer LIKE '%facebook.com%' THEN 'Facebook'
+    WHEN referrer IS NULL OR referrer = '' THEN 'Direct (typed URL)'
+    ELSE 'Other: ' || SPLIT_PART(SPLIT_PART(referrer, '://', 2), '/', 1)
+  END as source,
+  COUNT(*) as total_visits,
+  COUNT(DISTINCT ip_hash) as unique_visitors
+FROM page_views
+GROUP BY source
+ORDER BY total_visits DESC;
+```
+
+#### Daily Traffic Overview
+
+```sql
+-- Daily page views and unique visitors
+SELECT 
+  DATE(created_at) as date,
+  COUNT(*) as total_views,
+  COUNT(DISTINCT ip_hash) as unique_visitors
+FROM page_views
+WHERE created_at > NOW() - INTERVAL '30 days'
+GROUP BY DATE(created_at)
+ORDER BY date DESC;
+```
+
+#### LinkedIn Traffic Breakdown
+
+```sql
+-- See which LinkedIn pages are sending traffic
+SELECT 
+  referrer,
+  COUNT(*) as clicks
+FROM page_views
+WHERE referrer LIKE '%linkedin.com%'
+GROUP BY referrer
+ORDER BY clicks DESC;
+```
+
+#### Geographic Distribution
+
+```sql
+-- Visitors by country
+SELECT 
+  country,
+  COUNT(*) as visits,
+  COUNT(DISTINCT ip_hash) as unique_visitors
+FROM page_views
+WHERE country IS NOT NULL
+GROUP BY country
+ORDER BY visits DESC;
+```
+
+### Supabase Free Tier Limits
+
+Your analytics are well within the free tier:
+
+- ✅ **500,000 Edge Function invocations/month** (all functions combined)
+- ✅ **Typical usage**: 100-1,000 visitors/month = ~1,400 calls (< 0.3% of limit)
+- ✅ **Cost**: $0 (even at 100K visitors/month, you'd only use 28% of free tier)
+- ✅ **After free tier**: $2 per 1 Million additional invocations
+
+### Privacy Features
+
+- ✅ No cookies required (GDPR-friendly)
+- ✅ IP addresses are hashed (SHA-256, truncated to 16 chars)
+- ✅ No personal data stored
+- ✅ Row Level Security enabled (public can only insert, not read)
+- ✅ Fire-and-forget tracking (doesn't block page load)
 
 ## Customization
 
