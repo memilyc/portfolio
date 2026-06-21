@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" data-view="terminal">
+<html lang="en" data-theme="dark" data-view="reader">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
@@ -864,8 +864,10 @@ function applyView(v){
   if (v === 'terminal' && inputRow.style.display !== 'none') cmdline.focus();
 }
 (function initView(){
-  let v = 'terminal';
-  try { v = localStorage.getItem('portfolio-view') || 'terminal'; } catch(e){}
+  // ponytail: URL param > localStorage > default reader
+  const params = new URLSearchParams(window.location.search);
+  let v = params.get('view') || localStorage.getItem('portfolio-view') || 'reader';
+  if (!['terminal', 'reader'].includes(v)) v = 'reader';
   applyView(v);
 })();
 viewBtn.addEventListener('click', () =>
