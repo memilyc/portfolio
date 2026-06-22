@@ -923,28 +923,15 @@ themeBtn.addEventListener('click', () =>
   applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
 
 /* ---- Guestbook reader form helpers ---- */
-function expandTestimonials(){
-  const extra = document.getElementById('reader-testimonials-extra');
-  const btn = document.querySelector('.r-test-expand');
-  if (extra.style.display === 'none') {
-    extra.style.display = 'block';
-    btn.textContent = 'Show less ↑';
-  } else {
-    extra.style.display = 'none';
-    btn.textContent = btn.textContent.replace('Show less ↑', `Show all ${TESTIMONIALS.length} testimonials ↓`);
-  }
-}
-
 function expandTestimonialText(idx){
   const el = document.getElementById('r-test-text-' + idx);
   const btn = el.nextElementSibling;
-  const fullText = TESTIMONIALS[idx].text;
   if (el.dataset.expanded === 'true') {
-    el.innerHTML = escapeHtml(truncateAtWord(fullText, 250));
+    el.innerHTML = escapeHtml(TESTIMONIALS[idx].highlight);
     el.dataset.expanded = 'false';
     btn.textContent = 'read more';
   } else {
-    el.innerHTML = fullText.split('\n\n').map(p => `<p style="margin:0 0 0.8em;">${escapeHtml(p)}</p>`).join('');
+    el.innerHTML = TESTIMONIALS[idx].text.split('\n\n').map(p => `<p style="margin:0 0 0.8em;">${escapeHtml(p)}</p>`).join('');
     el.dataset.expanded = 'true';
     btn.textContent = 'show less';
   }
@@ -1032,19 +1019,11 @@ function buildReaderGuestbookForm(container) {
 }
 
 function buildReader(){
-  // Shuffle testimonials once per page load for random featured pair
-  const _tShuffled = [...TESTIMONIALS].sort(() => Math.random() - 0.5);
-  const _tFeatured = _tShuffled.slice(0, 2);
-  const _tRest     = _tShuffled.slice(2);
-  const _renderTestimonial = (t, idx) => {
-    const displayText = truncateAtWord(t.text, 250);
-    const truncated = displayText.endsWith('...');
-    return `<li>
-      <div class="r-test-name">${escapeHtml(t.name)} <span class="r-test-rel">${escapeHtml(t.relationship)}</span></div>
-      <div class="r-test-text" id="r-test-text-${idx}">${escapeHtml(displayText)}</div>
-      ${truncated ? `<button class="r-test-readmore" onclick="expandTestimonialText(${idx})">read more</button>` : ''}
-    </li>`;
-  };
+  const _renderTestimonial = (t, idx) => `<li>
+    <div class="r-test-name">${escapeHtml(t.name)} <span class="r-test-rel">${escapeHtml(t.relationship)}</span></div>
+    <div class="r-test-text" id="r-test-text-${idx}">${escapeHtml(t.highlight)}</div>
+    <button class="r-test-readmore" onclick="expandTestimonialText(${idx})">read more</button>
+  </li>`;
   const c = CONFIG;
   const esc = escapeHtml;
   reader.innerHTML = `
@@ -1088,15 +1067,9 @@ function buildReader(){
     ${TESTIMONIALS.length > 0 ? `
     <section class="r-sec" id="testimonials">
       <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
-      <ul class="r-testimonials" id="reader-testimonials">
-        ${_tFeatured.map((t, idx) => _renderTestimonial(t, idx)).join('')}
+      <ul class="r-testimonials">
+        ${TESTIMONIALS.map((t, idx) => _renderTestimonial(t, idx)).join('')}
       </ul>
-      ${_tRest.length > 0 ? `<button class="r-test-expand" onclick="expandTestimonials()">Show all ${TESTIMONIALS.length} testimonials ↓</button>` : ''}
-      <div id="reader-testimonials-extra" style="display: none;">
-        <ul class="r-testimonials">
-          ${_tRest.map((t, idx) => _renderTestimonial(t, idx + 2)).join('')}
-        </ul>
-      </div>
       ${testimonialCTA(true)}
     </section>
     ` : ''}
