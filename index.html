@@ -1032,6 +1032,19 @@ function buildReaderGuestbookForm(container) {
 }
 
 function buildReader(){
+  // Shuffle testimonials once per page load for random featured pair
+  const _tShuffled = [...TESTIMONIALS].sort(() => Math.random() - 0.5);
+  const _tFeatured = _tShuffled.slice(0, 2);
+  const _tRest     = _tShuffled.slice(2);
+  const _renderTestimonial = (t, idx) => {
+    const displayText = truncateAtWord(t.text, 250);
+    const truncated = displayText.endsWith('...');
+    return `<li>
+      <div class="r-test-name">${escapeHtml(t.name)} <span class="r-test-rel">${escapeHtml(t.relationship)}</span></div>
+      <div class="r-test-text" id="r-test-text-${idx}">${escapeHtml(displayText)}</div>
+      ${truncated ? `<button class="r-test-readmore" onclick="expandTestimonialText(${idx})">read more</button>` : ''}
+    </li>`;
+  };
   const c = CONFIG;
   const esc = escapeHtml;
   reader.innerHTML = `
@@ -1072,32 +1085,18 @@ function buildReader(){
         ${c.strengths.themes.map(([t,d]) => `<li><span class="r-st">${esc(t)}</span><span class="r-sd">${esc(d)}</span></li>`).join('')}
       </ol>
     </section>
-    ${TESTIMONIALS.length > 0 ? (() => {
-      // shuffle a copy so the two featured are random each page load
-      const shuffled = [...TESTIMONIALS].sort(() => Math.random() - 0.5);
-      const featured = shuffled.slice(0, 2);
-      const rest = shuffled.slice(2);
-      const renderItem = (t, idx) => {
-        const displayText = truncateAtWord(t.text, 250);
-        const truncated = displayText.endsWith('...');
-        return `<li>
-          <div class="r-test-name">${esc(t.name)} <span class="r-test-rel">${esc(t.relationship)}</span></div>
-          <div class="r-test-text" id="r-test-text-${idx}">${esc(displayText)}</div>
-          ${truncated ? `<button class="r-test-readmore" onclick="expandTestimonialText(${idx})">read more</button>` : ''}
-        </li>`;
-      };
-      return `
+    ${TESTIMONIALS.length > 0 ? `
     <section class="r-sec" id="testimonials">
       <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
       <ul class="r-testimonials" id="reader-testimonials">
-        ${featured.map((t, idx) => renderItem(t, idx)).join('')}
+        ${_tFeatured.map((t, idx) => _renderTestimonial(t, idx)).join('')}
       </ul>
-      ${rest.length > 0 ? `<button class="r-test-expand" onclick="expandTestimonials()">Show all ${TESTIMONIALS.length} testimonials ↓</button>` : ''}
+      ${_tRest.length > 0 ? `<button class="r-test-expand" onclick="expandTestimonials()">Show all ${TESTIMONIALS.length} testimonials ↓</button>` : ''}
       <div id="reader-testimonials-extra" style="display: none;">
         <ul class="r-testimonials">
-          ${rest.map((t, idx) => renderItem(t, idx + 2)).join('')}
+          ${_tRest.map((t, idx) => _renderTestimonial(t, idx + 2)).join('')}
         </ul>
-      </div>`; })()
+      </div>
       ${testimonialCTA(true)}
     </section>
     ` : ''}
