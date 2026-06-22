@@ -1502,7 +1502,7 @@ const commands = {
   },
   cv(){
     print(`Opening résumé → <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`, 'cyan');
-    window.location.href = CONFIG.cv;
+    window.open(CONFIG.cv, '_blank', 'noopener');
   },
   theme(){
     applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
@@ -2381,7 +2381,7 @@ const commands = {
 
   resume(){
     print(`Opening résumé → <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`, 'cyan');
-    window.location.href = CONFIG.cv;
+    window.open(CONFIG.cv, '_blank', 'noopener');
   },
 
   whyhireme(){
