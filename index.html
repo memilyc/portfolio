@@ -2657,20 +2657,25 @@ function runCommand(raw){
   const cmd = (raw || '').trim();
   
   // Handle !! (repeat last command)
-  if (cmd === '!!' && commandHistory.length > 0) {
-    const lastCmd = commandHistory[commandHistory.length - 1];
-    printPromptEcho('!!');
-    print('<span class="dim">' + escapeHtml(lastCmd) + '</span>');
-    runCommand(lastCmd);
+  if (cmd === '!!') {
+    if (commandHistory.length > 0) {
+      const lastCmd = commandHistory[commandHistory.length - 1];
+      printPromptEcho('!!');
+      print('<span class="dim">' + escapeHtml(lastCmd) + '</span>');
+      runCommand(lastCmd);
+    } else {
+      printPromptEcho('!!');
+      print('<span class="err">no commands in history</span>');
+    }
     return;
   }
-  
+
   printPromptEcho(cmd);
   if (!cmd) return;
   if (quizState.tailInterval) { clearInterval(quizState.tailInterval); quizState.tailInterval = null; }
-  
+
   // Add to history
-  if (cmd !== 'history' && cmd !== 'clear') {
+  if (cmd !== 'history' && cmd !== 'clear' && cmd !== '!!') {
     commandHistory.push(cmd);
     historyIndex = -1;
   }
