@@ -940,11 +940,11 @@ function expandTestimonialText(idx){
   const btn = el.nextElementSibling;
   const fullText = TESTIMONIALS[idx].text;
   if (el.dataset.expanded === 'true') {
-    el.textContent = truncateAtWord(fullText, 250);
+    el.innerHTML = escapeHtml(truncateAtWord(fullText, 250));
     el.dataset.expanded = 'false';
     btn.textContent = 'read more';
   } else {
-    el.textContent = fullText;
+    el.innerHTML = fullText.split('\n\n').map(p => `<p style="margin:0 0 0.8em;">${escapeHtml(p)}</p>`).join('');
     el.dataset.expanded = 'true';
     btn.textContent = 'show less';
   }
@@ -1792,21 +1792,15 @@ const commands = {
       print('<span class="accent b">│</span> <span class="yellow">Testimonial #' + (targetIdx + 1) + '</span>');
       print('<span class="accent b">├─────────────────────────────────────────┤</span>');
       blank();
-      // Word-wrap the text to ~60 chars
-      const words = t.text.split(' ');
-      let line = '';
-      const lines = [];
-      words.forEach(w => {
-        if ((line + ' ' + w).trim().length > 58) {
-          lines.push(line.trim());
-          line = w;
-        } else {
-          line = (line + ' ' + w).trim();
-        }
-      });
-      if (line) lines.push(line);
-      lines.forEach(l => {
-        print('<span class="accent b">│</span>   ' + escapeHtml(l));
+      t.text.split('\n\n').forEach((para, pi, arr) => {
+        const words = para.split(' ');
+        let line = '';
+        words.forEach(w => {
+          if ((line + ' ' + w).trim().length > 58) { print('<span class="accent b">│</span>   ' + escapeHtml(line.trim())); line = w; }
+          else { line = (line + ' ' + w).trim(); }
+        });
+        if (line) print('<span class="accent b">│</span>   ' + escapeHtml(line));
+        if (pi < arr.length - 1) print('<span class="accent b">│</span>');
       });
       blank();
       print('<span class="accent b">├─────────────────────────────────────────┤</span>');
@@ -1837,9 +1831,12 @@ const commands = {
     print('<span class="accent b">' + escapeHtml(t.name) + '</span>');
     print('<span class="dim">(' + escapeHtml(t.relationship) + ')</span>');
     blank();
-    print('"' + escapeHtml(preview) + '"');
     if (truncated) {
+      print('"' + escapeHtml(preview) + '"');
       print('<span class="dim">...</span> <a class="tlink" href="#" onclick="commands.testimonials(\'read ' + escapeHtml(t.name) + '\'); return false;">read full</a>');
+    } else {
+      const paras = t.text.split('\n\n');
+      paras.forEach((p, i) => { print(escapeHtml(p)); if (i < paras.length - 1) blank(); });
     }
     blank();
     if (TESTIMONIALS.length > 1) {
