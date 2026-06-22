@@ -2766,7 +2766,7 @@ cmdline.addEventListener('keydown', e => {
       quizState.gbMessage = msg; submitGuestbook(); return;
     }
 
-    if (v.trim()) { commandHistory.push(v); historyIndex = commandHistory.length; }
+    if (v.trim() && v.trim() !== '!!') { commandHistory.push(v); historyIndex = commandHistory.length; }
     runCommand(v);
   } else if (e.key === 'ArrowUp'){
     if (historyIndex > 0){ historyIndex--; cmdline.value = commandHistory[historyIndex]; tab.active = false; updateGhost(); e.preventDefault(); }
