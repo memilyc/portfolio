@@ -980,10 +980,14 @@ function buildReaderGuestbookForm(container) {
       .then(({ data, error }) => {
         let entriesHtml = '';
         if (!error && data && data.length) {
-          entriesHtml = '<ul class="r-gb-entries">' + data.map(row => {
+          const toRow = row => {
             const date = new Date(row.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
             return `<li><span class="r-gb-nick">${escapeHtml(row.nickname)}</span><span class="r-gb-date">${date}</span><div class="r-gb-msg">${escapeHtml(sanitizeGuestbook(row.message))}</div></li>`;
-          }).join('') + '</ul>';
+          };
+          const visible = data.slice(0, 5).map(toRow).join('');
+          const hidden  = data.slice(5).map(toRow).join('');
+          entriesHtml = `<ul class="r-gb-entries">${visible}</ul>`;
+          if (hidden) entriesHtml += `<ul class="r-gb-entries" id="gb-more" style="display:none;">${hidden}</ul><button class="r-gb-btn" id="gb-read-more" style="margin-bottom:16px;">Show all ${data.length} entries ↓</button>`;
         } else {
           entriesHtml = '<p class="r-gb-status dim" style="margin-bottom:16px;">No entries yet — be the first!</p>';
         }
@@ -995,6 +999,11 @@ function buildReaderGuestbookForm(container) {
             <button class="r-gb-btn" id="gb-submit">Sign guestbook →</button>
             <span class="r-gb-status" id="gb-status" style="display:none;"></span>
           </div>`;
+        const readMoreBtn = document.getElementById('gb-read-more');
+        if (readMoreBtn) readMoreBtn.addEventListener('click', () => {
+          document.getElementById('gb-more').style.display = '';
+          readMoreBtn.remove();
+        });
         document.getElementById('gb-submit').addEventListener('click', async () => {
           const nick = (document.getElementById('gb-nick').value || '').trim();
           const msg  = (document.getElementById('gb-msg').value || '').trim();
