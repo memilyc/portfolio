@@ -12,5 +12,10 @@ const TESTIMONIALS = [
     name: "Sokunrotanak Srey",
     relationship: "Worked with Emily on the same team",
     text: "I highly recommend Emily. She's the kind of colleague who raises the bar wherever she shows up. Emily leads with an inclusive mindset and a sharp attention to detail. At one of our company meetups, she made a point of ensuring that every attendee felt genuinely welcomed and accommodated. She's the kind of quiet, thoughtful leadership that doesn't go unnoticed.She's also a fast learner who doesn't shy away from high-stakes challenges. Emily is part of our Customer Emergency On-Call rotation, which demands immediate, clear-headed responses to complex technical problems. Her resilience and patience under that kind of pressure are something I've always admired. That same thoroughness carries into her everyday work. When investigating GitLab bugs, Emily takes the time to fully reproduce issues before raising them. She makes sure that her reports are accurate, actionable, and save the team unnecessary back-and-forth."
+  },
+  {
+    name: "Cynthia 'Arty' Ng",
+    relationship: "Was in the same department as Emily",
+    text: "In addition to being a great engineer, Emily is an amazingly smart, positive, and thoughtful person. She handled tickets with care, and helped so many customers with her breath and depth of technical knowledge. As a team mate, she will find a way to include those who may be otherwise "left out" of team activities. It's also always a pleasure to be on a call with Emily, who always brings a positive attitude. Highly recommended for any organization."
   }
 ];

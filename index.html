@@ -3,12 +3,33 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
-<title>M. Emily Chang | Technical Support Engineer</title>
+<title>M. Emily Chang | Senior Support Engineer · Open to Work</title>
+<meta name="description" content="M. Emily Chang — Senior Support Engineer with 9+ years in enterprise SaaS, fintech, and DevSecOps. Open to work." />
+<meta property="og:title" content="M. Emily Chang | Senior Support Engineer" />
+<meta property="og:description" content="9+ years in enterprise technical support. Open to work." />
+<meta property="og:image" content="https://memilyc.github.io/portfolio/em.png" />
+<meta property="og:url" content="https://memilyc.github.io/portfolio/" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="M. Emily Chang | Senior Support Engineer" />
+<meta name="twitter:description" content="9+ years in enterprise technical support. Open to work." />
+<meta name="twitter:image" content="https://memilyc.github.io/portfolio/em.png" />
+<link rel="icon" type="image/x-icon" href="em.ico" />
+<link rel="icon" type="image/png" href="em.png" />
+<link rel="shortcut icon" href="em.ico" />
+<link rel="apple-touch-icon" href="em.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="testimonials.js"></script>
+<script>
+  // Fallback if testimonials.js fails to load
+  if (typeof TESTIMONIALS === 'undefined') {
+    console.warn('testimonials.js failed to load - hiding testimonial sections');
+    window.TESTIMONIALS = [];
+  }
+</script>
 <style>
   :root[data-theme="dark"] {
     --bg:        #0b0e14;
@@ -677,18 +698,18 @@ const CONFIG = {
   user: "memilyc",
   host: "portfolio",
   name: "M. Emily Chang",
-  role: "Former Senior Support Engineer @ GitLab",
-  tagline: "Engineer, troubleshooter, and translator between customers, business needs, and complex systems.",
+  role: "Senior Support Engineer · Open to work.",
+  tagline: "9 years turning complex technical chaos into clarity — for customers, for teammates, for entire companies.",
   about: [
-    "I have 9+ years helping enterprise customers debug complex issues across PostgreSQL, Linux, Docker, and multi-cloud environments (AWS, GCP, Azure).",
-    "Before GitLab, I worked in system administration and software engineering — maintaining 99.95% uptime across Linux/Windows, and building financial products like loan management and credit-scoring platforms.",
+    "I help enterprise customers debug complex issues across PostgreSQL, Linux, Docker, and multi-cloud environments (AWS, GCP, Azure).",
+    "Before GitLab, I worked in system administration and software engineering, maintaining 99.95% uptime across Linux/Windows and building financial products like loan management and credit-scoring platforms.",
     "I was part of a 24/7 on-call rotation, led cross-regional pairing sessions, and built internal tools and improved documentation so the same problem never bites anyone twice.",
   ],
   skills: [
     ["Support",   "customer & SaaS support · incident mgmt · on-call · log analysis"],
     ["Systems",   "Linux admin · Docker · Kubernetes · Bash · PowerShell"],
     ["Cloud",     "AWS · GCP · Azure · Terraform · Ansible"],
-    ["Databases", "PostgreSQL · MySQL · MongoDB "],
+    ["Databases", "PostgreSQL · MySQL ·  MongoDB "],
     ["Code",      "Ruby · Python · JavaScript / Node · PHP · Git & CI/CD"],
     ["Tooling",   "Zendesk · Jira · Confluence · technical documentation"],
   ],
@@ -706,24 +727,24 @@ const CONFIG = {
     {
       title:  "PostgreSQL Connection Calculator",
       stack:  "PostgreSQL · JavaScript",
-      desc:   "An interactive tool to quickly calculate PostgreSQL connection requirements for your GitLab instance.",
+      desc:   "Ever tried doing connection pool math during a live incident? It's rough. I built this so the team could get accurate PostgreSQL max_connections recommendations in seconds, without digging through docs mid-call.",
       url:    "https://postgresql-connection-calculator-759014.gitlab.io/",
       label:  "Open tool →",
     },
     {
       title:  "Convert UTC Bot",
       stack:  "Deno SDK · Slack Workflow · GitLab CI",
-      desc:   "Slack Workflow App (Deno SDK) that reacts to :convertutc: emoji and replies with UTC-converted times and shareable timezone links.Built on Deno SDK and hosted on GitLab, it eliminates the mental overhead of timezone math across distributed teams.",
+      desc:   "Working async across 65+ countries means timezone math is a daily tax. I got tired of it, so I built a Slack bot that converts any UTC timestamp into a shareable link showing everyone's local time at once. GitLab adopted it company-wide.",
       url:    "https://gitlab.com/gitlab-com/support/toolbox/convert-utc-bot",
       label:  "View on GitLab →",
     },
     {
-      title:  "Viggou.net",
-      stack:  "Media · Community · Chinese entertainment",
-      desc:   "Side project and passion: I lead and manage a media page covering the Chinese entertainment industry — local events, artists, and community coverage. Handles editorial direction, content strategy, and social presence.",
-      url:    "https://viggou.net",
-      label:  "Visit viggou.net →",
-    },
+  title: "SQL vs NoSQL: MongoDB & MySQL Performance Study",
+  stack: "MongoDB · MySQL · Python · Big Data",
+  desc: "Co-authored peer-reviewed research benchmarking MongoDB and MySQL across insert, select, update, and delete operations on up to 1 million Twitter records. Published in Springer's Advances in Information and Communication Networks (FICC 2018). 10 citations.",
+  url: "https://link.springer.com/chapter/10.1007/978-3-030-03402-3_20",
+  label: "Read on Springer →",
+},
   ],
   cv:       "https://memilyc.github.io",
   email:    "echangw2010@gmail.com",
@@ -1006,6 +1027,7 @@ function buildReader(){
         ${c.strengths.themes.map(([t,d]) => `<li><span class="r-st">${esc(t)}</span><span class="r-sd">${esc(d)}</span></li>`).join('')}
       </ol>
     </section>
+    ${TESTIMONIALS.length > 0 ? `
     <section class="r-sec" id="testimonials">
       <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
       <ul class="r-testimonials" id="reader-testimonials">
@@ -1038,6 +1060,7 @@ function buildReader(){
       </div>
       ${testimonialCTA(true)}
     </section>
+    ` : ''}
     <section class="r-sec" id="contact">
       <h2 class="r-h" data-section="contact">Contact ${sectionCopyIcon('contact')}</h2>
       <ul class="r-links">
@@ -1594,8 +1617,8 @@ const commands = {
     }
   },
   testimonials(args){
+    // Silently skip if testimonials.js failed to load
     if (typeof TESTIMONIALS === 'undefined' || !TESTIMONIALS || TESTIMONIALS.length === 0) {
-      print('<span class="yellow">No testimonials loaded yet.</span>');
       return;
     }
 
