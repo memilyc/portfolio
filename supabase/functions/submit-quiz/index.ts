@@ -84,7 +84,7 @@ serve(async (req) => {
   // Fetch correct answers for this session's questions
   const { data: questions } = await supabase
     .from("trivia_questions")
-    .select("id, correct_answer, category, difficulty")
+    .select("id, question, correct_answer, category, difficulty, option_a, option_b, option_c, option_d")
     .in("id", questionIds);
 
   if (!questions) return err("Could not verify answers", 500);
