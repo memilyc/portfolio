@@ -151,6 +151,34 @@
   }
   .bar-btn:hover { color: var(--accent); border-color: var(--accent); }
 
+  /* ── Drag & Resize ─────────────────────────────────────── */
+  .window.user-positioned {
+    position: fixed !important;
+    margin: 0 !important;
+  }
+  .window.dragging, .window.resizing {
+    transition: none !important;
+    user-select: none;
+  }
+  .bar.draggable { cursor: move; }
+  .bar.draggable:active { cursor: grabbing; }
+
+  .resize-handle {
+    position: absolute;
+    z-index: 10;
+  }
+  .resize-handle.resize-n  { top: -4px;    left: 8px;    right: 8px;   height: 8px;  cursor: n-resize; }
+  .resize-handle.resize-s  { bottom: -4px; left: 8px;    right: 8px;   height: 8px;  cursor: s-resize; }
+  .resize-handle.resize-e  { right: -4px;  top: 8px;     bottom: 8px;  width: 8px;   cursor: e-resize; }
+  .resize-handle.resize-w  { left: -4px;   top: 8px;     bottom: 8px;  width: 8px;   cursor: w-resize; }
+  .resize-handle.resize-ne { top: -4px;    right: -4px;  width: 16px;  height: 16px; cursor: ne-resize; }
+  .resize-handle.resize-nw { top: -4px;    left: -4px;   width: 16px;  height: 16px; cursor: nw-resize; }
+  .resize-handle.resize-se { bottom: -4px; right: -4px;  width: 16px;  height: 16px; cursor: se-resize; }
+  .resize-handle.resize-sw { bottom: -4px; left: -4px;   width: 16px;  height: 16px; cursor: sw-resize; }
+
+  .window.maximized .resize-handle,
+  .window.minimized .resize-handle { display: none; }
+
   .window::after {
     content: "";
     position: absolute;
@@ -672,6 +700,14 @@
 </head>
 <body>
   <div class="window" id="window">
+    <div class="resize-handle resize-n"></div>
+    <div class="resize-handle resize-s"></div>
+    <div class="resize-handle resize-e"></div>
+    <div class="resize-handle resize-w"></div>
+    <div class="resize-handle resize-ne"></div>
+    <div class="resize-handle resize-nw"></div>
+    <div class="resize-handle resize-se"></div>
+    <div class="resize-handle resize-sw"></div>
     <div class="bar">
       <button class="dot r" id="dotClose" aria-label="Close terminal" title="Hide (Esc)"></button>
       <button class="dot y" id="dotMinimize" aria-label="Minimize" title="Minimize to title bar"></button>
@@ -1161,6 +1197,96 @@ document.getElementById('dotMaximize').addEventListener('click', (e) => {
     setWindowState('maximized');
   }
 });
+
+// ── Drag & Resize ────────────────────────────────────────────
+const MIN_W = 400, MIN_H = 220;
+
+function isMobileNow() { return window.innerWidth <= 600; }
+
+function enterUserPositioned() {
+  if (isMobileNow()) return;
+  const rect = win.getBoundingClientRect();
+  win.style.left   = rect.left + 'px';
+  win.style.top    = rect.top  + 'px';
+  win.style.width  = rect.width  + 'px';
+  win.style.height = rect.height + 'px';
+  win.classList.add('user-positioned');
+}
+
+// Drag via title bar
+(function initDrag() {
+  const bar = document.querySelector('.bar');
+  bar.classList.add('draggable');
+  let startX, startY, startL, startT;
+
+  bar.addEventListener('mousedown', e => {
+    if (isMobileNow()) return;
+    if (e.target.closest('button')) return;
+    if (windowState === 'maximized' || windowState === 'minimized') return;
+    e.preventDefault();
+    if (!win.classList.contains('user-positioned')) enterUserPositioned();
+    startX = e.clientX; startY = e.clientY;
+    startL = parseFloat(win.style.left); startT = parseFloat(win.style.top);
+    win.classList.add('dragging');
+
+    function onMove(e) {
+      win.style.left = (startL + e.clientX - startX) + 'px';
+      win.style.top  = Math.max(0, startT + e.clientY - startY) + 'px';
+    }
+    function onUp() {
+      win.classList.remove('dragging');
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+})();
+
+// Resize via handles
+document.querySelectorAll('.resize-handle').forEach(handle => {
+  handle.addEventListener('mousedown', e => {
+    if (isMobileNow()) return;
+    if (windowState === 'maximized' || windowState === 'minimized') return;
+    e.preventDefault();
+    if (!win.classList.contains('user-positioned')) enterUserPositioned();
+
+    const dir = handle.className.replace('resize-handle resize-', '');
+    const startX = e.clientX, startY = e.clientY;
+    const startL = parseFloat(win.style.left),  startT = parseFloat(win.style.top);
+    const startW = parseFloat(win.style.width), startH = parseFloat(win.style.height);
+    win.classList.add('resizing');
+
+    function onMove(e) {
+      const dx = e.clientX - startX, dy = e.clientY - startY;
+      let l = startL, t = startT, w = startW, h = startH;
+      if (dir.includes('e'))  w = Math.max(MIN_W, startW + dx);
+      if (dir.includes('s'))  h = Math.max(MIN_H, startH + dy);
+      if (dir.includes('w')) { w = Math.max(MIN_W, startW - dx); if (w > MIN_W) l = startL + dx; }
+      if (dir.includes('n')) { h = Math.max(MIN_H, startH - dy); if (h > MIN_H) t = startT + dy; }
+      win.style.left = l + 'px'; win.style.top  = t + 'px';
+      win.style.width = w + 'px'; win.style.height = h + 'px';
+    }
+    function onUp() {
+      win.classList.remove('resizing');
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+});
+
+// When maximized -> normal, clear user-positioned so CSS re-centers
+const _origSetWindowState = setWindowState;
+// patch: after going normal from maximized, reset user-positioned
+document.getElementById('dotMaximize').addEventListener('click', () => {
+  if (windowState === 'maximized') {
+    win.classList.remove('user-positioned');
+    win.style.left = win.style.top = win.style.width = win.style.height = '';
+  }
+});
+// ─────────────────────────────────────────────────────────────
 
 function el(tag, cls, html){
   const e = document.createElement(tag);
