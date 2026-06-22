@@ -479,7 +479,7 @@ const TESTIMONIALS = [
   .r-h:hover .copy-link { opacity: 1; }
   .r-h .copy-link:hover { color: var(--accent); background: var(--bg-bar); }
   .r-h .copy-link.copied { color: var(--accent); }
-  .r-body { font-size: 15px; line-height: 1.8; color: var(--fg); max-width: 66ch; }
+  .r-body { font-size: 15px; line-height: 1.8; color: var(--fg); }
   .r-skills, .r-links { list-style: none; }
   .r-skills li {
     display: flex; gap: 14px; padding: 8px 0; flex-wrap: wrap;
@@ -526,7 +526,7 @@ const TESTIMONIALS = [
   .r-projects li:last-child { border-bottom: none; }
   .r-proj-title { color: var(--cyan); font-weight: 700; font-size: 15px; }
   .r-proj-stack { font-size: 12px; color: var(--magenta); margin: 3px 0 6px; }
-  .r-proj-desc { font-size: 14px; color: var(--fg); line-height: 1.7; max-width: 62ch; }
+  .r-proj-desc { font-size: 14px; color: var(--fg); line-height: 1.7; }
   .r-proj-link { font-size: 13px; margin-top: 6px; }
 
   .r-testimonials { list-style: none; }
@@ -537,7 +537,7 @@ const TESTIMONIALS = [
   .r-testimonials li:last-child { border-bottom: none; }
   .r-test-name { color: var(--cyan); font-weight: 700; font-size: 15px; margin-bottom: 6px; }
   .r-test-rel { color: var(--dim); font-weight: 400; font-size: 13px; }
-  .r-test-text { font-size: 14px; color: var(--fg); line-height: 1.7; font-style: italic; max-width: 62ch; }
+  .r-test-text { font-size: 14px; color: var(--fg); line-height: 1.7; font-style: italic; }
   .r-test-text::before { content: '"'; color: var(--magenta); font-weight: 700; }
   .r-test-text::after { content: '"'; color: var(--magenta); font-weight: 700; }
   .r-test-cta {
@@ -1296,16 +1296,22 @@ function print(html, cls){
   screen.scrollTop = screen.scrollHeight;
   return d;
 }
-function printPromptEcho(cmd){
-  // Show shortened path in prompt
-  let displayPath = currentDir;
-  if (displayPath.startsWith('/home/emily/portfolio')) {
-    displayPath = '~' + displayPath.substring('/home/emily/portfolio'.length);
-  } else if (displayPath.startsWith('/home/emily')) {
-    displayPath = '~' + displayPath.substring('/home/emily'.length);
+function normalizePath(p) {
+  const stack = [];
+  for (const part of p.split('/').filter(Boolean)) {
+    if (part === '..') stack.pop();
+    else if (part !== '.') stack.push(part);
   }
-  if (!displayPath) displayPath = '~';
-  print(`<span class="prompt">${CONFIG.user}@${CONFIG.host}</span>:<span class="path">${escapeHtml(displayPath)}</span>$ <span class="cmd">${escapeHtml(cmd)}</span>`);
+  return '/' + stack.join('/') || '/';
+}
+function shortPath(dir) {
+  let p = dir;
+  if (p.startsWith('/home/emily/portfolio')) p = '~' + p.slice('/home/emily/portfolio'.length);
+  else if (p.startsWith('/home/emily')) p = '~' + p.slice('/home/emily'.length);
+  return p || '~';
+}
+function printPromptEcho(cmd){
+  print(`<span class="prompt">${CONFIG.user}@${CONFIG.host}</span>:<span class="path">${escapeHtml(shortPath(currentDir))}</span>$ <span class="cmd">${escapeHtml(cmd)}</span>`);
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -1380,6 +1386,90 @@ let helpCount = 0;
 let commandHistory = [];
 let historyIndex = -1;
 let currentDir = '/home/emily/portfolio';
+
+const FS_DIRS = {
+  '/home/emily/portfolio': ['projects', 'skills', 'experience', 'quotes', 'dadjokes'],
+  '/home/emily/portfolio/projects': ['terminal-portfolio', 'postgresql-calculator', 'convert-utc-bot'],
+  '/home/emily/portfolio/skills': [],
+  '/home/emily/portfolio/experience': [],
+  '/home/emily/portfolio/quotes': [],
+  '/home/emily/portfolio/dadjokes': [],
+  '/home/emily': ['portfolio'],
+  '/home': ['emily'],
+  '/': ['home', 'etc', 'var', 'tmp'],
+};
+
+const FS_CONTENTS = {
+  '/home/emily/portfolio': [
+    { name: 'about.md',         type: 'file', size: '2.3K' },
+    { name: 'resume.pdf',       type: 'file', size: '128K' },
+    { name: 'projects',         type: 'dir',  size: '4.0K' },
+    { name: 'skills',           type: 'dir',  size: '4.0K' },
+    { name: 'experience',       type: 'dir',  size: '4.0K' },
+    { name: 'recommendations',  type: 'file', size: '8.1K' },
+    { name: 'contact.txt',      type: 'file', size: '512'  },
+    { name: 'quotes',           type: 'dir',  size: '4.0K' },
+    { name: 'dadjokes',         type: 'dir',  size: '4.0K' },
+  ],
+  '/home/emily/portfolio/projects': [
+    { name: 'terminal-portfolio',      type: 'dir', size: '4.0K' },
+    { name: 'postgresql-calculator',   type: 'dir', size: '4.0K' },
+    { name: 'convert-utc-bot',         type: 'dir', size: '4.0K' },
+  ],
+  '/home/emily/portfolio/skills':     [{ name: 'technical.md', type: 'file', size: '1.2K' }],
+  '/home/emily/portfolio/experience': [{ name: 'gitlab.md',    type: 'file', size: '1.8K' }],
+  '/home/emily/portfolio/quotes':     [{ name: 'README.md',    type: 'file', size: '128'  }],
+  '/home/emily/portfolio/dadjokes':   [{ name: 'README.md',    type: 'file', size: '128'  }],
+  '/home/emily': [{ name: 'portfolio', type: 'dir', size: '4.0K' }],
+  '/home':       [{ name: 'emily',     type: 'dir', size: '4.0K' }],
+  '/':           [
+    { name: 'home', type: 'dir', size: '4.0K' },
+    { name: 'etc',  type: 'dir', size: '4.0K' },
+    { name: 'var',  type: 'dir', size: '4.0K' },
+    { name: 'tmp',  type: 'dir', size: '4.0K' },
+  ],
+};
+
+const FILE_CONTENT = {
+  '/home/emily/portfolio/about.md': [
+    '# about.md', '',
+    ...CONFIG.about.flatMap(p => [p, '']),
+  ],
+  '/home/emily/portfolio/contact.txt': [
+    'Email:    ' + CONFIG.email,
+    'LinkedIn: ' + CONFIG.linkedin,
+    'GitHub:   ' + CONFIG.github,
+    'Web:      this terminal :)',
+  ],
+  '/home/emily/portfolio/resume.pdf': [
+    '<span class="dim">Binary file (PDF) — type \'cv\' to open in a new tab.</span>',
+  ],
+  '/home/emily/portfolio/recommendations': [
+    '# recommendations', '',
+    ...TESTIMONIALS.flatMap(t => [
+      `<span class="accent b">${escapeHtml(t.name)}</span> <span class="dim">(${escapeHtml(t.relationship)})</span>`,
+      escapeHtml(t.highlight),
+      '',
+    ]),
+  ],
+  '/home/emily/portfolio/skills/technical.md': [
+    '# technical.md', '',
+    ...CONFIG.skills.map(([cat, items]) => `<span class="accent b">${escapeHtml(cat)}</span>  ${escapeHtml(items)}`),
+  ],
+  '/home/emily/portfolio/experience/gitlab.md': [
+    '# gitlab.md', '',
+    `<span class="accent b">${escapeHtml(CONFIG.role)}</span>`,
+    escapeHtml(CONFIG.tagline),
+    '',
+    ...CONFIG.about.flatMap(p => [escapeHtml(p), '']),
+  ],
+  '/home/emily/portfolio/quotes/README.md': [
+    'Quotes live here. Try: <span class="accent">quote</span>',
+  ],
+  '/home/emily/portfolio/dadjokes/README.md': [
+    'Dad jokes live here. Try: <span class="accent">dadjoke</span>',
+  ],
+};
 
 const commands = {
   help(){
@@ -1899,54 +1989,27 @@ const commands = {
   cd(args){
     const argv = (args || '').trim().split(/\s+/).filter(Boolean);
     const target = argv[0] || '~';
-    
-    // Handle special cases
-    if (target === '~' || target === '$HOME') {
-      currentDir = '/home/emily/portfolio';
-      return;
-    }
-    if (target === '-') {
-      print('<span class="yellow">cd: OLDPWD not set</span>');
-      return;
-    }
-    if (target === '..') {
-      if (currentDir === '/home/emily/portfolio') {
-        currentDir = '/home/emily';
-      } else if (currentDir === '/home/emily') {
-        currentDir = '/home';
-      } else if (currentDir === '/home') {
-        currentDir = '/';
-      }
-      return;
-    }
-    
-    // Directory structure
-    const dirs = {
-      '/home/emily/portfolio': ['projects', 'skills', 'experience', 'quotes', 'dadjokes'],
-      '/home/emily/portfolio/projects': ['terminal-portfolio', 'postgresql-calculator', 'convert-utc-bot'],
-      '/home/emily': ['emily'],
-      '/home': ['emily'],
-      '/': ['home', 'etc', 'var', 'tmp'],
+    const setDir = d => {
+      currentDir = d;
+      document.querySelector('#inputRow .path').textContent = shortPath(d);
     };
-    
-    // Handle relative paths
-    let newPath;
-    if (target.startsWith('/')) {
-      newPath = target;
-    } else if (target === '.' || target === './') {
+
+    if (target === '~' || target === '$HOME') { setDir('/home/emily/portfolio'); return; }
+    if (target === '-') { print('<span class="yellow">cd: OLDPWD not set</span>'); return; }
+    if (target === '.' || target === './') return;
+
+    if (target === '..') {
+      const parts = currentDir.split('/').filter(Boolean);
+      parts.pop();
+      setDir('/' + parts.join('/') || '/');
       return;
-    } else {
-      newPath = currentDir === '/' ? '/' + target : currentDir + '/' + target;
     }
-    
-    // Normalize path (remove trailing slashes, handle double slashes)
+
+    let newPath = target.startsWith('/') ? target : (currentDir === '/' ? '/' + target : currentDir + '/' + target);
     newPath = newPath.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
-    
-    // Check if directory exists
-    if (dirs[newPath] || target === '..') {
-      currentDir = newPath;
-    } else if (dirs[currentDir] && dirs[currentDir].includes(target)) {
-      currentDir = currentDir === '/' ? '/' + target : currentDir + '/' + target;
+
+    if (FS_DIRS[newPath] !== undefined) {
+      setDir(newPath);
     } else {
       print(`<span class="yellow">cd: ${escapeHtml(target)}: No such directory</span>`);
     }
@@ -1959,44 +2022,12 @@ const commands = {
     const longFormat = joined.includes('l');
     const humanReadable = joined.includes('h');
 
-    // Directory contents based on current directory
-    const dirContents = {
-      '/home/emily/portfolio': [
-        { name: 'about.md', type: 'file', size: '2.3K' },
-        { name: 'resume.pdf', type: 'file', size: '128K' },
-        { name: 'projects', type: 'dir', size: '4.0K' },
-        { name: 'skills', type: 'dir', size: '4.0K' },
-        { name: 'experience', type: 'dir', size: '4.0K' },
-        { name: 'recommendations', type: 'file', size: '8.1K' },
-        { name: 'contact.txt', type: 'file', size: '512' },
-        { name: 'quotes', type: 'dir', size: '4.0K' },
-        { name: 'dadjokes', type: 'dir', size: '4.0K' },
-      ],
-      '/home/emily/portfolio/projects': [
-        { name: 'terminal-portfolio', type: 'dir', size: '4.0K' },
-        { name: 'postgresql-calculator', type: 'dir', size: '4.0K' },
-        { name: 'convert-utc-bot', type: 'dir', size: '4.0K' },
-      ],
-      '/home/emily': [
-        { name: 'portfolio', type: 'dir', size: '4.0K' },
-      ],
-      '/home': [
-        { name: 'emily', type: 'dir', size: '4.0K' },
-      ],
-      '/': [
-        { name: 'home', type: 'dir', size: '4.0K' },
-        { name: 'etc', type: 'dir', size: '4.0K' },
-        { name: 'var', type: 'dir', size: '4.0K' },
-        { name: 'tmp', type: 'dir', size: '4.0K' },
-      ],
-    };
-
     const hidden = [
       { name: '.config', type: 'dir', size: '4.0K' },
       { name: '.secrets', type: 'file', size: '64' },
     ];
 
-    const files = dirContents[currentDir] || [];
+    const files = FS_CONTENTS[currentDir] || [];
     const allFiles = showAll ? [...hidden, ...files] : files;
 
     if (longFormat) {
@@ -2034,30 +2065,20 @@ const commands = {
     }
   },
   cat(args){
-    const argv = (args || '').trim().split(/\s+/).filter(Boolean);
-    const file = argv[0];
-    
-    // Easter egg: just "cat" prints a cat emoji
-    if (!file) {
-      print('🐱');
-      return;
-    }
-    
-    if (file === 'about.md' || file === './about.md') {
-      print('Hi, I\'m Emily 👋');
-      blank();
-      print('I build reliable systems,');
-      print('solve tricky problems,');
-      print('and enjoy helping people.');
-    } else if (file === 'contact.txt' || file === './contact.txt') {
-      print('Email: ' + CONFIG.email);
-      print('LinkedIn: ' + CONFIG.linkedin);
-      print('GitHub: ' + CONFIG.github);
-    } else if (file === '.secrets' || file === './.secrets') {
-      print('<span class="yellow">Permission denied</span>');
-    } else {
-      print(`<span class="yellow">cat: ${escapeHtml(file)}: No such file or directory</span>`);
-    }
+    const file = (args || '').trim().split(/\s+/)[0];
+    if (!file) { print('🐱'); return; }
+
+    if (file === '.secrets' || file === './.secrets') { print('<span class="yellow">Permission denied</span>'); return; }
+
+    const abs  = normalizePath(file.startsWith('/') ? file : (currentDir === '/' ? '/' + file : currentDir + '/' + file));
+    const dir  = abs.slice(0, abs.lastIndexOf('/')) || '/';
+    const name = abs.slice(abs.lastIndexOf('/') + 1);
+    const entry = (FS_CONTENTS[dir] || []).find(f => f.name === name);
+
+    if (!entry)              { print(`<span class="yellow">cat: ${escapeHtml(file)}: No such file or directory</span>`); return; }
+    if (entry.type === 'dir'){ print(`<span class="yellow">cat: ${escapeHtml(file)}: Is a directory</span>`); return; }
+
+    (FILE_CONTENT[abs] || ['<span class="dim">(empty)</span>']).forEach(line => print(line));
   },
   tree(){
     if (currentDir === '/home/emily/portfolio') {
