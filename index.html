@@ -1151,6 +1151,10 @@ function setWindowState(state) {
   const win = document.getElementById('window');
   win.classList.remove('minimized', 'maximized', 'closed');
   if (state !== 'normal') win.classList.add(state);
+  if (state === 'normal') {
+    win.classList.remove('user-positioned');
+    win.style.left = win.style.top = win.style.width = win.style.height = '';
+  }
   try { localStorage.setItem('window-state', state); } catch(e) {}
 }
 
@@ -1214,7 +1218,7 @@ function enterUserPositioned() {
 }
 
 // Drag via title bar
-(function initDrag() {
+{
   const bar = document.querySelector('.bar');
   bar.classList.add('draggable');
   let startX, startY, startL, startT;
@@ -1241,7 +1245,7 @@ function enterUserPositioned() {
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
   });
-})();
+}
 
 // Resize via handles
 document.querySelectorAll('.resize-handle').forEach(handle => {
@@ -1277,15 +1281,6 @@ document.querySelectorAll('.resize-handle').forEach(handle => {
   });
 });
 
-// When maximized -> normal, clear user-positioned so CSS re-centers
-const _origSetWindowState = setWindowState;
-// patch: after going normal from maximized, reset user-positioned
-document.getElementById('dotMaximize').addEventListener('click', () => {
-  if (windowState === 'maximized') {
-    win.classList.remove('user-positioned');
-    win.style.left = win.style.top = win.style.width = win.style.height = '';
-  }
-});
 // ─────────────────────────────────────────────────────────────
 
 function el(tag, cls, html){
@@ -2925,12 +2920,14 @@ const vv = window.visualViewport;
 
 function fitToViewport() {
   if (window.innerWidth > 600) {
-    /* Desktop: let CSS handle sizing, clear any JS overrides */
-    win.style.position = '';
-    win.style.top      = '';
-    win.style.left     = '';
-    win.style.width    = '';
-    win.style.height   = '';
+    /* Desktop: let CSS handle sizing unless user has manually positioned */
+    if (!win.classList.contains('user-positioned')) {
+      win.style.position = '';
+      win.style.top      = '';
+      win.style.left     = '';
+      win.style.width    = '';
+      win.style.height   = '';
+    }
     return;
   }
 
