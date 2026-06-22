@@ -1072,37 +1072,32 @@ function buildReader(){
         ${c.strengths.themes.map(([t,d]) => `<li><span class="r-st">${esc(t)}</span><span class="r-sd">${esc(d)}</span></li>`).join('')}
       </ol>
     </section>
-    ${TESTIMONIALS.length > 0 ? `
+    ${TESTIMONIALS.length > 0 ? (() => {
+      // shuffle a copy so the two featured are random each page load
+      const shuffled = [...TESTIMONIALS].sort(() => Math.random() - 0.5);
+      const featured = shuffled.slice(0, 2);
+      const rest = shuffled.slice(2);
+      const renderItem = (t, idx) => {
+        const displayText = truncateAtWord(t.text, 250);
+        const truncated = displayText.endsWith('...');
+        return `<li>
+          <div class="r-test-name">${esc(t.name)} <span class="r-test-rel">${esc(t.relationship)}</span></div>
+          <div class="r-test-text" id="r-test-text-${idx}">${esc(displayText)}</div>
+          ${truncated ? `<button class="r-test-readmore" onclick="expandTestimonialText(${idx})">read more</button>` : ''}
+        </li>`;
+      };
+      return `
     <section class="r-sec" id="testimonials">
       <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
       <ul class="r-testimonials" id="reader-testimonials">
-        ${TESTIMONIALS.slice(0, 2).map((t, idx) => {
-          const displayText = truncateAtWord(t.text, 250);
-          const truncated = displayText.endsWith('...');
-          return `
-          <li>
-            <div class="r-test-name">${esc(t.name)} <span class="r-test-rel">${esc(t.relationship)}</span></div>
-            <div class="r-test-text" id="r-test-text-${idx}">${esc(displayText)}</div>
-            ${truncated ? `<button class="r-test-readmore" onclick="expandTestimonialText(${idx})">read more</button>` : ''}
-          </li>`;
-        }).join('')}
+        ${featured.map((t, idx) => renderItem(t, idx)).join('')}
       </ul>
-      ${TESTIMONIALS.length > 2 ? `<button class="r-test-expand" onclick="expandTestimonials()">Show all ${TESTIMONIALS.length} testimonials ↓</button>` : ''}
+      ${rest.length > 0 ? `<button class="r-test-expand" onclick="expandTestimonials()">Show all ${TESTIMONIALS.length} testimonials ↓</button>` : ''}
       <div id="reader-testimonials-extra" style="display: none;">
         <ul class="r-testimonials">
-          ${TESTIMONIALS.slice(2).map((t, idx) => {
-          const realIdx = idx + 2;
-          const displayText = truncateAtWord(t.text, 250);
-          const truncated = displayText.endsWith('...');
-          return `
-            <li>
-              <div class="r-test-name">${esc(t.name)} <span class="r-test-rel">${esc(t.relationship)}</span></div>
-              <div class="r-test-text" id="r-test-text-${realIdx}">${esc(displayText)}</div>
-              ${truncated ? `<button class="r-test-readmore" onclick="expandTestimonialText(${realIdx})">read more</button>` : ''}
-            </li>`;
-        }).join('')}
+          ${rest.map((t, idx) => renderItem(t, idx + 2)).join('')}
         </ul>
-      </div>
+      </div>`; })()
       ${testimonialCTA(true)}
     </section>
     ` : ''}
@@ -1821,32 +1816,34 @@ const commands = {
       return;
     }
 
-    // Carousel view — show first 2 testimonials with expand option
+    // Random single testimonial
+    if (typeof commands._lastTestimonialIdx === 'undefined') commands._lastTestimonialIdx = -1;
+    let idx = commands._lastTestimonialIdx;
+    // pick a different one each time
+    if (TESTIMONIALS.length > 1) {
+      do { idx = Math.floor(Math.random() * TESTIMONIALS.length); } while (idx === commands._lastTestimonialIdx);
+    } else { idx = 0; }
+    commands._lastTestimonialIdx = idx;
+    const t = TESTIMONIALS[idx];
+
     print('<span class="dim">$ testimonials</span>');
     blank();
     print('<span class="accent b">═══════════════════════════════════════</span>');
     print('<span class="accent b">  What colleagues say about Emily</span>');
     print('<span class="accent b">═══════════════════════════════════════</span>');
     blank();
-
-    // Show first 2 testimonials as previews
-    const showCount = Math.min(2, TESTIMONIALS.length);
-    for (let i = 0; i < showCount; i++) {
-      const t = TESTIMONIALS[i];
-      const preview = truncateAtWord(t.text, 250);
-      const truncated = preview.endsWith('...');
-      print('<span class="cyan b">[' + (i + 1) + ']</span> <span class="accent b">' + escapeHtml(t.name) + '</span>');
-      print('     <span class="dim">(' + escapeHtml(t.relationship) + ')</span>');
-      print('     "' + escapeHtml(preview) + '"');
-      if (truncated) {
-        print('     <span class="dim">...</span> <a class="tlink" href="#" onclick="commands.testimonials(\'read ' + escapeHtml(t.name) + '\'); return false;">read full</a>');
-      }
-      if (i < showCount - 1) blank();
-    }
-
+    const preview = truncateAtWord(t.text, 250);
+    const truncated = preview.endsWith('...');
+    print('<span class="accent b">' + escapeHtml(t.name) + '</span>');
+    print('<span class="dim">(' + escapeHtml(t.relationship) + ')</span>');
     blank();
-    if (TESTIMONIALS.length > 2) {
-      print('<span class="dim">(' + (TESTIMONIALS.length - 2) + ' more — type</span> <span class="accent">testimonials all</span> <span class="dim">to see all)</span>');
+    print('"' + escapeHtml(preview) + '"');
+    if (truncated) {
+      print('<span class="dim">...</span> <a class="tlink" href="#" onclick="commands.testimonials(\'read ' + escapeHtml(t.name) + '\'); return false;">read full</a>');
+    }
+    blank();
+    if (TESTIMONIALS.length > 1) {
+      print('<span class="dim">(<a class="tlink" href="#" onclick="commands.testimonials(); return false;">next →</a> or type <span class="accent">testimonials all</span> to see all)</span>');
     }
     print(testimonialCTA());
   },
