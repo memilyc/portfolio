@@ -885,6 +885,14 @@ async function edgeFn(name, opts = {}) {
   return res.json();
 }
 
+const huntState = {
+  active: false,
+  phase: 'idle',
+  found: new Set(),
+  target: 10,
+  startTime: 0,
+};
+
 const quizState = {
   active: false,
   phase: 'idle',
@@ -1275,7 +1283,7 @@ function el(tag, cls, html){
   return e;
 }
 
-const CHIP_NAMES = ['about','skills','projects','strengths','contact','cv','quote','dadjoke','testimonials','quiz','leaderboard','guestbook','neofetch','credits','theme','clear','help'];
+const CHIP_NAMES = ['about','skills','projects','strengths','contact','cv','quote','dadjoke','testimonials','quiz','leaderboard','guestbook','egghunt','neofetch','credits','theme','clear','help'];
 
 /* ponytail: single source of truth for chips — boot + help both call this */
 function renderChips(){
@@ -1497,6 +1505,7 @@ const commands = {
     print('  <span class="cyan">quiz</span>               Start an interactive trivia quiz');
     print('  <span class="cyan">leaderboard</span>        View quiz scores');
     print('  <span class="cyan">guestbook</span>          Read or sign the guestbook');
+    print('  <span class="cyan">egghunt</span>            Hunt for hidden easter egg commands 🥚');
     blank();
     print('  <span class="cyan">neofetch</span>           System information');
     print('  <span class="cyan">credits</span>            Project credits');
@@ -1972,6 +1981,7 @@ const commands = {
     print('  <span class="cyan">◆</span> <span class="accent b">Claude</span> <span class="dim">(Anthropic)</span> — design + build partner');
     print('  <span class="green">◆</span> <span class="accent b">ChatGPT</span> <span class="dim">(OpenAI)</span> — brainstorming + refinement');
     print('  <span class="yellow">◆</span> <span class="accent b">Qoder</span> — implementation + integration');
+    print('  <span class="magenta">◆</span> <span class="accent b">Avatars in Pixels</span> — pixel avatar · <a class="tlink" href="https://www.avatarsinpixels.com/minipix/clothing/Body" target="_blank" rel="noopener">avatarsinpixels.com</a>');
     blank();
     print('<span class="dim">All ideas, direction, and questionable jokes are Emily\'s own.</span>');
   },
@@ -2117,49 +2127,122 @@ const commands = {
       print('Usage: <span class="accent">man &lt;command&gt;</span>');
       return;
     }
-    if (cmd === 'quote') {
-      print('<span class="accent b">QUOTE(1)</span>');
-      blank();
-      print('<span class="yellow b">NAME</span>');
-      print('  quote - display inspirational quotes');
-      blank();
-      print('<span class="yellow b">SYNOPSIS</span>');
-      print('  <span class="cyan">quote</span> [<span class="cyan">-n</span> <span class="accent">&lt;number&gt;</span>] [<span class="cyan">--all</span>] [<span class="cyan">-h</span>]');
-      blank();
-      print('<span class="yellow b">DESCRIPTION</span>');
-      print('  Displays a random inspirational quote from the collection.');
+    const MAN = {
+      about:        { syn: 'about', desc: 'Display a summary of who Emily is — role, background, and experience.', opts: [] },
+      skills:       { syn: 'skills', desc: 'List technical skills grouped by category.', opts: [] },
+      projects:     { syn: 'projects', desc: 'Browse selected projects with stack, description, and links.', opts: [] },
+      strengths:    { syn: 'strengths', desc: 'Show top CliftonStrengths themes with descriptions.', opts: [] },
+      contact:      { syn: 'contact', desc: 'Print email, LinkedIn, GitHub, and README links.', opts: [] },
+      cv:           { syn: 'cv', desc: 'Open the full résumé PDF in a new tab.', opts: [] },
+      theme:        { syn: 'theme', desc: 'Toggle between dark and light colour themes.', opts: [] },
+      clear:        { syn: 'clear', desc: 'Clear all terminal output.', opts: [] },
+      help:         { syn: 'help', desc: 'List available commands with brief descriptions.', opts: [] },
+      neofetch:     { syn: 'neofetch', desc: 'Display system info and avatar in neofetch style.', opts: [] },
+      credits:      { syn: 'credits', desc: 'Show build credits.', opts: [] },
+      history:      { syn: 'history', desc: 'Show the last 20 commands entered this session.', opts: [] },
+      pwd:          { syn: 'pwd', desc: 'Print the current working directory.', opts: [] },
+      whoami:       { syn: 'whoami [-v]', desc: 'Print the current user.', opts: ['-v, --verbose   Print extra context'] },
+      id:           { syn: 'id', desc: 'Print uid, gid, and group memberships.', opts: [] },
+      uname:        { syn: 'uname [-a]', desc: 'Print operating system name.', opts: ['-a, --all   Print all system info'] },
+      tree:         { syn: 'tree', desc: 'Display the portfolio filesystem as a tree.', opts: [] },
+      cat:          { syn: 'cat <file>', desc: 'Print the contents of a file in the virtual filesystem.', opts: [] },
+      cd:           { syn: 'cd [dir]', desc: 'Change the current directory. Use ~ to return home, .. to go up.', opts: [] },
+      ls:           { syn: 'ls [-a] [-l] [-h]', desc: 'List files in the current directory.', opts: ['-a   Show hidden files (.config, .secrets)', '-l   Long format', '-h   Human-readable sizes'] },
+      man:          { syn: 'man <command>', desc: 'Display the manual page for a command.', opts: [] },
+      quote:        { syn: 'quote [-n <N>] [-a] [-h]', desc: 'Print a random inspirational quote.', opts: ['-n, --number <N>   Print N quotes', '-a, --all          Print all quotes', '-h, --help         Show help'] },
+      dadjoke:      { syn: 'dadjoke [-n <N>] [-a] [-h]', desc: 'Tell a terrible dad joke. Side effects: eye rolling.', opts: ['-n <N>   Tell N jokes', '-a       All jokes', '-h       Help'] },
+      testimonials: { syn: 'testimonials [all | read <name>]', desc: 'Read what colleagues say about Emily.', opts: ['(no args)        Random testimonial', 'all              Show all testimonials', 'read <name>      Read a specific person\'s full testimonial'] },
+      quiz:         { syn: 'quiz [easy|medium|hard|mixed|emily]', desc: 'Start an interactive trivia quiz. Beat the leaderboard!', opts: [] },
+      leaderboard:  { syn: 'leaderboard [-n <N>] [-c <cat>] [-d <diff>]', desc: 'View the quiz high-score leaderboard.', opts: ['-n <N>       Show top N entries', '-c <cat>     Filter by category', '-d <diff>    Filter by difficulty', '-h           Help'] },
+      guestbook:    { syn: 'guestbook [sign | -h]', desc: 'Read visitor messages or leave your own.', opts: ['(no args)   View recent messages', 'sign        Sign the guestbook', '-h          Help'] },
+      resume:       { syn: 'resume', desc: 'Alias for cv — opens the résumé in a new tab.', opts: [] },
+      whyhireme:    { syn: 'whyhireme', desc: 'A direct answer to the most important question.', opts: [] },
+      uptime:       { syn: 'uptime', desc: 'Show how long Emily has been in the industry.', opts: [] },
+      top:          { syn: 'top', desc: 'Show running processes (Emily edition).', opts: [] },
+      htop:         { syn: 'htop', desc: 'Interactive process viewer. More colours than top.', opts: [] },
+      pipeline:     { syn: 'pipeline', desc: 'Run the CI/CD pipeline (what could go wrong?).', opts: [] },
+      journalctl:   { syn: 'journalctl [-xe]', desc: 'Read the system journal for dramatic effect.', opts: ['-xe   Show recent errors'] },
+      privacy:      { syn: 'privacy [disable | enable]', desc: 'View or change analytics tracking preferences.', opts: ['disable / opt-out   Stop tracking', 'enable  / opt-in    Resume tracking'] },
+      egghunt:      { syn: 'egghunt', desc: 'Start a timed easter egg hunt. Find 10 hidden commands to get on the leaderboard.', opts: [] },
+    };
+    const page = MAN[cmd];
+    if (!page) { print(`<span class="yellow">No manual entry for ${escapeHtml(cmd)}</span>`); return; }
+    print(`<span class="accent b">${cmd.toUpperCase()}(1)</span>`);
+    blank();
+    print('<span class="yellow b">NAME</span>');
+    print(`  ${cmd} - ${page.desc}`);
+    blank();
+    print('<span class="yellow b">SYNOPSIS</span>');
+    print(`  <span class="cyan">${escapeHtml(page.syn)}</span>`);
+    if (page.opts.length) {
       blank();
       print('<span class="yellow b">OPTIONS</span>');
-      print('  <span class="cyan">-n</span>, <span class="cyan">--number</span> <span class="accent">&lt;N&gt;</span>   Print N random quotes');
-      print('  <span class="cyan">-a</span>, <span class="cyan">--all</span>            Print all quotes');
-      print('  <span class="cyan">-h</span>, <span class="cyan">--help</span>           Show help');
-    } else if (cmd === 'dadjoke') {
-      print('<span class="accent b">DADJOKE(1)</span>');
-      blank();
-      print('<span class="yellow b">NAME</span>');
-      print('  dadjoke - tell terrible dad jokes');
-      blank();
-      print('<span class="yellow b">SYNOPSIS</span>');
-      print('  <span class="cyan">dadjoke</span> [<span class="cyan">-n</span> <span class="accent">&lt;number&gt;</span>] [<span class="cyan">--all</span>] [<span class="cyan">-h</span>]');
-      blank();
-      print('<span class="yellow b">WARNING</span>');
-      print('  Side effects may include: eye rolling, groaning, and reluctant chuckling.');
-    } else if (cmd === 'ls') {
-      print('<span class="accent b">LS(1)</span>');
-      blank();
-      print('<span class="yellow b">NAME</span>');
-      print('  ls - list portfolio contents');
-      blank();
-      print('<span class="yellow b">SYNOPSIS</span>');
-      print('  <span class="cyan">ls</span> [<span class="cyan">-a</span>] [<span class="cyan">-l</span>] [<span class="cyan">-h</span>]');
-      blank();
-      print('<span class="yellow b">OPTIONS</span>');
-      print('  <span class="cyan">-a</span>   Show hidden files (.config, .secrets)');
-      print('  <span class="cyan">-l</span>   Use long format');
-      print('  <span class="cyan">-h</span>   Human-readable file sizes');
-    } else {
-      print(`<span class="yellow">No manual entry for ${escapeHtml(cmd)}</span>`);
+      page.opts.forEach(o => print(`  <span class="cyan">${escapeHtml(o)}</span>`));
     }
+  },
+  'easter-egg'(){
+    const frames = [
+      ['  (\\(\\  ', '  ( -.-)  🥚', "  o_(\")(\")", ''],
+      ['  (\\(\\  ', '  ( -.-)  🥚', "  o_(\")(\")", '  *hop*'],
+      ['  (\\(\\     ', '  ( -.-)  🥚', "  o_(\")(\")", '  *hop hop*'],
+      ['    (\\(\\   ', '    ( -.-)🥚', "    o_(\")(\")", '  *hop hop hop*'],
+      ['    (\\(\\   ', '    ( ^.^)🥚', "    o_(\")(\")", '  *sniff sniff*'],
+      ['    (\\(\\   ', '    ( ^.^) 🌟', "    o_(\")(\")", '  *picks it up!*'],
+      ['    (\\(\\   ', '    ( ^w^) 🎉', "    o_(\")(\")", '  You found an easter egg!'],
+    ];
+    const div = document.createElement('div');
+    div.style.fontFamily = 'inherit';
+    div.style.whiteSpace = 'pre';
+    div.style.color = 'var(--accent)';
+    screen.appendChild(div);
+    let i = 0;
+    const tick = setInterval(() => {
+      div.innerHTML = frames[i].map(l => escapeHtml(l)).join('\n');
+      screen.scrollTop = screen.scrollHeight;
+      i++;
+      if (i >= frames.length) {
+        clearInterval(tick);
+        blank();
+        print('<span class="dim">🥕 You found a secret! Emily approves of your curiosity.</span>');
+        blank();
+      }
+    }, 320);
+  },
+  egghunt(args){
+    if ((args || '').trim().match(/^(-h|--help)$/)) {
+      print('<span class="accent b">EGGHUNT</span> — find 10 hidden commands to win');
+      blank();
+      print('<span class="yellow b">Tips:</span>');
+      print('  · Classic Linux sysadmin commands are a good starting point');
+      print('  · Think about what a curious recruiter would type');
+      print('  · Some commands are hiding in plain sight — try variations');
+      print('  · The emoji keyboard holds at least one secret 🤫');
+      print('  · Finding <span class="accent">recruiter-mode</span> unlocks hints for several more');
+      blank();
+      print('<span class="dim">Progress is tracked in-session only — refreshing resets the hunt.</span>');
+      return;
+    }
+    if (huntState.active) {
+      blank();
+      print(`<span class="yellow b">Hunt in progress:</span> <span class="cyan">${huntState.found.size}/${huntState.target} eggs found</span>`);
+      print('<span class="dim">Keep exploring... the terminal holds many secrets.</span>');
+      return;
+    }
+    huntState.active = true;
+    huntState.phase = 'hunting';
+    huntState.found = new Set();
+    huntState.startTime = Date.now();
+    blank();
+    print('<span class="yellow b">🥚 Easter Egg Hunt — STARTED</span>');
+    blank();
+    print(`Find <span class="accent b">${huntState.target}</span> hidden commands to complete the hunt.`);
+    print('<span class="dim">Timer is running... ⏱</span>');
+    blank();
+    print('<span class="cyan b">Hints:</span>');
+    print('<span class="dim">  · Think like a sysadmin watching production logs</span>');
+    print('<span class="dim">  · What would a curious recruiter want to know?</span>');
+    print('<span class="dim">  · Linux classics go a long way</span>');
+    print('<span class="dim">  · There might be something in the emoji keyboard 🤔</span>');
   },
   history(){
     if (commandHistory.length === 0) {
@@ -2589,7 +2672,18 @@ const EASTER_EGGS = {
   'htop':                   'htop',
   'dadjoke':                'dadjoke',
   'dad joke':               'dadjoke',
+  '🐣':                     'easter-egg',
+  '🥚':                     'easter-egg',
+  '🐰':                     'easter-egg',
+  '🐇':                     'easter-egg',
 };
+
+const HUNT_EGGS = new Set([
+  'tail -f', 'systemctl status emily', 'git blame', 'sudo',
+  'cat /etc/motd', 'ps aux', 'find', 'rm -rf', 'recruiter-mode',
+  'references', 'salary', 'whyhireme', 'uptime', 'pipeline',
+  'journalctl', 'top', 'free -m', 'htop', 'easter-egg',
+]);
 
 function showQuizQuestion(){
   const q = quizState.questions[quizState.currentQ];
@@ -2645,6 +2739,33 @@ async function submitQuizAnswer(answer){
   } else {
     showQuizQuestion();
   }
+}
+
+function finishEggHunt() {
+  const elapsed = Math.round((Date.now() - huntState.startTime) / 1000);
+  blank();
+  print(`<span class="yellow b">🎉 Hunt complete! All ${huntState.target} eggs found in ${elapsed}s</span>`);
+  blank();
+  print('Enter your nickname for the leaderboard (3–20 chars, letters/numbers/space/_ or -):');
+  huntState.phase = 'nickname';
+}
+
+async function submitEggHunt(nickname) {
+  const duration = Math.round((Date.now() - huntState.startTime) / 1000);
+  huntState.active = false;
+  huntState.phase = 'idle';
+  print('<span class="dim">Submitting score...</span>');
+  try {
+    await edgeFn('submit-egg-hunt', {
+      method: 'POST',
+      body: JSON.stringify({ nickname, found: huntState.target, duration }),
+    });
+    blank();
+    print(`<span class="green b">Saved!</span> <span class="dim">Type</span> <span class="accent">leaderboard egg-hunt</span> <span class="dim">to see scores.</span>`);
+  } catch {
+    print('<span class="err">Could not save score. Your time was impressive anyway! 🥕</span>');
+  }
+  blank();
 }
 
 async function finishQuiz(nickname){
@@ -2768,16 +2889,17 @@ function resolve(raw){
 function runCommand(raw){
   const cmd = (raw || '').trim();
   
-  // Handle !! (repeat last command)
-  if (cmd === '!!') {
-    if (commandHistory.length > 0) {
-      const lastCmd = commandHistory[commandHistory.length - 1];
-      printPromptEcho('!!');
-      print('<span class="dim">' + escapeHtml(lastCmd) + '</span>');
-      runCommand(lastCmd);
+  // Handle !! and !N (repeat from history)
+  if (cmd === '!!' || /^!\d+$/.test(cmd)) {
+    const idx = cmd === '!!' ? commandHistory.length - 1 : parseInt(cmd.slice(1), 10) - 1;
+    if (commandHistory[idx] !== undefined) {
+      const target = commandHistory[idx];
+      printPromptEcho(cmd);
+      print('<span class="dim">' + escapeHtml(target) + '</span>');
+      runCommand(target);
     } else {
-      printPromptEcho('!!');
-      print('<span class="err">no commands in history</span>');
+      printPromptEcho(cmd);
+      print(`<span class="err">${escapeHtml(cmd)}: event not found</span>`);
     }
     return;
   }
@@ -2787,7 +2909,7 @@ function runCommand(raw){
   if (quizState.tailInterval) { clearInterval(quizState.tailInterval); quizState.tailInterval = null; }
 
   // Add to history
-  if (cmd !== 'history' && cmd !== 'clear' && cmd !== '!!') {
+  if (cmd !== 'history' && cmd !== 'clear' && cmd !== '!!' && !/^!\d+$/.test(cmd)) {
     commandHistory.push(cmd);
     historyIndex = -1;
   }
@@ -2803,6 +2925,15 @@ function runCommand(raw){
       if (cmdFn) {
         const args = cmd.toLowerCase().replace(new RegExp('^' + r.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*'), '');
         cmdFn(args || undefined);
+      }
+      if (huntState.active && huntState.phase === 'hunting'
+          && r.easter && HUNT_EGGS.has(r.name)
+          && !huntState.found.has(r.name)) {
+        huntState.found.add(r.name);
+        const n = huntState.found.size;
+        blank();
+        print(`<span class="green b">🥚 Egg found! [${n}/${huntState.target}]</span>`);
+        if (n >= huntState.target) finishEggHunt();
       }
     }
   } else {
@@ -2839,6 +2970,17 @@ cmdline.addEventListener('keydown', e => {
       else if (['a','b','c','d'].includes(ans)) { printPromptEcho(ans); submitQuizAnswer(ans); }
       else { printPromptEcho(v); print('<span class="yellow">Type a, b, c, or d to answer. Type quit to abandon.</span>'); }
       return;
+    }
+
+    if (huntState.phase === 'nickname') {
+      const nick = v.trim(); printPromptEcho(nick);
+      cmdline.value = '';
+      if (!/^[a-zA-Z0-9 _-]{3,20}$/.test(nick) || !isClean(nick)) {
+        print('<span class="yellow">Invalid nickname. 3–20 chars: letters, numbers, spaces, _ or -</span>');
+        print('Enter your nickname:');
+        return;
+      }
+      submitEggHunt(nick); return;
     }
 
     if (quizState.phase === 'nickname') {
@@ -2878,7 +3020,7 @@ cmdline.addEventListener('keydown', e => {
       quizState.gbMessage = msg; submitGuestbook(); return;
     }
 
-    if (v.trim() && v.trim() !== '!!') { commandHistory.push(v); historyIndex = commandHistory.length; }
+    if (v.trim() && v.trim() !== '!!' && !/^!\d+$/.test(v.trim())) { commandHistory.push(v); historyIndex = commandHistory.length; }
     runCommand(v);
   } else if (e.key === 'ArrowUp'){
     if (historyIndex > 0){ historyIndex--; cmdline.value = commandHistory[historyIndex]; tab.active = false; updateGhost(); e.preventDefault(); }
@@ -3078,7 +3220,11 @@ function armSkip(){
   function onDevToolsOpen(){
     if (devtoolsOpen) return;
     devtoolsOpen = true;
-    console.log('%cHello World! 👋\n%cI see you\'re peeking into my code.\n\nIf you\'re a developer, I\'d love to chat!\nhttps://linkedin.com/in/memilyc', 'color:#7ec699;font-size:24px;font-weight:bold;', 'color:#e6b450;font-size:14px;');
+    if (typeof huntState !== 'undefined' && huntState.active) {
+      console.log('%cTrying to cheat? 🙈\n%cWhere\'s the fun in that... but I respect that you try.\n\nThe eggs are in the terminal. Go find them the honest way!', 'color:#e6b450;font-size:22px;font-weight:bold;', 'color:#7ec699;font-size:14px;');
+    } else {
+      console.log('%cHello World! 👋\n%cI see you\'re peeking into my code.\n\nIf you\'re a developer, I\'d love to chat!\nhttps://linkedin.com/in/memilyc', 'color:#7ec699;font-size:24px;font-weight:bold;', 'color:#e6b450;font-size:14px;');
+    }
   }
   function checkSize(){ if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) onDevToolsOpen(); }
   setInterval(checkSize, 1000);
