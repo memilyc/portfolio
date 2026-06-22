@@ -16,6 +16,11 @@ const TESTIMONIALS = [
   {
     name: "Cynthia 'Arty' Ng",
     relationship: "Was in the same department as Emily",
-    text: "In addition to being a great engineer, Emily is an amazingly smart, positive, and thoughtful person. She handled tickets with care, and helped so many customers with her breath and depth of technical knowledge. As a team mate, she will find a way to include those who may be otherwise "left out" of team activities. It's also always a pleasure to be on a call with Emily, who always brings a positive attitude. Highly recommended for any organization."
+    text: "In addition to being a great engineer, Emily is an amazingly smart, positive, and thoughtful person. She handled tickets with care, and helped so many customers with her breath and depth of technical knowledge. As a team mate, she will find a way to include those who may be otherwise 'left out' of team activities. It's also always a pleasure to be on a call with Emily, who always brings a positive attitude. Highly recommended for any organization."
+  },
+  {
+    name: "Suvinya Mullaseril",
+    relationship: "Worked with Emily on the same team",
+    text: "I had the pleasure of working with Emily Chang and can confidently say she is an exceptional teammate and support professional. Emily is incredibly helpful, consistently calm under pressure, and especially impressive on customer calls, where she brings a cool-headed, thoughtful presence even in challenging situations.She has outstanding troubleshooting skills and a strong ability to work through complex issues methodically while keeping the customer experience front and center. Emily also truly lives the CREDIT values in the way she supports both customers and colleagues, and the results she delivers for customers are consistently excellent. Beyond her technical strengths, Emily has deep product and support knowledge, is a generous mentor to others, and is genuinely pleasant to work with. She also contributes meaningfully to team culture by encouraging team-building activities and helping create a positive, collaborative environment. Any team would be lucky to have her."
   }
 ];
