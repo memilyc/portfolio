@@ -1409,6 +1409,7 @@ const FS_DIRS = {
 
 const FS_CONTENTS = {
   '/home/emily/portfolio': [
+    { name: '.egg',             type: 'file', size: '1'    },
     { name: 'about.md',         type: 'file', size: '2.3K' },
     { name: 'resume.pdf',       type: 'file', size: '128K' },
     { name: 'projects',         type: 'dir',  size: '4.0K' },
@@ -1439,6 +1440,7 @@ const FS_CONTENTS = {
 };
 
 const FILE_CONTENT = {
+  '/home/emily/portfolio/.egg': ['__EASTER_EGG__'],
   '/home/emily/portfolio/about.md': [
     '# about.md', '',
     ...CONFIG.about.flatMap(p => [p, '']),
@@ -2037,7 +2039,7 @@ const commands = {
       { name: '.secrets', type: 'file', size: '64' },
     ];
 
-    const files = FS_CONTENTS[currentDir] || [];
+    const files = (FS_CONTENTS[currentDir] || []).filter(f => showAll || !f.name.startsWith('.'));
     const allFiles = showAll ? [...hidden, ...files] : files;
 
     if (longFormat) {
@@ -2088,7 +2090,19 @@ const commands = {
     if (!entry)              { print(`<span class="yellow">cat: ${escapeHtml(file)}: No such file or directory</span>`); return; }
     if (entry.type === 'dir'){ print(`<span class="yellow">cat: ${escapeHtml(file)}: Is a directory</span>`); return; }
 
-    (FILE_CONTENT[abs] || ['<span class="dim">(empty)</span>']).forEach(line => print(line));
+    const content = FILE_CONTENT[abs] || ['<span class="dim">(empty)</span>'];
+    if (content[0] === '__EASTER_EGG__') {
+      commands['easter-egg']();
+      if (huntState.active && huntState.phase === 'hunting' && !huntState.found.has('fs-egg')) {
+        huntState.found.add('fs-egg');
+        const n = huntState.found.size;
+        blank();
+        print(`<span class="green b">🥚 Egg found! [${n}/${huntState.target}]</span>`);
+        if (n >= huntState.target) finishEggHunt();
+      }
+      return;
+    }
+    content.forEach(line => print(line));
   },
   tree(){
     if (currentDir === '/home/emily/portfolio') {
@@ -2569,9 +2583,7 @@ const commands = {
   'recruiter-mode'(){
     print('<span class="accent b">Recruiter mode enabled.</span>');
     blank();
-    print('Recommended commands: resume · whyhireme · projects · strengths · salary');
-    blank();
-    print('<span class="red">Permission denied.</span> <span class="dim">Nice try.</span>');
+    print('Recommended commands: <span class="cyan">resume</span> · <span class="cyan">whyhireme</span> · <span class="cyan">projects</span> · <span class="cyan">strengths</span> · <span class="cyan">salary</span>');
   },
 
   references(){ print('References available upon <span class="accent">successful deployment</span>.'); },
@@ -2673,6 +2685,7 @@ const EASTER_EGGS = {
   'find / -name root_cause':'find',
   'find /':                 'find',
   'rm -rf /':               'rm -rf',
+  'rm -rf \\':              'rm -rf',
   'rm -rf':                 'rm -rf',
   'recruiter-mode':         'recruiter-mode',
   'references':             'references',
@@ -2858,11 +2871,41 @@ function getMatches(input){
     .sort((a, b) => (b.prefix - a.prefix) || (b.score - a.score) || (a.name.length - b.name.length));
 }
 
+function getFsCompletions(v) {
+  const lower = v.toLowerCase();
+  const fsMatch = lower.match(/^(cat|cd)\s+(.*)/);
+  if (!fsMatch) return null;
+  const cmd = fsMatch[1], partial = fsMatch[2];
+  const lastSlash = partial.lastIndexOf('/');
+  const dir = lastSlash >= 0
+    ? normalizePath(partial.startsWith('/') ? partial.slice(0, lastSlash) || '/' : currentDir + '/' + partial.slice(0, lastSlash))
+    : currentDir;
+  const stub = lastSlash >= 0 ? partial.slice(lastSlash + 1) : partial;
+  const prefix = lastSlash >= 0 ? partial.slice(0, lastSlash + 1) : '';
+  const entries = FS_CONTENTS[dir] || [];
+  const matches = entries
+    .filter(e => cmd === 'cd' ? e.type === 'dir' : true)
+    .filter(e => e.name.startsWith(stub))
+    .map(e => cmd + ' ' + prefix + e.name + (e.type === 'dir' ? '/' : ''));
+  return matches.length ? matches : null;
+}
+
 function updateGhost(){
   const v = cmdline.value;
-  const m = getMatches(v);
   ghost.innerHTML = ''; hint.innerHTML = '';
-  if (!v.trim() || !m.length) return;
+  if (!v.trim()) return;
+  const fs = getFsCompletions(v);
+  if (fs) {
+    if (fs.length === 1 && fs[0] !== v) {
+      ghost.innerHTML = `<span class="gt">${escapeHtml(v)}</span>${escapeHtml(fs[0].slice(v.length))}`;
+      hint.innerHTML = '<span class="dim">↹ tab</span>';
+    } else if (fs.length > 1) {
+      hint.innerHTML = '<span class="dim">↹ tab</span>';
+    }
+    return;
+  }
+  const m = getMatches(v);
+  if (!m.length) return;
   const best = m[0];
   if (best.prefix && best.name !== v.trim().toLowerCase()){
     ghost.innerHTML = `<span class="gt">${escapeHtml(v)}</span>${escapeHtml(best.name.slice(v.length))}`;
@@ -2875,9 +2918,14 @@ function updateGhost(){
 let tab = { active: false, list: [], idx: -1 };
 function onTab(){
   if (!tab.active){
-    const m = getMatches(cmdline.value);
-    if (!m.length) return;
-    tab = { active: true, list: m.map(x => x.name), idx: -1 };
+    const fs = getFsCompletions(cmdline.value);
+    if (fs && fs.length) {
+      tab = { active: true, list: fs, idx: -1 };
+    } else {
+      const m = getMatches(cmdline.value);
+      if (!m.length) return;
+      tab = { active: true, list: m.map(x => x.name), idx: -1 };
+    }
   }
   tab.idx = (tab.idx + 1) % tab.list.length;
   cmdline.value = tab.list[tab.idx];
