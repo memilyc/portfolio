@@ -2209,23 +2209,39 @@ const commands = {
     }, 320);
   },
   egghunt(args){
-    if ((args || '').trim().match(/^(-h|--help)$/)) {
-      print('<span class="accent b">EGGHUNT</span> — find 10 hidden commands to win');
+    const a = (args || '').trim();
+    if (a.match(/^(-h|--help)$/)) {
+      print('<span class="accent b">EGGHUNT</span> — find 10 hidden commands to join the leaderboard');
+      blank();
+      print('<span class="yellow b">How it works:</span>');
+      print('  1. Type <span class="accent">egghunt</span> to start the timer');
+      print('  2. Explore the terminal and find hidden easter egg commands');
+      print('  3. Each new discovery counts — find 10 to finish');
+      print('  4. Enter your nickname and your time gets saved to the leaderboard');
+      print('  5. Type <span class="accent">leaderboard egg-hunt</span> to see the scores');
       blank();
       print('<span class="yellow b">Tips:</span>');
       print('  · Classic Linux sysadmin commands are a good starting point');
       print('  · Think about what a curious recruiter would type');
-      print('  · Some commands are hiding in plain sight — try variations');
       print('  · The emoji keyboard holds at least one secret 🤫');
       print('  · Finding <span class="accent">recruiter-mode</span> unlocks hints for several more');
       blank();
-      print('<span class="dim">Progress is tracked in-session only — refreshing resets the hunt.</span>');
+      print('<span class="dim">Type <span class="accent">egghunt quit</span> to abandon a hunt. Progress is in-session only.</span>');
+      return;
+    }
+    if (a.match(/^(quit|stop|exit|cancel)$/)) {
+      if (!huntState.active) { print('<span class="dim">No hunt in progress.</span>'); return; }
+      huntState.active = false;
+      huntState.phase = 'idle';
+      huntState.found = new Set();
+      blank();
+      print('<span class="yellow">Hunt abandoned.</span> <span class="dim">Type <span class="accent">egghunt</span> to start a new one.</span>');
       return;
     }
     if (huntState.active) {
       blank();
       print(`<span class="yellow b">Hunt in progress:</span> <span class="cyan">${huntState.found.size}/${huntState.target} eggs found</span>`);
-      print('<span class="dim">Keep exploring... the terminal holds many secrets.</span>');
+      print('<span class="dim">Type <span class="accent">egghunt -h</span> for tips · <span class="accent">egghunt quit</span> to abandon</span>');
       return;
     }
     huntState.active = true;
@@ -2975,9 +2991,14 @@ cmdline.addEventListener('keydown', e => {
     if (huntState.phase === 'nickname') {
       const nick = v.trim(); printPromptEcho(nick);
       cmdline.value = '';
+      if (nick.toLowerCase() === 'quit' || nick.toLowerCase() === 'skip') {
+        huntState.active = false; huntState.phase = 'idle';
+        print('<span class="dim">Score not saved. Type <span class="accent">egghunt</span> to try again.</span>');
+        blank(); return;
+      }
       if (!/^[a-zA-Z0-9 _-]{3,20}$/.test(nick) || !isClean(nick)) {
         print('<span class="yellow">Invalid nickname. 3–20 chars: letters, numbers, spaces, _ or -</span>');
-        print('Enter your nickname:');
+        print('Enter your nickname (or type <span class="accent">skip</span> to not save):');
         return;
       }
       submitEggHunt(nick); return;
