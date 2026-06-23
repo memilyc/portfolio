@@ -1404,6 +1404,9 @@ let currentDir = '/home/emily/portfolio';
 const FS_DIRS = {
   '/home/emily/portfolio': ['projects', 'skills', 'experience', 'quotes', 'dadjokes'],
   '/home/emily/portfolio/projects': ['terminal-portfolio', 'postgresql-calculator', 'convert-utc-bot'],
+  '/home/emily/portfolio/projects/terminal-portfolio': [],
+  '/home/emily/portfolio/projects/postgresql-calculator': [],
+  '/home/emily/portfolio/projects/convert-utc-bot': [],
   '/home/emily/portfolio/skills': [],
   '/home/emily/portfolio/experience': [],
   '/home/emily/portfolio/quotes': [],
@@ -1431,6 +1434,9 @@ const FS_CONTENTS = {
     { name: 'postgresql-calculator',   type: 'dir', size: '4.0K' },
     { name: 'convert-utc-bot',         type: 'dir', size: '4.0K' },
   ],
+  '/home/emily/portfolio/projects/terminal-portfolio':    [{ name: 'README.md', type: 'file', size: '256' }],
+  '/home/emily/portfolio/projects/postgresql-calculator': [{ name: 'README.md', type: 'file', size: '512' }],
+  '/home/emily/portfolio/projects/convert-utc-bot':       [{ name: 'README.md', type: 'file', size: '512' }],
   '/home/emily/portfolio/skills':     [{ name: 'technical.md', type: 'file', size: '1.2K' }],
   '/home/emily/portfolio/experience': [{ name: 'gitlab.md',    type: 'file', size: '1.8K' }],
   '/home/emily/portfolio/quotes':     [{ name: 'README.md',    type: 'file', size: '128'  }],
@@ -1485,6 +1491,33 @@ const FILE_CONTENT = {
   '/home/emily/portfolio/dadjokes/README.md': [
     'Dad jokes live here. Try: <span class="accent">dadjoke</span>',
   ],
+  '/home/emily/portfolio/projects/terminal-portfolio/README.md': [
+    '# terminal-portfolio', '',
+    'This portfolio — a browser-based terminal built from scratch.',
+    '',
+    '<span class="accent">stack</span>   Vanilla JS · HTML · CSS · Supabase',
+    '<span class="accent">link</span>    <a class="tlink" href="https://memilyc.github.io" target="_blank" rel="noopener">https://memilyc.github.io</a>',
+  ],
+  '/home/emily/portfolio/projects/postgresql-calculator/README.md': (() => {
+    const p = CONFIG.projects.find(x => x.title.toLowerCase().includes('postgresql'));
+    return p ? [
+      '# postgresql-calculator', '',
+      escapeHtml(p.desc),
+      '',
+      `<span class="accent">stack</span>   ${escapeHtml(p.stack)}`,
+      `<span class="accent">link</span>    <a class="tlink" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.url)}</a>`,
+    ] : ['<span class="dim">(no content)</span>'];
+  })(),
+  '/home/emily/portfolio/projects/convert-utc-bot/README.md': (() => {
+    const p = CONFIG.projects.find(x => x.title.toLowerCase().includes('utc'));
+    return p ? [
+      '# convert-utc-bot', '',
+      escapeHtml(p.desc),
+      '',
+      `<span class="accent">stack</span>   ${escapeHtml(p.stack)}`,
+      `<span class="accent">link</span>    <a class="tlink" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.url)}</a>`,
+    ] : ['<span class="dim">(no content)</span>'];
+  })(),
 };
 
 const commands = {
@@ -2088,15 +2121,21 @@ const commands = {
 
     if (file === '.secrets' || file === './.secrets') { print('<span class="yellow">Permission denied</span>'); return; }
 
-    const abs  = normalizePath(file.startsWith('/') ? file : (currentDir === '/' ? '/' + file : currentDir + '/' + file));
+    const expanded = file.startsWith('~/') ? '/home/emily/portfolio' + file.slice(1) : file === '~' ? '/home/emily/portfolio' : file;
+    const abs  = normalizePath(expanded.startsWith('/') ? expanded : (currentDir === '/' ? '/' + expanded : currentDir + '/' + expanded));
     const dir  = abs.slice(0, abs.lastIndexOf('/')) || '/';
     const name = abs.slice(abs.lastIndexOf('/') + 1);
-    const entry = (FS_CONTENTS[dir] || []).find(f => f.name === name);
+    const entry = (FS_CONTENTS[dir] || []).find(f => f.name.toLowerCase() === name.toLowerCase());
 
     if (!entry)              { print(`<span class="yellow">cat: ${escapeHtml(file)}: No such file or directory</span>`); return; }
-    if (entry.type === 'dir'){ print(`<span class="yellow">cat: ${escapeHtml(file)}: Is a directory</span>`); return; }
+    const realAbs = dir + '/' + entry.name;
+    if (entry.type === 'dir'){
+      const readme = FILE_CONTENT[realAbs + '/README.md'];
+      if (readme) { readme.forEach(line => print(line)); return; }
+      print(`<span class="yellow">cat: ${escapeHtml(file)}: Is a directory</span>`); return;
+    }
 
-    const content = FILE_CONTENT[abs] || ['<span class="dim">(empty)</span>'];
+    const content = FILE_CONTENT[realAbs] || ['<span class="dim">(empty)</span>'];
     if (content[0] === '__EASTER_EGG__') {
       commands['easter-egg']();
       if (huntState.active && huntState.phase === 'hunting' && !huntState.found.has('fs-egg')) {
@@ -2200,6 +2239,7 @@ const commands = {
       page.opts.forEach(o => print(`  <span class="cyan">${escapeHtml(o)}</span>`));
     }
   },
+  './welcome.sh'(){ runWelcome(); },
   'easter-egg'(){
     const frames = [
       ['  (\\(\\  ', '  ( -.-)  🥚', "  o_(\")(\")", ''],
@@ -2707,6 +2747,7 @@ const EASTER_EGGS = {
   'htop':                   'htop',
   'dadjoke':                'dadjoke',
   'dad joke':               'dadjoke',
+  './welcome.sh':           './welcome.sh',
   '🐣':                     'easter-egg',
   '🥚':                     'easter-egg',
   '🐰':                     'easter-egg',
@@ -2881,7 +2922,9 @@ function getFsCompletions(v) {
   const lower = v.toLowerCase();
   const fsMatch = lower.match(/^(cat|cd)\s+(.*)/);
   if (!fsMatch) return null;
-  const cmd = fsMatch[1], partial = fsMatch[2];
+  const cmd = fsMatch[1];
+  const rawPartial = fsMatch[2];
+  const partial = rawPartial.startsWith('~/') ? '/home/emily/portfolio' + rawPartial.slice(1) : rawPartial === '~' ? '/home/emily/portfolio' : rawPartial;
   const lastSlash = partial.lastIndexOf('/');
   const dir = lastSlash >= 0
     ? normalizePath(partial.startsWith('/') ? partial.slice(0, lastSlash) || '/' : currentDir + '/' + partial.slice(0, lastSlash))
@@ -3215,22 +3258,7 @@ function printLine(html, cls, pause){
   return ms > 0 ? wait(ms) : Promise.resolve();
 }
 
-async function boot(){
-  buildReader();
-  const date = new Date().toString().replace(/ GMT.*/, '');
-  print(`<span class="dim">Last login: ${date} on ttys001</span>`);
-  blank();
-  await typeLine(`${CONFIG.user}@${CONFIG.host}:~$ whoami`, '');
-  await wait(isMobile() ? 500 : 180);
-  commands.whoami();
-  blank();
-  await wait(isMobile() ? 600 : 0);
-  await typeLine(`${CONFIG.user}@${CONFIG.host}:~$ ./welcome.sh`, '');
-  await wait(isMobile() ? 500 : 180);
-
-  /* On mobile: print each about line individually with a generous pause so
-     the screen doesn't flood and the user can read one chunk at a time.
-     On desktop: keep the original instant render. */
+async function runWelcome(){
   if (isMobile()) {
     await printLine(`<span class="accent b">${CONFIG.name}</span> <span class="dim">—</span> <span class="cyan">${CONFIG.role}</span>`, '', 700);
     await printLine(`<span class="dim">// ${CONFIG.tagline}</span>`, '', 1100);
@@ -3244,13 +3272,27 @@ async function boot(){
   } else {
     commands.about();
   }
-
   blank();
-  await wait(isMobile() ? 700 : 0);
   print('<span class="dim">Tip: tap a chip below, or type a command ↓</span>');
   if (!isMobile()) {
     print('<span class="dim">New to terminals? Click <span class="accent">▤ reader view</span> (top-right) for a plain page.</span>');
   }
+  renderChips();
+}
+
+async function boot(){
+  buildReader();
+  const date = new Date().toString().replace(/ GMT.*/, '');
+  print(`<span class="dim">Last login: ${date} on ttys001</span>`);
+  blank();
+  await typeLine(`${CONFIG.user}@${CONFIG.host}:~$ whoami`, '');
+  await wait(isMobile() ? 500 : 180);
+  commands.whoami();
+  blank();
+  await wait(isMobile() ? 600 : 0);
+  await typeLine(`${CONFIG.user}@${CONFIG.host}:~$ ./welcome.sh`, '');
+  await wait(isMobile() ? 500 : 180);
+  await runWelcome();
   await wait(isMobile() ? 500 : 0);
 
   // Show chips only (no help output on first run)
