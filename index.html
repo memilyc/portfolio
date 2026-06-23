@@ -903,6 +903,7 @@ const huntState = {
   found: new Set(),
   target: 10,
   startTime: 0,
+  sessionId: null,
 };
 
 const quizState = {
@@ -2146,6 +2147,7 @@ const commands = {
       commands['easter-egg']();
       if (huntState.active && huntState.phase === 'hunting' && !huntState.found.has('fs-egg')) {
         huntState.found.add('fs-egg');
+        if (huntState.sessionId) edgeFn('register-egg', { method: 'POST', body: JSON.stringify({ sessionId: huntState.sessionId, egg: 'fs-egg' }) }).catch(() => {});
         const n = huntState.found.size;
         blank();
         print(`<span class="green b">🥚 Egg found! [${n}/${huntState.target}]</span>`);
@@ -2314,6 +2316,11 @@ const commands = {
     huntState.phase = 'hunting';
     huntState.found = new Set();
     huntState.startTime = Date.now();
+    huntState.sessionId = null;
+    // Create server-side session (fire-and-forget; hunt continues even if this fails)
+    edgeFn('start-egg-hunt', { method: 'POST', body: '{}' })
+      .then(d => { if (d?.sessionId) huntState.sessionId = d.sessionId; })
+      .catch(() => {});
     blank();
     print('<span class="yellow b">🥚 Easter Egg Hunt — STARTED</span>');
     blank();
@@ -2472,7 +2479,7 @@ const commands = {
         const diff = (row.difficulty || 'mixed').padEnd(8,' ').slice(0,8);
         const cat  = row.category;
         const cls  = i < 3 ? 'yellow b' : 'fg';
-        print(`<span class="${cls}">  ${rank}  ${nick}${sc}${dur}${diff}${cat}</span>`);
+        print(`<span class="${cls}">  ${rank}  ${escapeHtml(nick)}${sc}${dur}${escapeHtml(diff)}${escapeHtml(cat)}</span>`);
       });
       blank();
       print('<span class="dim">Type <span class="accent">quiz</span> to compete! Filters: <span class="accent">leaderboard easy</span> | <span class="accent">leaderboard emily</span></span>');
@@ -2840,7 +2847,7 @@ async function submitEggHunt(nickname) {
   try {
     await edgeFn('submit-egg-hunt', {
       method: 'POST',
-      body: JSON.stringify({ nickname, found: huntState.target, duration }),
+      body: JSON.stringify({ sessionId: huntState.sessionId, nickname, duration }),
     });
     blank();
     print(`<span class="green b">Saved!</span> <span class="dim">Type</span> <span class="accent">leaderboard egg-hunt</span> <span class="dim">to see scores.</span>`);
@@ -3049,6 +3056,7 @@ function runCommand(raw){
           && r.easter && HUNT_EGGS.has(r.name)
           && !huntState.found.has(r.name)) {
         huntState.found.add(r.name);
+        if (huntState.sessionId) edgeFn('register-egg', { method: 'POST', body: JSON.stringify({ sessionId: huntState.sessionId, egg: r.name }) }).catch(() => {});
         const n = huntState.found.size;
         blank();
         print(`<span class="green b">🥚 Egg found! [${n}/${huntState.target}]</span>`);
@@ -3300,9 +3308,6 @@ async function boot(){
   await wait(isMobile() ? 500 : 180);
   await runWelcome();
   await wait(isMobile() ? 500 : 0);
-
-  // Show chips only (no help output on first run)
-  renderChips();
 
   blank();
   

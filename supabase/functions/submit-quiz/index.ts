@@ -60,14 +60,17 @@ serve(async (req) => {
   if (!session) return err("Session not found", 404);
   if (session.completed) return err("Session already submitted", 409);
 
+  // Verify the submitting IP owns this session
+  const ip     = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ipHash = await sha256(ip);
+  if (session.ip_hash && session.ip_hash !== ipHash) return err("Session mismatch", 403);
+
   const questionIds: number[] = session.question_ids;
   if (!Array.isArray(answers) || answers.length !== questionIds.length) {
     return err("Answer count mismatch", 400);
   }
 
   // Rate limit check (20/day/IP)
-  const ip     = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const ipHash = await sha256(ip);
   const dayAgo = new Date(Date.now() - 86400000).toISOString();
 
   const { count: recentCount } = await supabase

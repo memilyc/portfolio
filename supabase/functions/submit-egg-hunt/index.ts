@@ -1,8 +1,8 @@
 // supabase/functions/submit-egg-hunt/index.ts
 // Deploy: supabase functions deploy submit-egg-hunt
 //
-// Receives { nickname, found, duration }
-// Validates nickname, rate-limits, writes leaderboard row for egg-hunt category.
+// Receives { sessionId, nickname, duration }
+// Reads server-side found count from egg_hunt_sessions instead of trusting client.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
@@ -13,7 +13,7 @@ const CORS = {
 };
 
 const NICKNAME_RE = /^[a-zA-Z0-9 _-]{3,20}$/;
-const RATE_LIMIT  = 10; // submissions per day per IP (lower than quiz — harder to game)
+const RATE_LIMIT  = 10; // submissions per day per IP
 
 const BLOCKED = /shit|fuck|cunt|dick|bitch|asshole|bastard|whore|slut|nigger|nigga|faggot|retard|pedo|rapist|porn|xxx|sex|dildo|pussy|penis|vagina|cum|orgasm|fetish|nsfw|wank|jizz|cock|twat|wanker|bollocks|masturbat|semen|erection|genital|horny|kys|kill.?yourself|nazi|hitler|racist|bigot/i;
 
@@ -32,9 +32,11 @@ serve(async (req) => {
   const body = await req.json().catch(() => null);
   if (!body) return err("Invalid request", 400);
 
-  const { nickname, found, duration, honeypot } = body;
+  const { sessionId, nickname, duration, honeypot } = body;
 
   if (honeypot) return err("Rejected", 400);
+
+  if (!sessionId || typeof sessionId !== "string") return err("Missing sessionId", 400);
 
   if (!nickname || !NICKNAME_RE.test(nickname)) {
     return err("Nickname must be 3–20 chars: letters, numbers, spaces, _ or -", 400);
@@ -43,17 +45,29 @@ serve(async (req) => {
     return err("That nickname isn't allowed. Please choose something appropriate.", 400);
   }
 
-  if (typeof found !== "number" || found < 1 || found > 10) {
-    return err("Invalid found count", 400);
-  }
   if (typeof duration !== "number" || duration < 10 || duration > 86400) {
     return err("Invalid duration", 400);
   }
 
   const ip     = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const ipHash = await sha256(ip);
-  const dayAgo = new Date(Date.now() - 86400000).toISOString();
 
+  // Load and verify session
+  const { data: session } = await supabase
+    .from("egg_hunt_sessions")
+    .select("id, ip_hash, found_eggs, completed")
+    .eq("id", sessionId)
+    .single();
+
+  if (!session) return err("Session not found", 404);
+  if (session.completed) return err("Hunt already submitted", 409);
+  if (session.ip_hash !== ipHash) return err("Session mismatch", 403);
+
+  const found = session.found_eggs.length;
+  if (found < 1) return err("No eggs registered for this session", 400);
+
+  // Rate limit
+  const dayAgo = new Date(Date.now() - 86400000).toISOString();
   const { count: recentCount } = await supabase
     .from("rate_limits")
     .select("id", { count: "exact", head: true })
@@ -75,8 +89,9 @@ serve(async (req) => {
   });
 
   await supabase.from("rate_limits").insert({ ip_hash: ipHash, action: "egg-hunt" });
+  await supabase.from("egg_hunt_sessions").update({ completed: true }).eq("id", sessionId);
 
-  return new Response(JSON.stringify({ success: true }), {
+  return new Response(JSON.stringify({ success: true, found }), {
     headers: { ...CORS, "Content-Type": "application/json" },
   });
 });
