@@ -7,17 +7,17 @@
 <meta name="description" content="M. Emily Chang — Senior Support Engineer with 9+ years in enterprise SaaS, fintech, and DevSecOps. Open to work." />
 <meta property="og:title" content="M. Emily Chang | Senior Support Engineer" />
 <meta property="og:description" content="9+ years in enterprise technical support. Open to work." />
-<meta property="og:image" content="https://memilyc.github.io/portfolio/em.png" />
+<meta property="og:image" content="https://memilyc.github.io/portfolio/assets/em.png" />
 <meta property="og:url" content="https://memilyc.github.io/portfolio/" />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content="M. Emily Chang | Senior Support Engineer" />
 <meta name="twitter:description" content="9+ years in enterprise technical support. Open to work." />
-<meta name="twitter:image" content="https://memilyc.github.io/portfolio/em.png" />
-<link rel="icon" type="image/x-icon" href="em.ico" />
-<link rel="icon" type="image/png" href="em.png" />
-<link rel="shortcut icon" href="em.ico" />
-<link rel="apple-touch-icon" href="em.png" />
+<meta name="twitter:image" content="https://memilyc.github.io/portfolio/assets/em.png" />
+<link rel="icon" type="image/x-icon" href="assets/em.ico" />
+<link rel="icon" type="image/png" href="assets/em.png" />
+<link rel="shortcut icon" href="assets/em.ico" />
+<link rel="apple-touch-icon" href="assets/em.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
@@ -105,6 +105,24 @@ const TESTIMONIALS = [
     --scan:      rgba(0,0,0,0.02);
     --selection: rgba(64,138,61,0.22);
   }
+  :root[data-theme="brown"] {
+    --bg:        #7d7564;
+    --bg-window: #5e5449;
+    --bg-bar:    #4d453b;
+    --fg:        #efe7da;
+    --dim:       #cabfae;
+    --prompt:    #a8c98a;
+    --path:      #7fa6cf;
+    --accent:    #ea7b23;
+    --cyan:      #7fa6cf;
+    --yellow:    #e0b96a;
+    --red:       #d96b6b;
+    --magenta:   #c792ea;
+    --border:    rgba(30,25,20,.45);
+    --glow:      rgba(234,123,35,0.15);
+    --scan:      rgba(0,0,0,0.03);
+    --selection: rgba(234,123,35,0.28);
+  }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   ::selection { background: var(--selection); }
@@ -188,6 +206,21 @@ const TESTIMONIALS = [
     white-space: nowrap;
   }
   .bar-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .theme-btn-group { display: flex; gap: 4px; }
+  .theme-dot-btn {
+    flex: 0 0 auto;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    padding: 0;
+  }
+  .theme-dot-btn:hover { transform: scale(1.2); }
+  .theme-dot-btn.active { border-color: var(--accent); }
+  .theme-dot-btn[data-t="dark"]  { background: #0b0e14; }
+  .theme-dot-btn[data-t="light"] { background: #e8e3d6; }
+  .theme-dot-btn[data-t="brown"] { background: #7d7564; }
 
   /* ── Drag & Resize ─────────────────────────────────────── */
   .window.user-positioned {
@@ -286,7 +319,7 @@ const TESTIMONIALS = [
     padding: 12px 22px 16px;
     border-top: 1px solid var(--border);
   }
-  .input-row .ps { color: var(--prompt); white-space: nowrap; }
+  .input-row .ps { color: var(--prompt); white-space: nowrap; font-size: 14px; }
   .input-row .ps .path { color: var(--path); }
   .input-wrap {
     position: relative;
@@ -735,7 +768,11 @@ const TESTIMONIALS = [
       <button class="dot g" id="dotMaximize" aria-label="Maximize" title="Fill screen"></button>
       <span class="title">memilyc@portfolio: ~</span>
       <button class="bar-btn" id="viewBtn" aria-label="Switch view">▤ reader view</button>
-      <button class="bar-btn" id="themeBtn" aria-label="Toggle theme">[ light ]</button>
+      <div class="theme-btn-group" aria-label="Choose theme">
+        <button class="theme-dot-btn" data-t="dark"  title="Dark theme"  aria-label="Dark theme"></button>
+        <button class="theme-dot-btn" data-t="light" title="Light theme" aria-label="Light theme"></button>
+        <button class="theme-dot-btn" data-t="brown" title="Brown theme" aria-label="Brown theme"></button>
+      </div>
     </div>
     <div class="screen" id="screen"></div>
     <div class="reader" id="reader"></div>
@@ -791,7 +828,7 @@ const CONFIG = {
     {
       title:  "Convert UTC Bot",
       stack:  "Deno SDK · Slack Workflow · GitLab CI",
-      desc:   "Working async across 65+ countries means timezone math is a daily tax. I got tired of it, so I built a Slack bot that converts any UTC timestamp into a shareable link showing everyone's local time at once. GitLab adopted it company-wide.",
+      desc:   "Working async across 65+ countries means timezone math is a daily tax. I got tired of it, so I built a Slack bot that converts any timestamp into a shareable link showing everyone's local time at once. GitLab adopted it company-wide.",
       url:    "https://gitlab.com/gitlab-com/support/toolbox/convert-utc-bot",
       label:  "View on GitLab →",
     },
@@ -817,7 +854,7 @@ const CONFIG = {
 const screen   = document.getElementById('screen');
 const inputRow = document.getElementById('inputRow');
 const cmdline  = document.getElementById('cmdline');
-const themeBtn = document.getElementById('themeBtn');
+const themeDotBtns = document.querySelectorAll('.theme-dot-btn');
 const viewBtn  = document.getElementById('viewBtn');
 const reader   = document.getElementById('reader');
 const root     = document.documentElement;
@@ -939,18 +976,21 @@ function resetQuizState() {
 const BLOCKED_RE = /shit|fuck|cunt|dick|bitch|asshole|bastard|whore|slut|nigger|nigga|faggot|retard|pedo|rapist|porn|xxx|sex|dildo|pussy|penis|vagina|cum|orgasm|fetish|nsfw|wank|jizz|cock|twat|wanker|bollocks|masturbat|semen|erection|genital|horny|kys|kill.?yourself|nazi|hitler|racist|bigot|bitcoin|crypto/i;
 function isClean(s){ return !BLOCKED_RE.test(s); }
 
+const THEME_CYCLE = ['dark', 'light', 'brown'];
+
 function applyTheme(t){
   root.setAttribute('data-theme', t);
-  themeBtn.textContent = t === 'dark' ? '[ light ]' : '[ dark ]';
+  themeDotBtns.forEach(b => b.classList.toggle('active', b.dataset.t === t));
   try { localStorage.setItem('portfolio-theme', t); } catch(e){}
 }
 (function initTheme(){
   let t = 'dark';
   try { t = localStorage.getItem('portfolio-theme') || 'dark'; } catch(e){}
+  const param = new URLSearchParams(location.search).get('theme');
+  if (THEME_CYCLE.includes(param)) t = param;
   applyTheme(t);
 })();
-themeBtn.addEventListener('click', () =>
-  applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+themeDotBtns.forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.t)));
 
 /* ---- Guestbook reader form helpers ---- */
 function expandTestimonialText(idx){
@@ -1013,6 +1053,7 @@ function buildReaderGuestbookForm(container) {
           <div class="r-gb-form" id="gb-form">
             <input id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
             <textarea id="gb-msg" placeholder="Leave a message... (2–300 chars)" maxlength="300"></textarea>
+            <p class="r-gb-status dim" id="gb-link-warn" style="font-size:12px;margin:2px 0 4px;display:none;">Links will be redacted to prevent spam.</p>
             <button class="r-gb-btn" id="gb-submit">Sign guestbook →</button>
             <span class="r-gb-status" id="gb-status" style="display:none;"></span>
           </div>`;
@@ -1020,6 +1061,11 @@ function buildReaderGuestbookForm(container) {
         if (readMoreBtn) readMoreBtn.addEventListener('click', () => {
           document.getElementById('gb-more').style.display = '';
           readMoreBtn.remove();
+        });
+        document.getElementById('gb-msg').addEventListener('input', () => {
+          const v = document.getElementById('gb-msg').value;
+          const hasLink = /https?:\/\//i.test(v) || /www\.[^\s]/i.test(v) || /\b[a-zA-Z0-9._%+-]+\.[a-z]{2,}\b/i.test(v);
+          document.getElementById('gb-link-warn').style.display = hasLink ? '' : 'none';
         });
         document.getElementById('gb-submit').addEventListener('click', async () => {
           const nick = (document.getElementById('gb-nick').value || '').trim();
@@ -1059,7 +1105,7 @@ function buildReader(){
   reader.innerHTML = `
     <header style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
       <h1 class="r-name">${esc(c.name)}</h1>
-      <img src="em.png" style="width: 80px; height: 80px; image-rendering: pixelated; border: 2px solid var(--border); border-radius: 8px;">
+      <img src="assets/em.png" style="width: 80px; height: 80px; image-rendering: pixelated; border: 2px solid var(--border); border-radius: 8px;">
     </header>
     <div class="r-role">${esc(c.role)}</div>
     <p class="r-tag">${esc(c.tagline)}</p>
@@ -1332,7 +1378,11 @@ function shortPath(dir) {
   return p || '~';
 }
 function printPromptEcho(cmd){
-  print(`<span class="prompt">${CONFIG.user}@${CONFIG.host}</span>:<span class="path">${escapeHtml(shortPath(currentDir))}</span>$ <span class="cmd">${escapeHtml(cmd)}</span>`);
+  print(`${promptHtml(shortPath(currentDir))} <span class="cmd">${escapeHtml(cmd)}</span>`);
+}
+/* Shared prompt markup so the echoed prompt, boot prompt, and input bar all match. */
+function promptHtml(path){
+  return `<span class="prompt">${CONFIG.user}@${CONFIG.host}<span style="color:inherit">:</span></span><span class="path">${escapeHtml(path)}</span><span class="prompt">$</span>`;
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -1433,6 +1483,7 @@ const FS_CONTENTS = {
     { name: 'experience',       type: 'dir',  size: '4.0K' },
     { name: 'recommendations',  type: 'file', size: '8.1K' },
     { name: 'contact.txt',      type: 'file', size: '512'  },
+    { name: 'status.txt',       type: 'file', size: '256'  },
     { name: 'quotes',           type: 'dir',  size: '4.0K' },
     { name: 'dadjokes',         type: 'dir',  size: '4.0K' },
   ],
@@ -1469,6 +1520,18 @@ const FILE_CONTENT = {
     'LinkedIn: ' + CONFIG.linkedin,
     'GitHub:   ' + CONFIG.github,
     'Web:      this terminal :)',
+  ],
+  '/home/emily/portfolio/status.txt': [
+    '<span class="green b">╔══════════════════════════════════════╗</span>',
+    '<span class="green b">║                                      ║</span>',
+    '<span class="green b">║</span>   <span class="accent b">● OPEN TO WORK</span>                   <span class="green b">║</span>',
+    '<span class="green b">║                                      ║</span>',
+    '<span class="green b">║</span>   <span class="dim">Status:    </span><span class="fg">Actively looking</span>      <span class="green b">║</span>',
+    '<span class="green b">║</span>   <span class="dim">Role:      </span><span class="fg">Support Engineer</span>      <span class="green b">║</span>',
+    '<span class="green b">║</span>   <span class="dim">Location:  </span><span class="fg">Remote / Hybrid</span>       <span class="green b">║</span>',
+    '<span class="green b">║                                      ║</span>',
+    '<span class="green b">║</span>   <span class="dim">→ </span><span class="cyan">contact</span><span class="dim"> to get in touch</span>        <span class="green b">║</span>',
+    '<span class="green b">╚══════════════════════════════════════╝</span>',
   ],
   '/home/emily/portfolio/resume.pdf': [
     '<span class="dim">Binary file (PDF) — type \'cv\' to open in a new tab.</span>',
@@ -1627,9 +1690,23 @@ const commands = {
     print(`Opening résumé → <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`, 'cyan');
     window.open(CONFIG.cv, '_blank', 'noopener');
   },
-  theme(){
-    applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-    print(`theme → <span class="accent">${root.getAttribute('data-theme')}</span>`, 'dim');
+  theme(args){
+    const arg = (args || '').trim().replace(/^--/, '').toLowerCase();
+    if (THEME_CYCLE.includes(arg)) {
+      applyTheme(arg);
+      print(`theme → <span class="accent">${arg}</span>`, 'dim');
+    } else if (arg === '1') { this.theme('dark');
+    } else if (arg === '2') { this.theme('light');
+    } else if (arg === '3') { this.theme('brown');
+    } else {
+      const cur = root.getAttribute('data-theme');
+      print('<span class="dim">Choose a theme:</span>');
+      THEME_CYCLE.forEach((t, i) => {
+        const active = t === cur ? ' <span class="accent">← active</span>' : '';
+        print(`  <span class="accent b">${i+1}</span>  ${t}${active}`);
+      });
+      print('<span class="dim">Usage: <span class="accent">theme dark</span> · <span class="accent">theme light</span> · <span class="accent">theme brown</span></span>');
+    }
   },
   view(){
     print('Switching to <span class="accent">reader view</span> — a plain, scrollable page.', 'dim');
@@ -2169,10 +2246,11 @@ const commands = {
       print('├── <span class="cyan b">experience</span>');
       print('├── recommendations');
       print('├── <span class="cyan b">contact.txt</span>');
+      print('├── <span class="cyan b">status.txt</span>');
       print('├── <span class="cyan b">quotes</span>');
       print('└── <span class="cyan b">dadjokes</span>');
       blank();
-      print('<span class="dim">8 directories, 15 files</span>');
+      print('<span class="dim">8 directories, 16 files</span>');
     } else if (currentDir === '/home/emily/portfolio/projects') {
       print('.');
       print('├── terminal-portfolio');
@@ -2201,7 +2279,7 @@ const commands = {
       strengths:    { syn: 'strengths', desc: 'Show top CliftonStrengths themes with descriptions.', opts: [] },
       contact:      { syn: 'contact', desc: 'Print email, LinkedIn, GitHub, and README links.', opts: [] },
       cv:           { syn: 'cv', desc: 'Open the full résumé PDF in a new tab.', opts: [] },
-      theme:        { syn: 'theme', desc: 'Toggle between dark and light colour themes.', opts: [] },
+      theme:        { syn: 'theme [dark|light|brown]', desc: 'Switch colour theme. No arg shows options.', opts: ['dark    Dark theme', 'light   Light theme', 'brown   Brown theme'] },
       clear:        { syn: 'clear', desc: 'Clear all terminal output.', opts: [] },
       help:         { syn: 'help', desc: 'List available commands with brief descriptions.', opts: [] },
       neofetch:     { syn: 'neofetch', desc: 'Display system info and avatar in neofetch style.', opts: [] },
@@ -2356,7 +2434,7 @@ const commands = {
     ];
     const container = el('div', 'neofetch-container');
     const img = document.createElement('img');
-    img.src = 'em.png';
+    img.src = 'assets/em.png';
     img.className = 'neofetch-avatar';
     const infoWrap = document.createElement('div');
     infoWrap.innerHTML = info.join('<br>');
@@ -3149,6 +3227,7 @@ cmdline.addEventListener('keydown', e => {
       if (!msg || msg.length < 2) { print('<span class="yellow">Message too short (min 2 chars).</span>'); return; }
       if (msg.length > 300) { print('<span class="yellow">Message too long (max 300 chars).</span>'); return; }
       if (!isClean(msg)) { print('<span class="yellow">That message isn\'t allowed.</span>'); return; }
+      if (/https?:\/\//i.test(msg) || /www\.[^\s]/i.test(msg) || /\b[a-zA-Z0-9._%+-]+\.[a-z]{2,}\b/i.test(msg)) print('<span class="dim">Note: links will be redacted to prevent spam.</span>');
       quizState.gbMessage = msg; submitGuestbook(); return;
     }
 
@@ -3243,21 +3322,23 @@ const isMobile = () => window.innerWidth <= 600;
 /* Typing speed per character — comfortably readable on mobile */
 const CHAR_MS = () => isMobile() ? 55 : 16;
 
-function typeLine(text, cls){
+function typeLine(text, cls, prefix){
+  prefix = prefix || '';
   return new Promise(res => {
     const node = print('', cls);
     const cursor = el('span','cursor');
+    node.innerHTML = prefix;
     node.appendChild(cursor);
     let i = 0;
     (function step(){
-      if (skip){ node.innerHTML = text; res(); return; }
+      if (skip){ node.innerHTML = prefix + escapeHtml(text); res(); return; }
       if (i <= text.length){
-        node.innerHTML = text.slice(0,i);
+        node.innerHTML = prefix + escapeHtml(text.slice(0,i));
         node.appendChild(cursor);
         screen.scrollTop = screen.scrollHeight;
         i++;
         setTimeout(step, CHAR_MS());
-      } else { node.innerHTML = text; res(); }
+      } else { node.innerHTML = prefix + escapeHtml(text); res(); }
     })();
   });
 }
@@ -3299,12 +3380,12 @@ async function boot(){
   const date = new Date().toString().replace(/ GMT.*/, '');
   print(`<span class="dim">Last login: ${date} on ttys001</span>`);
   blank();
-  await typeLine(`${CONFIG.user}@${CONFIG.host}:~$ whoami`, '');
+  await typeLine(' whoami', '', promptHtml('~'));
   await wait(isMobile() ? 500 : 180);
   commands.whoami();
   blank();
   await wait(isMobile() ? 600 : 0);
-  await typeLine(`${CONFIG.user}@${CONFIG.host}:~$ ./welcome.sh`, '');
+  await typeLine(' ./welcome.sh', '', promptHtml('~'));
   await wait(isMobile() ? 500 : 180);
   await runWelcome();
   await wait(isMobile() ? 500 : 0);

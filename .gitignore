@@ -1,2 +1,12 @@
+# OS
 .DS_Store
+
+# Environment
 *.env
+.env.*
+
+# Supabase CLI local state (machine-specific, contains project refs)
+supabase/.temp/
+
+# Claude Code local settings
+.claude/
