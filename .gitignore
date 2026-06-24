@@ -10,3 +10,6 @@ supabase/.temp/
 
 # Claude Code local settings
 .claude/
+
+# Qoder auto-generated wiki docs (machine-generated, not source)
+.qoder/
