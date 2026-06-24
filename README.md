@@ -21,7 +21,7 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
 * **Linux Commands:** Authentic terminal experience with `ls`, `pwd`, `whoami`, `id`, `uname`, `cat`, `tree`, `man`, and more
 * **Command History:** Arrow keys to cycle through history, `!!` to repeat last command, `history` to view
 * **Easter Eggs:** 20+ hidden commands to discover (`resume`, `whyhireme`, `uptime`, `tail -f production.log`, `sudo make me a sandwich`, `salary`, and more)
-* **Themes:** Dark and Light mode support with persistence via `localStorage`.
+* **Themes:** Dark, Light, and Brown themes — switchable via dot buttons in the title bar, the `theme` terminal command, or the `?theme=brown` URL parameter (useful for CV links).
 * **Responsive Design:** Fully fluid layout that adjusts from desktop terminals to mobile device touch targets.
 * **Performance:** Zero frontend dependencies (Supabase JS client loaded via CDN), lightning-fast loading, no build process required.
 * **Analytics:** Built-in privacy-friendly visitor tracking with referrer analysis (no cookies, no third-party services).
@@ -201,7 +201,8 @@ Everything is configured via a single `CONFIG` object inside the `<script>` tag 
 | `cv` | Opens your CV in a new tab |
 | `neofetch` | System info in ASCII art |
 | `credits` | Show who built this |
-| `theme` | Toggles between Dark and Light mode |
+| `theme` | Show theme picker (Dark / Light / Brown) |
+| `theme dark` / `light` / `brown` | Switch to a specific theme |
 | `clear` | Clears the terminal screen |
 
 ### Interactive Features

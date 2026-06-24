@@ -21,7 +21,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const TESTIMONIALS = [
   {
@@ -268,9 +267,9 @@ const TESTIMONIALS = [
     font-size: 14px;
     line-height: 1.65;
   }
-  .screen::-webkit-scrollbar { width: 9px; }
-  .screen::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9px; }
-  .screen::-webkit-scrollbar-track { background: transparent; }
+  .screen::-webkit-scrollbar, .reader::-webkit-scrollbar { width: 9px; }
+  .screen::-webkit-scrollbar-thumb, .reader::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9px; }
+  .screen::-webkit-scrollbar-track, .reader::-webkit-scrollbar-track { background: transparent; }
 
   .line { white-space: pre-wrap; word-break: break-word; }
   .line + .line { margin-top: 1px; }
@@ -379,11 +378,77 @@ const TESTIMONIALS = [
   .reader {
     flex: 1 1 auto;
     overflow-y: auto;
-    padding: 40px clamp(22px, 6vw, 56px) 30px;
+    padding: 0 0 30px;
   }
-  .reader::-webkit-scrollbar { width: 9px; }
-  .reader::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9px; }
-  .reader::-webkit-scrollbar-track { background: transparent; }
+  .r-body-wrap {
+    padding: 20px clamp(22px, 6vw, 56px) 0;
+  }
+  .r-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg-bar);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+  }
+  .r-nav-links {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+    padding: 0 clamp(22px, 6vw, 56px);
+  }
+  .r-nav-links::-webkit-scrollbar { display: none; }
+  .r-nav-link {
+    flex-shrink: 0;
+    padding: 9px 13px;
+    font-size: 12.5px;
+    color: var(--dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    user-select: none;
+  }
+  .r-nav-link:hover { color: var(--fg); }
+  .r-nav-link.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .r-nav-toggle {
+    display: none;
+    margin-left: auto;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 13px;
+    font-size: 12.5px;
+    font-family: inherit;
+    color: var(--dim);
+    background: none;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .r-nav-toggle:hover { color: var(--fg); }
+  .r-nav-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-bar);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    min-width: 160px;
+    z-index: 20;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .r-nav-dropdown.open { display: block; }
+  .r-nav-dropdown .r-nav-link {
+    display: block;
+    border-bottom: 1px solid var(--border);
+    padding: 11px 16px;
+  }
+  .r-nav-dropdown .r-nav-link:last-child { border-bottom: none; }
+  .r-nav-dropdown .r-nav-link.active { border-bottom-color: var(--border); background: var(--glow); }
 
   [data-view="terminal"] .reader { display: none; }
   [data-view="reader"] .screen,
@@ -496,7 +561,7 @@ const TESTIMONIALS = [
   }
   .r-role { margin-top: 8px; font-size: 15px; color: var(--accent); font-weight: 500; }
   .r-tag  { margin-top: 12px; font-size: 15px; color: var(--dim); max-width: 60ch; line-height: 1.6; }
-  .r-sec  { margin-top: 32px; }
+  .r-sec  { margin-top: 32px; scroll-margin-top: 38px; }
   .r-h {
     font-size: 12px;
     text-transform: uppercase;
@@ -608,9 +673,45 @@ const TESTIMONIALS = [
   .r-test-readmore:hover { opacity: 0.8; }
 
   /* Guestbook in reader view */
-  .r-gb-entries { list-style: none; margin-bottom: 24px; }
+  .r-gb-entries { list-style: none; margin: 0; }
   .r-gb-entries li { padding: 10px 0; border-bottom: 1px dashed var(--border); }
   .r-gb-entries li:last-child { border-bottom: none; }
+  .gb-book {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-bar);
+    padding: 18px 22px 14px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  .gb-book-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+    flex-shrink: 0;
+  }
+  .gb-nav-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 5px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .gb-nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .gb-nav-btn:disabled { opacity: 0.25; cursor: default; }
+  .gb-page-info { color: var(--dim); font-size: 12px; }
+  @keyframes gb-in-right { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+  @keyframes gb-in-left  { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: none; } }
+  .gb-flip-next { animation: gb-in-right 0.2s ease; }
+  .gb-flip-prev { animation: gb-in-left  0.2s ease; }
   .r-gb-nick { color: var(--yellow); font-weight: 700; font-size: 14px; }
   .r-gb-date { color: var(--dim); font-size: 12px; margin-left: 8px; }
   .r-gb-msg  { color: var(--fg); font-size: 14px; margin-top: 4px; }
@@ -652,13 +753,6 @@ const TESTIMONIALS = [
     color: var(--dim);
     margin-bottom: 16px;
     font-style: italic;
-  }
-
-  @media (max-width: 600px) {
-    .reader { padding: 26px 18px 22px; }
-    .r-name { font-size: 30px; }
-    .r-k, .r-st { flex-basis: 110px; }
-    .r-cv { display: block; text-align: center; }
   }
 
   .cursor {
@@ -713,7 +807,11 @@ const TESTIMONIALS = [
     .reader {
       flex: 1 1 0;
       min-height: 0;
+      padding: 26px 18px 22px;
     }
+    .r-name { font-size: 30px; }
+    .r-k, .r-st { flex-basis: 110px; }
+    .r-cv { display: block; text-align: center; }
     .chips { gap: 7px; }
     .chip { font-size: 12.5px; padding: 7px 11px; }
     /* Input row pinned at bottom, above safe area notch */
@@ -728,6 +826,14 @@ const TESTIMONIALS = [
     .hint { display: none; }
     .credit { padding: 4px 13px env(safe-area-inset-bottom, 4px); font-size: 10px; flex-shrink: 0; }
     pre.ascii { font-size: 9px; }
+    .r-nav-links { display: none; }
+    .r-nav { width: fit-content; margin-left: auto; border-bottom: none; }
+    .r-nav-toggle { display: flex; border: 1px solid var(--border); border-radius: 5px; margin: 5px; }
+    header {
+      flex-direction: column-reverse;
+      align-items: flex-start !important;
+      gap: 15px !important;
+    }
   }
   .neofetch-container {
     display: flex;
@@ -742,13 +848,6 @@ const TESTIMONIALS = [
     border: 1px solid var(--border);
     padding: 4px;
     background: var(--bg-bar);
-  }
-  @media (max-width: 600px) {
-    header {
-      flex-direction: column-reverse;
-      align-items: flex-start !important;
-      gap: 15px !important;
-    }
   }
 </style>
 </head>
@@ -859,45 +958,13 @@ const viewBtn  = document.getElementById('viewBtn');
 const reader   = document.getElementById('reader');
 const root     = document.documentElement;
 
-let sb = null;
-try {
-  if (CONFIG.supabase && CONFIG.supabase.anonKey && CONFIG.supabase.anonKey !== 'YOUR_ANON_KEY_HERE') {
-    sb = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.anonKey);
-  }
-} catch(e) { console.warn('Supabase init failed', e); }
-
-// ── Page View Tracker ──────────────────────────────────────
-// Privacy-first analytics with user opt-out support
-async function trackPageView() {
-  if (!CONFIG.supabase || !CONFIG.supabase.url) return;
-  
-  // Respect user opt-out
-  if (localStorage.getItem('analytics-opt-out') === 'true') {
-    console.debug('[Tracking] User opted out - skipping');
-    return;
-  }
-  
-  try {
-    const payload = {
-      path: window.location.pathname + window.location.hash,
-      referrer: document.referrer || null
-    };
-    
-    // Fire and forget - don't block page load
-    const url = `${CONFIG.supabase.url}/functions/v1/track-page-view`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    
-    // Log result for debugging (remove after confirmed working)
-    const result = await response.json();
-    console.debug('[Tracking]', result.success ? '✓ tracked' : '✗ failed', result);
-  } catch(e) {
-    // Silently fail - tracking shouldn't break the site
-    console.debug('Page view tracking failed:', e);
-  }
+function trackPageView() {
+  if (!CONFIG.supabase?.url || localStorage.getItem('analytics-opt-out') === 'true') return;
+  fetch(`${CONFIG.supabase.url}/functions/v1/track-page-view`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: location.pathname + location.hash, referrer: document.referrer || null })
+  }).catch(() => {});
 }
 
 // ── Analytics Opt-Out Management ───────────────────────────
@@ -908,10 +975,8 @@ function toggleAnalyticsOptOut() {
   updateAnalyticsOptOutButton();
   
   if (newVal) {
-    console.log('[Analytics] You have opted out of analytics tracking');
     alert('Analytics tracking disabled. You will no longer be tracked on this site.');
   } else {
-    console.log('[Analytics] You have opted in to analytics tracking');
     alert('Analytics tracking enabled. Thank you for helping improve this site!');
   }
 }
@@ -981,11 +1046,11 @@ const THEME_CYCLE = ['dark', 'light', 'brown'];
 function applyTheme(t){
   root.setAttribute('data-theme', t);
   themeDotBtns.forEach(b => b.classList.toggle('active', b.dataset.t === t));
-  try { localStorage.setItem('portfolio-theme', t); } catch(e){}
+  safeSave('portfolio-theme', t);
 }
 (function initTheme(){
   let t = 'dark';
-  try { t = localStorage.getItem('portfolio-theme') || 'dark'; } catch(e){}
+  t = safeLoad('portfolio-theme', 'dark');
   const param = new URLSearchParams(location.search).get('theme');
   if (THEME_CYCLE.includes(param)) t = param;
   applyTheme(t);
@@ -1028,40 +1093,74 @@ function copySectionLink(section, e){
 }
 
 function buildReaderGuestbookForm(container) {
+  const PER_PAGE = 4;
   container.innerHTML = '<p class="r-gb-status dim" id="gb-loading">Loading entries...</p>';
-  if (sb) {
-    sb.from('guestbook')
-      .select('nickname, message, created_at')
-      .order('created_at', { ascending: false })
-      .limit(20)
-      .then(({ data, error }) => {
-        let entriesHtml = '';
-        if (!error && data && data.length) {
-          const toRow = row => {
-            const date = new Date(row.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-            return `<li><span class="r-gb-nick">${escapeHtml(row.nickname)}</span><span class="r-gb-date">${date}</span><div class="r-gb-msg">${escapeHtml(sanitizeGuestbook(row.message))}</div></li>`;
+  fetch(`${CONFIG.supabase.url}/rest/v1/guestbook?select=nickname,message,created_at&order=created_at.desc&limit=50`, {
+    headers: { apikey: CONFIG.supabase.anonKey, Authorization: `Bearer ${CONFIG.supabase.anonKey}` }
+  }).then(r => r.json()).then(data => {
+        const toRow = row => `<li><span class="r-gb-nick">${escapeHtml(row.nickname)}</span><span class="r-gb-date">${formatDate(row.created_at)}</span><div class="r-gb-msg">${escapeHtml(sanitizeGuestbook(row.message))}</div></li>`;
+
+        let bookHtml = '';
+        if (Array.isArray(data) && data.length) {
+          const pages = Math.ceil(data.length / PER_PAGE);
+          bookHtml = `
+            <div class="gb-book">
+              <ul class="r-gb-entries" id="gb-entries"></ul>
+              <div class="gb-book-nav">
+                <button class="gb-nav-btn" id="gb-prev">← Prev</button>
+                <span class="gb-page-info" id="gb-page-info"></span>
+                <button class="gb-nav-btn" id="gb-next">Next →</button>
+              </div>
+            </div>`;
+          container.innerHTML = bookHtml + `
+            <p class="r-gb-cta">Leave a little note before you go — add your digital footprint to this tiny corner of the internet 🌱</p>
+            <div class="r-gb-form" id="gb-form">
+              <input id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
+              <textarea id="gb-msg" placeholder="Leave a message... (2–300 chars)" maxlength="300"></textarea>
+              <p class="r-gb-status dim" id="gb-link-warn" style="font-size:12px;margin:2px 0 4px;display:none;">Links will be redacted to prevent spam.</p>
+              <button class="r-gb-btn" id="gb-submit">Sign guestbook →</button>
+              <span class="r-gb-status" id="gb-status" style="display:none;"></span>
+            </div>`;
+
+          let page = 0;
+          const renderPage = (dir) => {
+            const list = document.getElementById('gb-entries');
+            list.innerHTML = data.slice(page * PER_PAGE, (page + 1) * PER_PAGE).map(toRow).join('');
+            if (dir) {
+              list.classList.remove('gb-flip-next', 'gb-flip-prev');
+              void list.offsetWidth;
+              list.classList.add(dir === 'next' ? 'gb-flip-next' : 'gb-flip-prev');
+            }
+            document.getElementById('gb-page-info').textContent = `Page ${page + 1} of ${pages}`;
+            document.getElementById('gb-prev').disabled = page === 0;
+            document.getElementById('gb-next').disabled = page >= pages - 1;
           };
-          const visible = data.slice(0, 5).map(toRow).join('');
-          const hidden  = data.slice(5).map(toRow).join('');
-          entriesHtml = `<ul class="r-gb-entries">${visible}</ul>`;
-          if (hidden) entriesHtml += `<ul class="r-gb-entries" id="gb-more" style="display:none;">${hidden}</ul><button class="r-gb-btn" id="gb-read-more" style="margin-bottom:16px;">Show all ${data.length} entries ↓</button>`;
+          renderPage(null);
+
+          // Measure every page to find the tallest, then lock that as min-height
+          const list = document.getElementById('gb-entries');
+          let maxH = 0;
+          for (let p = 0; p < pages; p++) {
+            list.innerHTML = data.slice(p * PER_PAGE, (p + 1) * PER_PAGE).map(toRow).join('');
+            maxH = Math.max(maxH, list.scrollHeight);
+          }
+          list.style.minHeight = maxH + 'px';
+          list.innerHTML = data.slice(0, PER_PAGE).map(toRow).join(''); // restore page 0
+
+          document.getElementById('gb-prev').addEventListener('click', () => { page--; renderPage('prev'); });
+          document.getElementById('gb-next').addEventListener('click', () => { page++; renderPage('next'); });
         } else {
-          entriesHtml = '<p class="r-gb-status dim" style="margin-bottom:16px;">No entries yet — be the first!</p>';
+          container.innerHTML = `<p class="r-gb-status dim" style="margin-bottom:16px;">No entries yet — be the first!</p>
+            <p class="r-gb-cta">Leave a little note before you go — add your digital footprint to this tiny corner of the internet 🌱</p>
+            <div class="r-gb-form" id="gb-form">
+              <input id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
+              <textarea id="gb-msg" placeholder="Leave a message... (2–300 chars)" maxlength="300"></textarea>
+              <p class="r-gb-status dim" id="gb-link-warn" style="font-size:12px;margin:2px 0 4px;display:none;">Links will be redacted to prevent spam.</p>
+              <button class="r-gb-btn" id="gb-submit">Sign guestbook →</button>
+              <span class="r-gb-status" id="gb-status" style="display:none;"></span>
+            </div>`;
         }
-        container.innerHTML = entriesHtml + `
-          <p class="r-gb-cta">Leave a little note before you go — add your digital footprint to this tiny corner of the internet 🌱</p>
-          <div class="r-gb-form" id="gb-form">
-            <input id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
-            <textarea id="gb-msg" placeholder="Leave a message... (2–300 chars)" maxlength="300"></textarea>
-            <p class="r-gb-status dim" id="gb-link-warn" style="font-size:12px;margin:2px 0 4px;display:none;">Links will be redacted to prevent spam.</p>
-            <button class="r-gb-btn" id="gb-submit">Sign guestbook →</button>
-            <span class="r-gb-status" id="gb-status" style="display:none;"></span>
-          </div>`;
-        const readMoreBtn = document.getElementById('gb-read-more');
-        if (readMoreBtn) readMoreBtn.addEventListener('click', () => {
-          document.getElementById('gb-more').style.display = '';
-          readMoreBtn.remove();
-        });
+
         document.getElementById('gb-msg').addEventListener('input', () => {
           const v = document.getElementById('gb-msg').value;
           const hasLink = /https?:\/\//i.test(v) || /www\.[^\s]/i.test(v) || /\b[a-zA-Z0-9._%+-]+\.[a-z]{2,}\b/i.test(v);
@@ -1073,25 +1172,22 @@ function buildReaderGuestbookForm(container) {
           const statusEl = document.getElementById('gb-status');
           statusEl.className = 'r-gb-status';
           statusEl.style.display = '';
-          if (!nick || nick.length < 3 || nick.length > 20 || !/^[a-zA-Z0-9 _-]+$/.test(nick)) {
-            statusEl.textContent = 'Nickname must be 3–20 chars: letters, numbers, spaces, _ or -';
-            statusEl.classList.add('err'); return;
-          }
+          if (!validateNickname(nick)) { statusEl.textContent = 'Nickname must be 3–20 chars: letters, numbers, spaces, _ or -'; statusEl.classList.add('err'); return; }
           if (!isClean(nick)) { statusEl.textContent = 'That nickname isn\'t allowed.'; statusEl.classList.add('err'); return; }
           if (!msg || msg.length < 2) { statusEl.textContent = 'Message too short (min 2 chars).'; statusEl.classList.add('err'); return; }
           if (msg.length > 300) { statusEl.textContent = 'Message too long (max 300 chars).'; statusEl.classList.add('err'); return; }
           if (!isClean(msg)) { statusEl.textContent = 'That message isn\'t allowed.'; statusEl.classList.add('err'); return; }
           statusEl.textContent = 'Submitting...';
           try {
-            const data = await edgeFn('post-guestbook', { method: 'POST', body: JSON.stringify({ nickname: nick, message: msg }) });
-            if (data.error) { statusEl.textContent = 'Error: ' + data.error; statusEl.classList.add('err'); }
+            const res = await edgeFn('post-guestbook', { method: 'POST', body: JSON.stringify({ nickname: nick, message: msg }) });
+            if (res.error) { statusEl.textContent = 'Error: ' + res.error; statusEl.classList.add('err'); }
             else { statusEl.textContent = '✓ Message saved! Thanks for signing.'; document.getElementById('gb-nick').value = ''; document.getElementById('gb-msg').value = ''; }
           } catch(e) { statusEl.textContent = 'Failed: ' + e.message; statusEl.classList.add('err'); }
         });
+      })
+      .catch(() => {
+        container.innerHTML = '<p class="r-gb-status err">Guestbook unavailable.</p>';
       });
-  } else {
-    container.innerHTML = '<p class="r-gb-status err">Guestbook unavailable (Supabase not configured).</p>';
-  }
 }
 
 function buildReader(){
@@ -1102,7 +1198,22 @@ function buildReader(){
   </li>`;
   const c = CONFIG;
   const esc = escapeHtml;
+  const R_NAV_SECTIONS = [
+    ['about','About'], ['skills','Skills'], ['projects','Projects'],
+    ['strengths','Strengths'], ['testimonials','Testimonials'],
+    ['resume','Résumé'], ['contact','Contact'], ['guestbook','Guestbook']
+  ];
   reader.innerHTML = `
+    <nav class="r-nav" id="r-nav">
+      <div class="r-nav-links">
+        ${R_NAV_SECTIONS.map(([id, label]) => `<span class="r-nav-link" data-target="${id}">${label}</span>`).join('')}
+      </div>
+      <button class="r-nav-toggle" id="r-nav-toggle">≡ Sections</button>
+      <div class="r-nav-dropdown" id="r-nav-dropdown">
+        ${R_NAV_SECTIONS.map(([id, label]) => `<span class="r-nav-link" data-target="${id}">${label}</span>`).join('')}
+      </div>
+    </nav>
+    <div class="r-body-wrap">
     <header style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
       <h1 class="r-name">${esc(c.name)}</h1>
       <img src="assets/em.png" style="width: 80px; height: 80px; image-rendering: pixelated; border: 2px solid var(--border); border-radius: 8px;">
@@ -1144,23 +1255,30 @@ function buildReader(){
     <section class="r-sec" id="testimonials">
       <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
       <ul class="r-testimonials">
-        ${TESTIMONIALS.map((t, idx) => _renderTestimonial(t, idx)).join('')}
+        ${(() => {
+          const rest = TESTIMONIALS.slice(1).map((t, i) => ({ t, idx: i + 1 }));
+          for (let i = rest.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [rest[i], rest[j]] = [rest[j], rest[i]];
+          }
+          return [{ t: TESTIMONIALS[0], idx: 0 }, ...rest]
+            .map(({ t, idx }) => _renderTestimonial(t, idx)).join('');
+        })()}
       </ul>
       ${testimonialCTA(true)}
     </section>
     ` : ''}
+    <section class="r-sec" id="resume">
+      <h2 class="r-h" data-section="resume">Résumé ${sectionCopyIcon('resume')}</h2>
+      <a class="r-cv" href="${esc(c.cv)}" target="_blank" rel="noopener">Read my full CV →</a>
+    </section>
     <section class="r-sec" id="contact">
       <h2 class="r-h" data-section="contact">Contact ${sectionCopyIcon('contact')}</h2>
       <ul class="r-links">
         <li><span class="r-lk">Email</span><a class="tlink" href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>
         <li><span class="r-lk">LinkedIn</span><a class="tlink" href="${esc(c.linkedin)}" target="_blank" rel="noopener">${esc(c.linkedin)}</a></li>
         <li><span class="r-lk">GitHub</span><a class="tlink" href="${esc(c.github)}" target="_blank" rel="noopener">${esc(c.github)}</a></li>
-        <li><span class="r-lk">README</span><a class="tlink" href="${esc(c.readme)}" target="_blank" rel="noopener">my README page</a></li>
       </ul>
-    </section>
-    <section class="r-sec" id="resume">
-      <h2 class="r-h" data-section="resume">Résumé ${sectionCopyIcon('resume')}</h2>
-      <a class="r-cv" href="${esc(c.cv)}" target="_blank" rel="noopener">Read my full CV →</a>
     </section>
     <section class="r-sec" id="guestbook">
       <h2 class="r-h" data-section="guestbook">Guestbook ${sectionCopyIcon('guestbook')}</h2>
@@ -1173,16 +1291,41 @@ function buildReader(){
     <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; color: var(--dim); font-size: 12px;">
       <p style="margin-bottom: 8px;">This portfolio uses privacy-friendly analytics to understand visitor sources (no cookies, no personal data).</p>
       <p><button onclick="toggleAnalyticsOptOut()" id="analytics-optout-btn" style="background: none; border: 1px solid var(--border); color: var(--dim); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-family: inherit;">Disable analytics tracking</button></p>
-    </footer>`;
+    </footer>
+    </div>`;
 
   buildReaderGuestbookForm(document.getElementById('reader-guestbook'));
   updateAnalyticsOptOutButton();
+
+  // Hamburger toggle
+  const dropdown = document.getElementById('r-nav-dropdown');
+  document.getElementById('r-nav-toggle').addEventListener('click', e => {
+    e.stopPropagation();
+    dropdown.classList.toggle('open');
+  });
+  document.addEventListener('click', () => dropdown.classList.remove('open'));
+
+  // Nav click → smooth scroll + close dropdown
+  document.querySelectorAll('.r-nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById(link.dataset.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      dropdown.classList.remove('open');
+    });
+  });
+
+  // Active link tracking via IntersectionObserver (updates both bar + dropdown links)
+  const navLinks = document.querySelectorAll('.r-nav-link');
+  const setActive = (id) => navLinks.forEach(l => l.classList.toggle('active', l.dataset.target === id));
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) setActive(e.target.id); });
+  }, { root: document.getElementById('reader'), threshold: 0.25 });
+  document.querySelectorAll('.r-sec[id]').forEach(sec => observer.observe(sec));
 }
 
 function applyView(v){
   root.setAttribute('data-view', v);
   viewBtn.textContent = v === 'terminal' ? '▤ reader view' : '❯ terminal view';
-  try { localStorage.setItem('portfolio-view', v); } catch(e){}
+  safeSave('portfolio-view', v);
   if (v === 'terminal' && inputRow.style.display !== 'none') cmdline.focus();
 }
 (function initView(){
@@ -1207,7 +1350,7 @@ function setWindowState(state) {
     win.classList.remove('user-positioned');
     win.style.left = win.style.top = win.style.width = win.style.height = '';
   }
-  try { localStorage.setItem('window-state', state); } catch(e) {}
+  safeSave('window-state', state);
 }
 
 function restoreWindow() {
@@ -1225,9 +1368,7 @@ document.getElementById('dotClose').addEventListener('click', (e) => {
   document.body.style.cursor = 'pointer';
   document.body.title = 'Click anywhere to restore terminal';
   // Add click listener to body with setTimeout to avoid immediate trigger
-  setTimeout(() => {
-    document.body.addEventListener('click', restoreWindow, { once: true });
-  }, 100);
+  armRestore(document.body);
 });
 
 // 🟡 MINIMIZE: Collapse to title bar only
@@ -1237,10 +1378,7 @@ document.getElementById('dotMinimize').addEventListener('click', (e) => {
     restoreWindow();
   } else {
     setWindowState('minimized');
-    // Click bar to restore
-    setTimeout(() => {
-      document.querySelector('.bar').addEventListener('click', restoreWindow, { once: true });
-    }, 100);
+    armRestore(document.querySelector('.bar'));
   }
 });
 
@@ -1385,6 +1523,14 @@ function promptHtml(path){
   return `<span class="prompt">${CONFIG.user}@${CONFIG.host}<span style="color:inherit">:</span></span><span class="path">${escapeHtml(path)}</span><span class="prompt">$</span>`;
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function validateNickname(nick){ return nick && nick.length >= 3 && nick.length <= 20 && /^[a-zA-Z0-9 _-]+$/.test(nick); }
+function hasHelpFlag(argv){ return argv.includes('-h') || argv.includes('--help') || argv.includes('-help'); }
+function shuffle(arr){ return [...arr].sort(() => Math.random() - 0.5); }
+function formatDate(str){ return new Date(str).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }); }
+function safeSave(key, val){ try { localStorage.setItem(key, val); } catch(e){} }
+function safeLoad(key, def){ try { return localStorage.getItem(key) ?? def; } catch(e){ return def; } }
+function armRestore(target){ setTimeout(() => { (target || document.body).addEventListener('click', restoreWindow, { once: true }); }, 100); }
+function registerEgg(name){ if (huntState.sessionId) edgeFn('register-egg', { method: 'POST', body: JSON.stringify({ sessionId: huntState.sessionId, egg: name }) }).catch(() => {}); }
 
 /* ponytail: truncate at ~250 chars but break at next space to avoid mid-word cuts */
 function truncateAtWord(s, maxLen){
@@ -1452,7 +1598,6 @@ const DAD_JOKES = [
   { setup: "I tried to catch fog yesterday.", punchline: "Mist." },
   { setup: "Why did the coffee file a police report?", punchline: "It got mugged." },
 ];
-let lastJokeIdx = -1;
 let helpCount = 0;
 let commandHistory = [];
 let historyIndex = -1;
@@ -1496,7 +1641,7 @@ const FS_CONTENTS = {
   '/home/emily/portfolio/projects/postgresql-calculator': [{ name: 'README.md', type: 'file', size: '512' }],
   '/home/emily/portfolio/projects/convert-utc-bot':       [{ name: 'README.md', type: 'file', size: '512' }],
   '/home/emily/portfolio/skills':     [{ name: 'technical.md', type: 'file', size: '1.2K' }],
-  '/home/emily/portfolio/experience': [{ name: 'gitlab.md',    type: 'file', size: '1.8K' }],
+  '/home/emily/portfolio/experience': [{ name: 'summary.md',   type: 'file', size: '1.8K' }],
   '/home/emily/portfolio/quotes':     [{ name: 'README.md',    type: 'file', size: '128'  }],
   '/home/emily/portfolio/dadjokes':   [{ name: 'README.md',    type: 'file', size: '128'  }],
   '/home/emily': [{ name: 'portfolio', type: 'dir', size: '4.0K' }],
@@ -1524,14 +1669,18 @@ const FILE_CONTENT = {
   '/home/emily/portfolio/status.txt': [
     '<span class="green b">╔══════════════════════════════════════╗</span>',
     '<span class="green b">║                                      ║</span>',
-    '<span class="green b">║</span>   <span class="accent b">● OPEN TO WORK</span>                   <span class="green b">║</span>',
+    '<span class="green b">║</span>   <span class="accent b">● OPEN TO WORK</span>                     <span class="green b">║</span>',
     '<span class="green b">║                                      ║</span>',
-    '<span class="green b">║</span>   <span class="dim">Status:    </span><span class="fg">Actively looking</span>      <span class="green b">║</span>',
-    '<span class="green b">║</span>   <span class="dim">Role:      </span><span class="fg">Support Engineer</span>      <span class="green b">║</span>',
-    '<span class="green b">║</span>   <span class="dim">Location:  </span><span class="fg">Remote / Hybrid</span>       <span class="green b">║</span>',
+    '<span class="green b">║</span>   <span class="dim">Status:   </span> Actively looking        <span class="green b">║</span>',
+    '<span class="green b">║</span>   <span class="dim">Location: </span> Remote / Hybrid         <span class="green b">║</span>',
     '<span class="green b">║                                      ║</span>',
-    '<span class="green b">║</span>   <span class="dim">→ </span><span class="cyan">contact</span><span class="dim"> to get in touch</span>        <span class="green b">║</span>',
     '<span class="green b">╚══════════════════════════════════════╝</span>',
+    '',
+    '<span class="dim">Always open to connecting with people working on interesting</span>',
+    '<span class="dim">problems in Customer Success Engineering, Solutions Support,</span>',
+    '<span class="dim">or technical customer-facing roles.</span>',
+    '',
+    '<span class="dim">→ type </span><button class="chip" style="vertical-align:middle" onclick="runCommand(\'contact\')">contact</button><span class="dim"> to get in touch</span>',
   ],
   '/home/emily/portfolio/resume.pdf': [
     '<span class="dim">Binary file (PDF) — type \'cv\' to open in a new tab.</span>',
@@ -1548,8 +1697,8 @@ const FILE_CONTENT = {
     '# technical.md', '',
     ...CONFIG.skills.map(([cat, items]) => `<span class="accent b">${escapeHtml(cat)}</span>  ${escapeHtml(items)}`),
   ],
-  '/home/emily/portfolio/experience/gitlab.md': [
-    '# gitlab.md', '',
+  '/home/emily/portfolio/experience/summary.md': [
+    '# summary.md', '',
     `<span class="accent b">${escapeHtml(CONFIG.role)}</span>`,
     escapeHtml(CONFIG.tagline),
     '',
@@ -1716,7 +1865,7 @@ const commands = {
   quote(args){
     const argv = (args || '').trim().split(/\s+/).filter(Boolean);
     // Check for help flag
-    if (argv.includes('-h') || argv.includes('--help') || argv.includes('-help')) {
+    if (hasHelpFlag(argv)) {
       print('<span class="dim">$ quote --help</span>');
       blank();
       print('<span class="accent b">quote</span> — Print random inspirational quotes');
@@ -1855,7 +2004,7 @@ const commands = {
       print(`<span class="dim">$ fortune -n ${count}</span>`);
       blank();
       // Shuffle and pick N
-      const shuffled = [...quotes].sort(() => Math.random() - 0.5);
+      const shuffled = shuffle(quotes);
       const selected = shuffled.slice(0, count);
       selected.forEach((q, idx) => {
         if (idx > 0) blank();
@@ -1866,9 +2015,11 @@ const commands = {
     }
   },
   dadjoke(args){
+    const GROANS = ['( collective groan )','( the audience weeps )','( crickets... )','( someone leaves the room )','( dad laughs alone )','( a single tear )','( silence. painful silence. )','( groaning intensifies )','( ouch )','( why. )','( dad energy )','( rimshot )','( facepalm )','( a tumbleweed rolls by )','( the wi-fi disconnects in protest )'];
+    const groan = () => `<span class="dim">${GROANS[Math.floor(Math.random()*GROANS.length)]}</span>`;
     const argv = (args || '').trim().split(/\s+/).filter(Boolean);
     // Check for help flag
-    if (argv.includes('-h') || argv.includes('--help') || argv.includes('-help')) {
+    if (hasHelpFlag(argv)) {
       print('<span class="dim">$ dadjoke --help</span>');
       blank();
       print('<span class="accent b">dadjoke</span> — Tell a random dad joke');
@@ -1911,25 +2062,19 @@ const commands = {
     if (showAll) {
       print('<span class="dim">$ dadjoke --all</span>');
       blank();
-      // Shuffle all jokes
-      const shuffled = [...DAD_JOKES].sort(() => Math.random() - 0.5);
+      const shuffled = shuffle(DAD_JOKES);
       shuffled.forEach((joke, idx) => {
         if (idx > 0) blank();
         print(`<span class="dim">[${idx + 1}]</span> <span class="yellow">${escapeHtml(joke.setup)}</span>`);
-        setTimeout(() => {
-          print(`<span class="accent b">${escapeHtml(joke.punchline)}</span>`);
-          if (idx === shuffled.length - 1) {
-            blank();
-            print('<span class="dim">( collective groan )</span>');
-          }
-          screen.scrollTop = screen.scrollHeight;
-        }, (idx + 1) * 800);
+        print(`<span class="accent b">    ${escapeHtml(joke.punchline)}</span>`);
       });
+      blank();
+      print(groan());
     } else {
       print(`<span class="dim">$ dadjoke -n ${count}</span>`);
       blank();
       // Shuffle and pick N
-      const shuffled = [...DAD_JOKES].sort(() => Math.random() - 0.5);
+      const shuffled = shuffle(DAD_JOKES);
       const selected = shuffled.slice(0, count);
       selected.forEach((joke, idx) => {
         if (idx > 0) blank();
@@ -1939,7 +2084,7 @@ const commands = {
           print(`<span class="accent b">${escapeHtml(joke.punchline)}</span>`);
           if (idx === selected.length - 1) {
             blank();
-            print('<span class="dim">( groan )</span>');
+            print(groan());
           }
           screen.scrollTop = screen.scrollHeight;
         }, (idx + 1) * 800);
@@ -2224,7 +2369,7 @@ const commands = {
       commands['easter-egg']();
       if (huntState.active && huntState.phase === 'hunting' && !huntState.found.has('fs-egg')) {
         huntState.found.add('fs-egg');
-        if (huntState.sessionId) edgeFn('register-egg', { method: 'POST', body: JSON.stringify({ sessionId: huntState.sessionId, egg: 'fs-egg' }) }).catch(() => {});
+        registerEgg('fs-egg');
         const n = huntState.found.size;
         blank();
         print(`<span class="green b">🥚 Egg found! [${n}/${huntState.target}]</span>`);
@@ -2445,7 +2590,6 @@ const commands = {
   },
 
   async quiz(args){
-    if (!sb) { print('<span class="red">Supabase not configured. Set your anon key in CONFIG.</span>'); return; }
     if (quizState.active) { print('<span class="yellow">Quiz already in progress!</span> Type <span class="accent">quit</span> to abandon.'); return; }
     const sub = (args || '').trim().toLowerCase();
     if (sub) { return commands._startQuiz(sub); }
@@ -2511,10 +2655,9 @@ const commands = {
   },
 
   async leaderboard(args){
-    if (!sb) { print('<span class="red">Supabase not configured.</span>'); return; }
     const argv = (args || '').trim().split(/\s+/).filter(Boolean);
     // Check for help flag
-    if (argv.includes('-h') || argv.includes('--help') || argv.includes('-help')) {
+    if (hasHelpFlag(argv)) {
       print('<span class="dim">$ leaderboard --help</span>');
       blank();
       print('<span class="accent b">leaderboard</span> — View quiz scores');
@@ -2540,11 +2683,11 @@ const commands = {
     else if (filter) { catFilter = filter; label = filter.charAt(0).toUpperCase() + filter.slice(1); }
     print(`<span class="dim">$ cat leaderboard.txt${filter ? ' | filter: ' + filter : ''}</span>`);
     try {
-      let query = sb.from('leaderboard').select('nickname, score, total_questions, duration_seconds, category, difficulty, created_at').order('score', { ascending: false }).order('duration_seconds', { ascending: true });
-      if (diffFilter) query = query.eq('difficulty', diffFilter);
-      if (catFilter)  query = query.eq('category', catFilter);
-      const { data, error } = await query.limit(10);
-      if (error) throw error;
+      let url = `${CONFIG.supabase.url}/rest/v1/leaderboard?select=nickname,score,total_questions,duration_seconds,category,difficulty,created_at&order=score.desc,duration_seconds.asc&limit=10`;
+      if (diffFilter) url += `&difficulty=eq.${diffFilter}`;
+      if (catFilter)  url += `&category=eq.${catFilter}`;
+      const data = await fetch(url, { headers: { apikey: CONFIG.supabase.anonKey, Authorization: `Bearer ${CONFIG.supabase.anonKey}` } }).then(r => r.json());
+      if (!Array.isArray(data)) throw new Error(data.message || 'Load failed');
       if (!data.length) { print(`<span class="dim">No scores yet. Be the first — type <span class="accent">quiz</span>!</span>`); return; }
       blank();
       print(`<span class="accent b">  #  Nickname          Score   Time    Diff     Category</span>`);
@@ -2565,10 +2708,9 @@ const commands = {
   },
 
   async guestbook(args){
-    if (!sb) { print('<span class="red">Supabase not configured.</span>'); return; }
     const argv = (args || '').trim().split(/\s+/).filter(Boolean);
     // Check for help flag
-    if (argv.includes('-h') || argv.includes('--help') || argv.includes('-help')) {
+    if (hasHelpFlag(argv)) {
       print('<span class="dim">$ guestbook --help</span>');
       blank();
       print('<span class="accent b">guestbook</span> — Read or sign guest messages');
@@ -2598,11 +2740,11 @@ const commands = {
     print('You\'ve reached the guestbook. Leave a message, say hello, and make your mark on this little corner of the internet.');
     blank();
     try {
-      const { data, error } = await sb.from('guestbook').select('nickname, message, created_at').order('created_at', { ascending: false }).limit(20);
-      if (error) throw error;
+      const data = await fetch(`${CONFIG.supabase.url}/rest/v1/guestbook?select=nickname,message,created_at&order=created_at.desc&limit=20`, { headers: { apikey: CONFIG.supabase.anonKey, Authorization: `Bearer ${CONFIG.supabase.anonKey}` } }).then(r => r.json());
+      if (!Array.isArray(data)) throw new Error(data.message || 'Load failed');
       if (!data.length) { print('<span class="dim">Guestbook is empty. Type <span class="accent">guestbook sign</span> to be the first!</span>'); return; }
       data.forEach(row => {
-        const date = new Date(row.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+        const date = formatDate(row.created_at);
         print(`<span class="yellow b">${escapeHtml(row.nickname)}</span> <span class="dim">${date}</span>`);
         print(`  ${escapeHtml(sanitizeGuestbook(row.message))}`);
       });
@@ -2794,9 +2936,9 @@ const commands = {
 
   'rm -rf'(){
     let count = 0;
-    try { count = parseInt(localStorage.getItem('rmrf-count') || '0', 10); } catch(e){}
+    count = parseInt(safeLoad('rmrf-count', '0'), 10);
     count++;
-    try { localStorage.setItem('rmrf-count', String(count)); } catch(e){}
+    safeSave('rmrf-count', String(count));
     const responses = [
       'Nice try.\nThis isn\'t production.',
       'Seriously?',
@@ -3134,7 +3276,7 @@ function runCommand(raw){
           && r.easter && HUNT_EGGS.has(r.name)
           && !huntState.found.has(r.name)) {
         huntState.found.add(r.name);
-        if (huntState.sessionId) edgeFn('register-egg', { method: 'POST', body: JSON.stringify({ sessionId: huntState.sessionId, egg: r.name }) }).catch(() => {});
+        registerEgg(r.name);
         const n = huntState.found.size;
         blank();
         print(`<span class="green b">🥚 Egg found! [${n}/${huntState.target}]</span>`);
@@ -3195,7 +3337,7 @@ cmdline.addEventListener('keydown', e => {
 
     if (quizState.phase === 'nickname') {
       const nick = v.trim(); printPromptEcho(nick);
-      if (!nick || nick.length < 3 || nick.length > 20 || !/^[a-zA-Z0-9 _-]+$/.test(nick)) { print('<span class="yellow">Nickname must be 3–20 chars: letters, numbers, spaces, _ or -</span>'); return; }
+      if (!validateNickname(nick)) { print('<span class="yellow">Nickname must be 3–20 chars: letters, numbers, spaces, _ or -</span>'); return; }
       if (!isClean(nick)) { print('<span class="yellow">That nickname isn\'t allowed.</span>'); return; }
       finishQuiz(nick); return;
     }
@@ -3217,7 +3359,7 @@ cmdline.addEventListener('keydown', e => {
 
     if (quizState.gbStep === 'nickname') {
       const nick = v.trim(); printPromptEcho(nick);
-      if (!nick || nick.length < 3 || nick.length > 20 || !/^[a-zA-Z0-9 _-]+$/.test(nick)) { print('<span class="yellow">Nickname must be 3–20 chars: letters, numbers, spaces, _ or -</span>'); return; }
+      if (!validateNickname(nick)) { print('<span class="yellow">Nickname must be 3–20 chars: letters, numbers, spaces, _ or -</span>'); return; }
       if (!isClean(nick)) { print('<span class="yellow">That nickname isn\'t allowed.</span>'); return; }
       quizState.gbNickname = nick; quizState.gbStep = 'message';
       print('Enter your message (2–300 chars):'); return;
@@ -3449,9 +3591,7 @@ function armSkip(){
         setWindowState('closed');
         document.body.style.cursor = 'pointer';
         document.body.title = 'Click anywhere to restore terminal';
-        setTimeout(() => {
-          document.body.addEventListener('click', restoreWindow, { once: true });
-        }, 100);
+        armRestore(document.body);
       } else {
         restoreWindow();
       }
@@ -3465,9 +3605,7 @@ function armSkip(){
         restoreWindow();
       } else {
         setWindowState('minimized');
-        setTimeout(() => {
-          document.querySelector('.bar').addEventListener('click', restoreWindow, { once: true });
-        }, 100);
+        armRestore(document.querySelector('.bar'));
       }
     }
     
