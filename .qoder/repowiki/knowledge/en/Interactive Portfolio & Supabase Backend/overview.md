@@ -1,1 +1,0 @@
-A retro-themed static portfolio with an interactive terminal interface, backed by Supabase Edge Functions for trivia quizzes and a guestbook.

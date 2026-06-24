@@ -1,3 +1,0 @@
-- **Frontend**: A single-page application (`index.html`) using vanilla JavaScript and CSS3 to render dual 'Terminal' and 'Reader' views, configured via a global `CONFIG` object.
-- **Backend**: Serverless Deno Edge Functions (`supabase/functions/`) handle stateful interactions like quiz sessions (`start-quiz`, `submit-quiz`) and guestbook posts (`post-guestbook`), ensuring sensitive logic (e.g., answer validation) remains server-side.
-- **Data Layer**: PostgreSQL schema managed via SQL migrations (`supabase/migrations/`), featuring Row Level Security (RLS) policies that restrict direct client writes while allowing public reads for leaderboard and guestbook data.

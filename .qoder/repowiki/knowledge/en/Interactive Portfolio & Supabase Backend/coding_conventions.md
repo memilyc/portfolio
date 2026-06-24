@@ -1,4 +1,0 @@
-- Edge Functions implement standardized CORS headers and a consistent `err()` helper for JSON error responses with appropriate HTTP status codes.
-- Input validation in Edge Functions uses regular expressions for nickname formatting and custom logic for spam detection (URL counts, keyword filtering).
-- Rate limiting is enforced across Edge Functions by hashing client IPs (SHA-256) and tracking action counts in a dedicated `rate_limits` database table.
-- Database migrations use descriptive timestamps for filenames and include inline comments categorizing SQL blocks (e.g., RLS, Indexes, Seed Data).
