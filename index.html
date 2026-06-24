@@ -639,17 +639,13 @@ const TESTIMONIALS = [
   .r-proj-desc { font-size: 14px; color: var(--fg); line-height: 1.7; }
   .r-proj-link { font-size: 13px; margin-top: 6px; }
 
-  .r-testimonials { list-style: none; }
-  .r-testimonials li {
-    padding: 16px 0;
-    border-bottom: 1px dashed var(--border);
-  }
-  .r-testimonials li:last-child { border-bottom: none; }
-  .r-test-name { color: var(--cyan); font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .r-test-name { color: var(--cyan); font-weight: 700; font-size: 15px; margin-bottom: 4px; }
   .r-test-rel { color: var(--dim); font-weight: 400; font-size: 13px; }
-  .r-test-text { font-size: 14px; color: var(--fg); line-height: 1.7; font-style: italic; }
-  .r-test-text::before { content: '"'; color: var(--magenta); font-weight: 700; }
-  .r-test-text::after { content: '"'; color: var(--magenta); font-weight: 700; }
+  .t-slide-quote { font-size: 14px; color: var(--fg); line-height: 1.7; font-style: italic; margin: 10px 0 0; }
+  .t-slide-quote::before { content: '"'; color: var(--magenta); font-weight: 700; font-style: normal; }
+  .t-slide-quote::after  { content: '"'; color: var(--magenta); font-weight: 700; font-style: normal; }
+  .t-slide-full { font-size: 14px; color: var(--fg); line-height: 1.7; margin-top: 10px; display: none; }
+  .t-slide-full p { margin: 0 0 0.8em; }
   .r-test-cta {
     font-size: 13px;
     color: var(--dim);
@@ -1057,21 +1053,6 @@ function applyTheme(t){
 })();
 themeDotBtns.forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.t)));
 
-/* ---- Guestbook reader form helpers ---- */
-function expandTestimonialText(idx){
-  const el = document.getElementById('r-test-text-' + idx);
-  const btn = el.nextElementSibling;
-  if (el.dataset.expanded === 'true') {
-    el.textContent = TESTIMONIALS[idx].highlight;
-    el.dataset.expanded = 'false';
-    btn.textContent = 'read more';
-  } else {
-    el.innerHTML = TESTIMONIALS[idx].text.split('\n\n').map(p => `<p style="margin:0 0 0.8em;">${escapeHtml(p)}</p>`).join('');
-    el.dataset.expanded = 'true';
-    btn.textContent = 'show less';
-  }
-}
-
 /* ponytail: generate copy link icon for section headers */
 function sectionCopyIcon(section){
   return `<span class="copy-link" onclick="copySectionLink('${section}', event)" title="Copy link to this section">🔗</span>`;
@@ -1191,11 +1172,6 @@ function buildReaderGuestbookForm(container) {
 }
 
 function buildReader(){
-  const _renderTestimonial = (t, idx) => `<li>
-    <div class="r-test-name">${escapeHtml(t.name)} <span class="r-test-rel">${escapeHtml(t.relationship)}</span></div>
-    <div class="r-test-text" id="r-test-text-${idx}">${escapeHtml(t.highlight || truncateAtWord(t.text, 200))}</div>
-    <button class="r-test-readmore" onclick="expandTestimonialText(${idx})">read more</button>
-  </li>`;
   const c = CONFIG;
   const esc = escapeHtml;
   const R_NAV_SECTIONS = [
@@ -1254,17 +1230,14 @@ function buildReader(){
     ${TESTIMONIALS.length > 0 ? `
     <section class="r-sec" id="testimonials">
       <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
-      <ul class="r-testimonials">
-        ${(() => {
-          const rest = TESTIMONIALS.slice(1).map((t, i) => ({ t, idx: i + 1 }));
-          for (let i = rest.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [rest[i], rest[j]] = [rest[j], rest[i]];
-          }
-          return [{ t: TESTIMONIALS[0], idx: 0 }, ...rest]
-            .map(({ t, idx }) => _renderTestimonial(t, idx)).join('');
-        })()}
-      </ul>
+      <div class="gb-book" id="t-carousel">
+        <div id="t-slide"></div>
+        <div class="gb-book-nav">
+          <button class="gb-nav-btn" id="t-prev">← Prev</button>
+          <span id="t-page-info" class="dim" style="font-size:13px;"></span>
+          <button class="gb-nav-btn" id="t-next">Next →</button>
+        </div>
+      </div>
       ${testimonialCTA(true)}
     </section>
     ` : ''}
@@ -1296,6 +1269,62 @@ function buildReader(){
 
   buildReaderGuestbookForm(document.getElementById('reader-guestbook'));
   updateAnalyticsOptOutButton();
+
+  // Testimonials carousel
+  if (TESTIMONIALS.length > 0) {
+    const tOrder = [TESTIMONIALS[0], ...shuffle(TESTIMONIALS.slice(1))];
+    let tIdx = 0;
+
+    function renderTSlide(idx, dir) {
+      const t = tOrder[idx];
+      const slide = document.getElementById('t-slide');
+      slide.innerHTML = `
+        <div class="r-test-name">${escapeHtml(t.name)} <span class="r-test-rel">${escapeHtml(t.relationship)}</span></div>
+        <div class="t-slide-quote">${escapeHtml(t.highlight)}</div>
+        <button class="r-test-readmore" id="t-readmore">read more</button>
+        <div class="t-slide-full">${t.text.split('\n\n').map(p => `<p>${escapeHtml(p)}</p>`).join('')}</div>
+      `;
+      document.getElementById('t-page-info').textContent = `${idx + 1} / ${tOrder.length}`;
+      document.getElementById('t-prev').disabled = idx === 0;
+      document.getElementById('t-next').disabled = idx === tOrder.length - 1;
+
+      void slide.offsetWidth;
+      slide.classList.remove('gb-flip-next', 'gb-flip-prev');
+      void slide.offsetWidth;
+      if (dir === 'next') slide.classList.add('gb-flip-next');
+      else if (dir === 'prev') slide.classList.add('gb-flip-prev');
+
+      document.getElementById('t-readmore').addEventListener('click', () => {
+        const full = slide.querySelector('.t-slide-full');
+        const quote = slide.querySelector('.t-slide-quote');
+        const btn = document.getElementById('t-readmore');
+        const expanded = full.style.display === 'block';
+        full.style.display = expanded ? 'none' : 'block';
+        quote.style.display = expanded ? '' : 'none';
+        btn.textContent = expanded ? 'read more' : 'show less';
+      });
+    }
+
+    // Lock height to tallest slide (collapsed state)
+    (function lockHeight() {
+      const slide = document.getElementById('t-slide');
+      let maxH = 0;
+      for (let i = 0; i < tOrder.length; i++) {
+        renderTSlide(i, null);
+        maxH = Math.max(maxH, slide.scrollHeight);
+      }
+      slide.style.minHeight = maxH + 'px';
+      renderTSlide(0, null);
+      tIdx = 0;
+    })();
+
+    document.getElementById('t-prev').addEventListener('click', () => {
+      if (tIdx > 0) renderTSlide(--tIdx, 'prev');
+    });
+    document.getElementById('t-next').addEventListener('click', () => {
+      if (tIdx < tOrder.length - 1) renderTSlide(++tIdx, 'next');
+    });
+  }
 
   // Hamburger toggle
   const dropdown = document.getElementById('r-nav-dropdown');
