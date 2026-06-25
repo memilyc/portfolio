@@ -1093,7 +1093,7 @@ function copySectionLink(section, e){
 function buildReaderGuestbookForm(container) {
   const PER_PAGE = 4;
   container.innerHTML = '<p class="r-gb-status dim" id="gb-loading">Loading entries...</p>';
-  fetch(`${CONFIG.supabase.url}/rest/v1/guestbook?select=nickname,message,created_at&order=created_at.desc&limit=50`, {
+  fetch(`${CONFIG.supabase.url}/rest/v1/guestbook?select=nickname,message,created_at&hidden=is.false&order=created_at.desc&limit=50`, {
     headers: { apikey: CONFIG.supabase.anonKey, Authorization: `Bearer ${CONFIG.supabase.anonKey}` }
   }).then(r => r.json()).then(data => {
         const toRow = row => `<li><span class="r-gb-nick">${escapeHtml(row.nickname)}</span><span class="r-gb-date">${formatDate(row.created_at)}</span><div class="r-gb-msg">${escapeHtml(sanitizeGuestbook(row.message))}</div></li>`;
@@ -2806,7 +2806,7 @@ const commands = {
     print('You\'ve reached the guestbook. Leave a message, say hello, and make your mark on this little corner of the internet.');
     blank();
     try {
-      const data = await fetch(`${CONFIG.supabase.url}/rest/v1/guestbook?select=nickname,message,created_at&order=created_at.desc&limit=20`, { headers: { apikey: CONFIG.supabase.anonKey, Authorization: `Bearer ${CONFIG.supabase.anonKey}` } }).then(r => r.json());
+      const data = await fetch(`${CONFIG.supabase.url}/rest/v1/guestbook?select=nickname,message,created_at&hidden=is.false&order=created_at.desc&limit=20`, { headers: { apikey: CONFIG.supabase.anonKey, Authorization: `Bearer ${CONFIG.supabase.anonKey}` } }).then(r => r.json());
       if (!Array.isArray(data)) throw new Error(data.message || 'Load failed');
       if (!data.length) { print('<span class="dim">Guestbook is empty. Type <span class="accent">guestbook sign</span> to be the first!</span>'); return; }
       data.forEach(row => {
