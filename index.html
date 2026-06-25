@@ -81,6 +81,7 @@ const TESTIMONIALS = [
     --yellow:    #e7c664;
     --red:       #ff6b6b;
     --magenta:   #c792ea;
+    --green:     #58d68d;
     --border:    #1d2530;
     --glow:      rgba(126,231,135,0.10);
     --scan:      rgba(255,255,255,0.022);
@@ -99,6 +100,7 @@ const TESTIMONIALS = [
     --yellow:    #b07d00;
     --red:       #c4314b;
     --magenta:   #8959a8;
+    --green:     #2e8b57;
     --border:    #d4ccb8;
     --glow:      rgba(64,138,61,0.08);
     --scan:      rgba(0,0,0,0.02);
@@ -117,6 +119,7 @@ const TESTIMONIALS = [
     --yellow:    #e0b96a;
     --red:       #d96b6b;
     --magenta:   #c792ea;
+    --green:     #a8c98a;
     --border:    rgba(30,25,20,.45);
     --glow:      rgba(234,123,35,0.15);
     --scan:      rgba(0,0,0,0.03);
@@ -282,6 +285,7 @@ const TESTIMONIALS = [
   .cyan   { color: var(--cyan); }
   .yellow { color: var(--yellow); }
   .red    { color: var(--red); }
+  .green  { color: var(--green); }
   .magenta{ color: var(--magenta); }
   .b      { font-weight: 700; }
 
@@ -1044,6 +1048,9 @@ function resetQuizState() {
   quizState.quizWrong = [];
 }
 
+let adventureState = { active: false, mode: 'none', phase: 'idle', step: 0, mockCwd: '/home/emily', killed: false };
+// mode: 'guided' | 'free'  phase: 'idle'|'picking'|'guided-awaitCmd'|'guided-awaitEnter'|'free'
+
 const BLOCKED_RE = /shit|fuck|cunt|dick|bitch|asshole|bastard|whore|slut|nigger|nigga|faggot|retard|pedo|rapist|porn|xxx|sex|dildo|pussy|penis|vagina|cum|orgasm|fetish|nsfw|wank|jizz|cock|twat|wanker|bollocks|masturbat|semen|erection|genital|horny|kys|kill.?yourself|nazi|hitler|racist|bigot|bitcoin|crypto/i;
 function isClean(s){ return !BLOCKED_RE.test(s); }
 
@@ -1387,7 +1394,8 @@ function setWindowState(state) {
   if (state !== 'normal') win.classList.add(state);
   if (state === 'normal') {
     win.classList.remove('user-positioned');
-    win.style.left = win.style.top = win.style.width = win.style.height = '';
+    win.style.left = win.style.top = win.style.width = win.style.height = win.style.position = '';
+    setTimeout(fitToViewport, 0);
   }
   safeSave('window-state', state);
 }
@@ -1519,7 +1527,7 @@ function el(tag, cls, html){
   return e;
 }
 
-const CHIP_NAMES = ['about','skills','projects','strengths','contact','cv','quote','dadjoke','testimonials','quiz','leaderboard','guestbook','egghunt','neofetch','credits','theme','clear','help'];
+const CHIP_NAMES = ['about','skills','projects','strengths','contact','cv','quote','dadjoke','testimonials','quiz','leaderboard','guestbook','egghunt','neofetch','credits','theme','clear','help','adventure'];
 
 /* ponytail: single source of truth for chips — boot + help both call this */
 function renderChips(){
@@ -1555,7 +1563,19 @@ function shortPath(dir) {
   return p || '~';
 }
 function printPromptEcho(cmd){
-  print(`${promptHtml(shortPath(currentDir))} <span class="cmd">${escapeHtml(cmd)}</span>`);
+  const ps = adventureState.active
+    ? `<span class="prompt">emily@prod-server-01<span style="color:inherit">:</span></span><span class="path">${escapeHtml(adventureState.mockCwd)}</span><span class="prompt">$</span>`
+    : promptHtml(shortPath(currentDir));
+  print(`${ps} <span class="cmd">${escapeHtml(cmd)}</span>`);
+}
+function syncAdventureInputPrompt() {
+  const ps = document.querySelector('#inputRow .ps');
+  if (!ps) return;
+  if (adventureState.active) {
+    ps.innerHTML = `<span>emily@prod-server-01</span>:<span class="path">${escapeHtml(adventureState.mockCwd)}</span>$`;
+  } else {
+    ps.innerHTML = `<span>${CONFIG.user}@${CONFIG.host}</span>:<span class="path">${escapeHtml(shortPath(currentDir))}</span>$`;
+  }
 }
 /* Shared prompt markup so the echoed prompt, boot prompt, and input bar all match. */
 function promptHtml(path){
@@ -1806,6 +1826,7 @@ const commands = {
     print('  <span class="cyan">guestbook</span>          Read or sign the guestbook');
     print('  <span class="cyan">egghunt</span>            Hunt for hidden easter egg commands 🥚');
     blank();
+    print('  <span class="cyan">adventure</span>          P0 incident story — save the server! (guide/free)');
     print('  <span class="cyan">neofetch</span>           System information');
     print('  <span class="cyan">credits</span>            Project credits');
     print('  <span class="cyan">theme</span>              Toggle light/dark theme');
@@ -2281,6 +2302,12 @@ const commands = {
     }
     blank();
     print('<span class="dim">Full details: PRIVACY_COMPLIANCE.md in the GitHub repo</span>');
+  },
+  adventure(args){
+    if (adventureState.active) {
+      print('<span class="dim">Adventure already in progress. Type <span class="accent">quit</span> to exit.</span>'); return;
+    }
+    startAdventure(args === 'guide');
   },
   credits(){
     print('<span class="dim">$ cat credits.txt</span>');
@@ -3341,6 +3368,43 @@ cmdline.addEventListener('keydown', e => {
     const v = cmdline.value;
     cmdline.value = ''; tab.active = false; updateGhost();
 
+    // ── Adventure mode ──
+    if (adventureState.active) {
+      const trimmed = v.trim();
+      const lower = trimmed.toLowerCase();
+
+      if (adventureState.phase === 'picking') {
+        printPromptEcho(trimmed);
+        if (lower === 'guide') { startGuided(); }
+        else if (lower === 'quit' || lower === 'exit') { abandonAdventure(); }
+        else { startFree(trimmed); }
+        return;
+      }
+
+      if (adventureState.phase === 'guided-awaitEnter') {
+        if (trimmed) printPromptEcho(trimmed);
+        showAdventureStep(adventureState.step + 1);
+        return;
+      }
+
+      if (adventureState.phase === 'guided-awaitCmd') {
+        const expected = ADVENTURE_STEPS[adventureState.step].cmd;
+        printPromptEcho(trimmed);
+        if (lower === expected.toLowerCase()) { runAdventureStep(adventureState.step); }
+        else if (lower === 'quit' || lower === 'exit') { abandonAdventure(); }
+        else { print(`<span class="dim">Tip: type <span class="accent">${escapeHtml(expected)}</span> ↩ — or <span class="accent">quit</span> to exit.</span>`); }
+        return;
+      }
+
+      if (adventureState.phase === 'free') {
+        if (lower === 'quit' || lower === 'exit') { printPromptEcho(trimmed); abandonAdventure(); return; }
+        if (lower === 'clear') { commands.clear(); return; }
+        printPromptEcho(trimmed);
+        handleFreeCmd(trimmed);
+        return;
+      }
+    }
+
     if (quizState.phase === 'picking') {
       const pick = v.trim().toLowerCase();
       printPromptEcho(pick);
@@ -3554,6 +3618,483 @@ async function runWelcome(){
     print('<span class="dim">New to terminals? Click <span class="accent">▤ reader view</span> (top-right) for a plain page.</span>');
   }
   renderChips();
+}
+
+// ── Guided Tour ─────────────────────────────────────────────
+// ── Adventure Mode ──────────────────────────────────────────
+
+const ADVENTURE_STEPS = [
+  {
+    cmd: 'tail -f /var/log/nginx/error.log',
+    setup: ['Check the nginx error log — first stop when users report 503s.'],
+    mockOutput: [
+      '<span class="dim">2024/11/14 14:21:33 [error] 891#891: *18842 connect() failed (111: Connection refused) while connecting to upstream</span>',
+      '<span class="red">2024/11/14 14:21:33 [error] *18843 upstream timed out (110) while reading response header from upstream</span>',
+      '<span class="red">2024/11/14 14:21:34 [error] *18844 upstream timed out (110) while reading response header from upstream</span>',
+      '<span class="red">2024/11/14 14:21:35 [error] *18901 connect() failed (111: Connection refused) while connecting to upstream</span>',
+      '<span class="dim">... (flooding — 200+ errors in the last 3 minutes)</span>',
+    ],
+    explain: [
+      "Nginx can't reach the app on port 3000 — it's either crashed or too overloaded to respond.",
+      'Check system load to see what the OS is dealing with.',
+    ],
+  },
+  {
+    cmd: 'uptime',
+    setup: ['Check how hard the system is working right now.'],
+    mockOutput: [
+      ' 14:23:51 up 47 days,  3:21,  2 users,  load average: <span class="red b">18.43</span><span class="dim">, 17.92, 15.11</span>',
+    ],
+    explain: [
+      'Load average <span class="red">18.43</span> on a 4-core box — completely saturated (normal is &lt; 4).',
+      "Something is eating all the CPU. Let's find it.",
+    ],
+  },
+  {
+    cmd: 'ps aux',
+    setup: ['List all processes sorted by CPU usage.'],
+    mockOutput: [
+      '<span class="dim">USER         PID  %CPU  %MEM   VSZ    RSS  COMMAND</span>',
+      '<span class="red b">emily      12847 892.1   0.3  45120  6840  node /app/worker.js</span>',
+      '<span class="dim">emily       1024   2.1   8.4 892344 89432  node /app/server.js</span>',
+      '<span class="dim">root         889   0.8   0.1  12324  2840  nginx: master process</span>',
+      '<span class="dim">www-data     891   0.4   0.1  12588  2960  nginx: worker process</span>',
+    ],
+    explain: [
+      'Found it — <span class="yellow">PID 12847</span> is consuming <span class="red">892% CPU</span>.',
+      "It's a Node.js worker stuck in an infinite loop, starving everything else.",
+      'Time to kill it.',
+    ],
+  },
+  {
+    cmd: 'kill -9 12847',
+    setup: ['Force-terminate the runaway process. -9 (SIGKILL) cannot be ignored.'],
+    mockOutput: [
+      'kill: sent signal 9 to PID 12847',
+      '<span class="dim">[1]+  Killed                  node /app/worker.js</span>',
+    ],
+    explain: [
+      'Process terminated. Load should drop within seconds.',
+      'Check the application logs to see if it is recovering.',
+    ],
+  },
+  {
+    cmd: 'tail -f production.log',
+    setup: ['Stream the application log to watch the recovery in real-time.'],
+    mockOutput: [
+      '<span class="red">[14:23:44] ERROR  DB connection pool exhausted (50/50 in use)</span>',
+      '<span class="red">[14:23:48] ERROR  POST /api/data — timeout after 30000ms</span>',
+      '<span class="yellow">[14:24:01] WARN   Worker PID 12847 terminated (SIGKILL)</span>',
+      '<span class="dim">[14:24:01] INFO   Releasing 48 stale DB connections from pool...</span>',
+      '<span class="dim">[14:24:02] INFO   DB connection pool reset  (0/50 in use)</span>',
+      '<span class="green">[14:24:03] INFO   Health check: OK ✓  (latency: 38ms)</span>',
+      '<span class="green">[14:24:03] INFO   Application accepting requests normally</span>',
+    ],
+    explain: [
+      'Root cause confirmed: the runaway worker held 48 DB connections open,',
+      'exhausting the pool and timing out every request behind it.',
+      "Now that it's gone the pool self-healed. Do a final health check.",
+    ],
+  },
+  {
+    cmd: 'curl localhost:3000/health',
+    setup: ['Hit the health endpoint to confirm production is fully back.'],
+    mockOutput: [
+      '{',
+      '  <span class="cyan">"status"</span>:      <span class="green">"healthy"</span>,',
+      '  <span class="cyan">"uptime_s"</span>:   <span class="dim">4082891</span>,',
+      '  <span class="cyan">"db_pool"</span>:    <span class="dim">"0/50 connections used"</span>,',
+      '  <span class="cyan">"latency_ms"</span>: <span class="green">38</span>',
+      '}',
+    ],
+    explain: [
+      '<span class="green">200 OK</span> — the app is healthy. Incident closed.',
+    ],
+  },
+];
+
+function startAdventure(autoGuide = false) {
+  adventureState = { active: true, mode: 'none', phase: 'picking', step: 0, mockCwd: '/home/emily', killed: false };
+  syncAdventureInputPrompt();
+  blank();
+  print('<span class="red b">🚨  PRODUCTION ALERT — P0 INCIDENT</span>');
+  print('<span class="dim">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>');
+  print('<span class="yellow">app.emily.dev</span> is returning <span class="red">503 Service Unavailable</span>');
+  print('<span class="dim">Affected users: <span class="red">1,247</span>  |  Incident started: 3 min ago</span>');
+  print('<span class="dim">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>');
+  blank();
+  if (autoGuide) { startGuided(); return; }
+  print("New to terminal?  Type <span class=\"accent\">guide</span>  for step-by-step help.");
+  print("Experienced?      Just start typing — the server is yours.");
+  print('<span class="dim">Type <span class="accent">quit</span> at any time to abandon the incident.</span>');
+}
+
+function startGuided() {
+  adventureState.mode = 'guided';
+  blank();
+  print('<span class="dim">── Guided mode ──  Follow each step. Type the command shown and press ↩</span>');
+  showAdventureStep(0);
+}
+
+function showAdventureStep(idx) {
+  if (idx >= ADVENTURE_STEPS.length) { endAdventure('guided'); return; }
+  const s = ADVENTURE_STEPS[idx];
+  blank();
+  print(`<span class="dim">── Step ${idx + 1}/${ADVENTURE_STEPS.length} ──</span> ${s.setup[0]}`);
+  blank();
+  print(`Type <span class="accent">${escapeHtml(s.cmd)}</span> ↩`);
+  adventureState.step = idx;
+  adventureState.phase = 'guided-awaitCmd';
+}
+
+function runAdventureStep(idx) {
+  const s = ADVENTURE_STEPS[idx];
+  blank();
+  s.mockOutput.forEach(l => print(l));
+  if (s.explain.length) {
+    blank();
+    s.explain.forEach(l => print('<span class="dim">' + l + '</span>'));
+  }
+  blank();
+  print('<span class="dim">↩  Press Enter to continue</span>');
+  adventureState.phase = 'guided-awaitEnter';
+}
+
+function startFree(firstCmd) {
+  adventureState.mode = 'free';
+  adventureState.phase = 'free';
+  blank();
+  print('<span class="dim">── Free explore ──  This is your server. Dig around and fix it.</span>');
+  print('<span class="dim">Hint: try  ls,  uptime,  ps aux  — or whatever you\'d do on a real box.</span>');
+  print('<span class="dim">Goal: find the problem and bring the server back up. Type quit to exit.</span>');
+  blank();
+  if (firstCmd) { printPromptEcho(firstCmd); handleFreeCmd(firstCmd); }
+}
+
+function handleFreeCmd(raw) {
+  const v = raw.trim();
+  const lower = v.toLowerCase();
+  const killed = adventureState.killed;
+
+  // cd
+  const CD_MAP = {
+    '': '/home/emily', '~': '/home/emily',
+    '/home/emily': '/home/emily', '/home/emily/': '/home/emily',
+    '/var/log': '/var/log', '/var/log/': '/var/log',
+    '/var': '/var', '/var/': '/var',
+    '/var/log/nginx': '/var/log/nginx', '/var/log/nginx/': '/var/log/nginx',
+    '/app': '/app', '/app/': '/app',
+    '/': '/',
+  };
+  if (lower === 'cd' || lower.startsWith('cd ')) {
+    const arg = lower === 'cd' ? '' : v.slice(3).trim();
+    if (arg in CD_MAP) {
+      adventureState.mockCwd = CD_MAP[arg]; syncAdventureInputPrompt(); return;
+    } else if (arg === '..' || arg === '../') {
+      const parts = adventureState.mockCwd.split('/').filter(Boolean);
+      parts.pop();
+      adventureState.mockCwd = parts.length ? '/' + parts.join('/') : '/';
+      syncAdventureInputPrompt(); return;
+    } else {
+      print(`<span class="dim">bash: cd: ${escapeHtml(arg)}: No such file or directory</span>`); return;
+    }
+  }
+
+  // pwd
+  if (lower === 'pwd') { print(adventureState.mockCwd); return; }
+
+  // whoami / id
+  if (lower === 'whoami') { print('emily'); return; }
+  if (lower === 'id') { print('uid=1001(emily) gid=1001(emily) groups=1001(emily),4(adm),27(sudo),1002(docker)'); return; }
+
+  // hostname
+  if (lower === 'hostname' || lower === 'hostname -f') { print('prod-server-01'); return; }
+
+  // uname
+  if (lower.startsWith('uname')) {
+    print('Linux prod-server-01 5.15.0-91-generic #101-Ubuntu SMP Tue Nov 14 13:30:08 UTC 2023 x86_64 GNU/Linux'); return;
+  }
+
+  // cat /etc/os-release
+  if (lower.includes('os-release') || lower === 'lsb_release -a') {
+    ['NAME="Ubuntu"','VERSION="22.04.3 LTS (Jammy Jellyfish)"','ID=ubuntu','PRETTY_NAME="Ubuntu 22.04.3 LTS"'].forEach(l => print(`<span class="dim">${l}</span>`)); return;
+  }
+
+  // node / npm version
+  if (lower === 'node --version' || lower === 'node -v') { print('v20.10.0'); return; }
+  if (lower === 'npm --version' || lower === 'npm -v') { print('10.2.5'); return; }
+
+  // env / printenv
+  if (lower === 'env' || lower === 'printenv') {
+    ['<span class="dim">NODE_ENV=production</span>','<span class="dim">PORT=3000</span>','<span class="dim">DB_POOL_SIZE=50</span>','<span class="dim">DB_HOST=db.internal</span>','<span class="dim">REDIS_URL=redis://cache.internal:6379</span>','<span class="dim">LOG_LEVEL=info</span>','<span class="dim">HOME=/home/emily</span>','<span class="dim">USER=emily</span>'].forEach(l => print(l)); return;
+  }
+
+  // w / who / last
+  if (lower === 'w' || lower === 'who') {
+    print('<span class="dim"> 14:24:01 up 47 days,  3:25,  2 users,  load average: ' + (killed ? '0.43, 3.21, 9.87' : '18.43, 17.92, 15.11') + '</span>');
+    print('<span class="dim">USER     TTY      FROM             LOGIN@   IDLE JCPU   PCPU WHAT</span>');
+    print('<span class="dim">emily    pts/0    10.0.1.42        14:10    0.00s  0.01s  0.00s bash</span>');
+    print('<span class="dim">deploy   pts/1    10.0.1.10        13:55   28:00   0.00s  0.00s sshd: deploy@pts/1</span>');
+    return;
+  }
+
+  // ip addr / ifconfig
+  if (lower === 'ip addr' || lower === 'ip a' || lower === 'ifconfig') {
+    ['<span class="dim">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536</span>','<span class="dim">    inet 127.0.0.1/8 scope host lo</span>','<span class="dim">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 9001</span>','<span class="dim">    inet <span class="yellow">10.0.1.55</span>/24 brd 10.0.1.255 scope global eth0</span>'].forEach(l => print(l)); return;
+  }
+
+  // ping
+  if (lower.startsWith('ping')) {
+    const host = v.split(' ').pop() || 'localhost';
+    print(`<span class="dim">PING ${escapeHtml(host)} (127.0.0.1) 56(84) bytes of data.</span>`);
+    print('<span class="dim">64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.045 ms</span>');
+    print('<span class="dim">64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.041 ms</span>');
+    print('<span class="dim">^C  (2 packets transmitted, 2 received, 0% packet loss)</span>'); return;
+  }
+
+  // netstat / ss — show port 3000 status
+  if (lower.startsWith('netstat') || lower.startsWith('ss ') || lower === 'ss') {
+    print('<span class="dim">Proto  Local Address          State       PID/Program</span>');
+    if (!killed) {
+      print('<span class="red">tcp    0.0.0.0:3000           CLOSE_WAIT  12847/node</span>');
+      print('<span class="dim">tcp    0.0.0.0:80             LISTEN      889/nginx</span>');
+      print('<span class="dim">tcp    0.0.0.0:22             LISTEN      612/sshd</span>');
+      print('<span class="dim">tcp    0.0.0.0:5432           LISTEN      741/postgres</span>');
+    } else {
+      print('<span class="green">tcp    0.0.0.0:3000           LISTEN      1024/node</span>');
+      print('<span class="dim">tcp    0.0.0.0:80             LISTEN      889/nginx</span>');
+      print('<span class="dim">tcp    0.0.0.0:22             LISTEN      612/sshd</span>');
+      print('<span class="dim">tcp    0.0.0.0:5432           LISTEN      741/postgres</span>');
+    }
+    return;
+  }
+
+  // lsof
+  if (lower.startsWith('lsof')) {
+    if (!killed) {
+      print('<span class="dim">COMMAND   PID   USER   FD   TYPE DEVICE   SIZE/OFF NODE NAME</span>');
+      print('<span class="red">node    12847  emily  cwd    DIR  259,1       4096  node /app</span>');
+      ['...','48x   IPv4 SOCK  TCP 127.0.0.1:3000->db.internal:5432 (CLOSE_WAIT)'].forEach(l => print(`<span class="dim">${l}</span>`));
+      print('<span class="dim">(48 stale sockets keeping DB connections open)</span>');
+    } else {
+      print('<span class="dim">(no output — PID 12847 no longer exists)</span>');
+    }
+    return;
+  }
+
+  // dmesg
+  if (lower.startsWith('dmesg')) {
+    if (killed) {
+      ['<span class="dim">[3889234.112] OOM killer not invoked</span>','<span class="yellow">[3889235.881] node[12847]: segfault at 0 ip 0000... (signal 9, SIGKILL)</span>','<span class="dim">[3889235.882] audit: type=1701 auid=1001 pid=12847 comm="node" sig=9</span>'].forEach(l => print(l));
+    } else {
+      ['<span class="dim">[3889180.019] nf_conntrack: table full, dropping packet</span>','<span class="red">[3889181.774] TCP: too many orphaned sockets</span>','<span class="red">[3889182.100] possible SYN flooding on port 3000</span>'].forEach(l => print(l));
+    }
+    return;
+  }
+
+  // cat /proc/loadavg
+  if (lower === 'cat /proc/loadavg') {
+    print(killed ? '<span class="dim">0.43 3.21 9.87 2/312 14921</span>' : '<span class="red">18.43 17.92 15.11 312/312 12847</span>'); return;
+  }
+
+  // ls
+  if (lower === 'ls' || lower === 'ls -la' || lower === 'ls -l' || lower === 'ls -a' || lower === 'ls -lah' || lower === 'ls -alh') {
+    const long = lower.includes('-l') || lower.includes('-a');
+    if (adventureState.mockCwd === '/var/log') {
+      if (long) {
+        ['<span class="dim">total 164</span>','<span class="dim">drwxr-xr-x  5 root  root   4096 Nov 14 14:20 .</span>','<span class="dim">drwxr-xr-x 14 root  root   4096 Nov 10 09:15 ..</span>','<span class="dim">drwxr-xr-x  2 root  adm    4096 Nov 14 14:23 <span class="cyan">nginx</span></span>','<span class="dim">-rw-r--r--  1 emily emily 128432 Nov 14 14:23 production.log</span>','<span class="dim">-rw-r-----  1 root  adm   32768 Nov 14 14:20 syslog</span>'].forEach(l => print(l));
+      } else { print('<span class="cyan">nginx</span>  production.log  syslog'); }
+    } else {
+      if (long) {
+        ['<span class="dim">total 32</span>','<span class="dim">drwxr-xr-x 5 emily emily 4096 Nov 14 14:21 .</span>','<span class="dim">drwxr-xr-x 3 root  root  4096 Nov 10 09:00 ..</span>','<span class="dim">drwxr-xr-x 8 emily emily 4096 Nov 14 12:00 <span class="cyan">app</span></span>','<span class="dim">-rw-r--r-- 1 emily emily  220 Nov 10 09:00 .bash_logout</span>','<span class="dim">lrwxrwxrwx 1 emily emily   32 Nov 14 09:00 production.log -> /var/log/production.log</span>'].forEach(l => print(l));
+      } else { print('<span class="cyan">app</span>  .bash_logout  .bashrc  production.log'); }
+    }
+    return;
+  }
+  if (lower === 'ls /var/log' || lower === 'ls /var/log/') {
+    print('<span class="cyan">nginx</span>  production.log  syslog'); return;
+  }
+
+  // uptime
+  if (lower === 'uptime') {
+    if (!killed) {
+      print(` ${new Date().toLocaleTimeString()} up 47 days,  3:21,  2 users,  load average: <span class="red b">18.43</span><span class="dim">, 17.92, 15.11</span>`);
+    } else {
+      print(` ${new Date().toLocaleTimeString()} up 47 days,  3:25,  2 users,  load average: <span class="green">0.43</span><span class="dim">, 3.21, 9.87</span>`);
+      blank();
+      print('<span class="green">✓ Load average has returned to normal.</span>');
+      endAdventure('free');
+    }
+    return;
+  }
+
+  // ps aux / top / htop
+  if (lower === 'ps aux' || lower === 'ps' || lower === 'top' || lower === 'htop' || lower === 'ps -ef' || lower === 'ps -aux') {
+    print('<span class="dim">USER         PID  %CPU  %MEM   VSZ    RSS  COMMAND</span>');
+    if (!killed) print('<span class="red b">emily      12847 892.1   0.3  45120  6840  node /app/worker.js</span>');
+    ['<span class="dim">emily       1024   2.1   8.4 892344 89432  node /app/server.js</span>','<span class="dim">root         889   0.8   0.1  12324  2840  nginx: master process</span>','<span class="dim">www-data     891   0.4   0.1  12588  2960  nginx: worker process</span>','<span class="dim">emily       2041   0.2   0.1   8912  2240  sshd: emily@pts/0</span>','<span class="dim">emily       2042   0.1   0.0   4456  1920  bash</span>'].forEach(l => print(l));
+    if (killed) { blank(); print('<span class="dim">(No runaway process — looks clean.)</span>'); }
+    return;
+  }
+
+  // kill -9 12847 (the right one)
+  if (lower === 'kill -9 12847' || lower === 'kill 12847' || lower === 'kill -15 12847' || lower === 'pkill -9 node' || lower === 'pkill node') {
+    if (killed) { print('<span class="dim">kill: (12847): No such process</span>'); return; }
+    adventureState.killed = true;
+    print('<span class="dim">[1]+  Killed                  node /app/worker.js</span>');
+    blank();
+    print('<span class="yellow">✓ Process terminated. Now verify the server is recovering.</span>');
+    print('<span class="dim">Try: uptime  or  curl localhost:3000/health</span>');
+    return;
+  }
+
+  // kill with wrong PID
+  if (/^kill\b/.test(lower)) {
+    const m = v.match(/\d+/);
+    if (m && m[0] !== '12847') { print(`<span class="dim">kill: (${m[0]}): No such process</span>`); return; }
+  }
+
+  // grep
+  if (lower.startsWith('grep') || lower.startsWith('egrep') || lower.startsWith('zgrep')) {
+    if (lower.includes('error') || lower.includes('ERROR')) {
+      if (!killed) {
+        ['<span class="red">[14:23:44] ERROR  DB connection pool exhausted (50/50 in use)</span>','<span class="red">[14:23:48] ERROR  POST /api/data — timeout after 30000ms</span>','<span class="red">[14:23:51] ERROR  POST /api/data — timeout after 30000ms</span>'].forEach(l => print(l));
+      } else {
+        print('<span class="dim">[14:24:03] INFO   Health check: OK ✓  (no new errors)</span>');
+      }
+    } else if (lower.includes('12847')) {
+      if (!killed) print('<span class="red">emily     12847 892.1   0.3  45120  6840  node /app/worker.js</span>');
+      else print('<span class="dim">(no output)</span>');
+    } else {
+      print('<span class="dim">(no matching lines)</span>');
+    }
+    return;
+  }
+
+  // nginx logs
+  if (lower.includes('nginx') && /^(tail|cat|less|more)/.test(lower)) {
+    ['<span class="dim">2024/11/14 14:21:33 [error] 891#891: *18842 connect() failed (111: Connection refused)</span>','<span class="red">2024/11/14 14:21:33 [error] *18843 upstream timed out (110) while reading response header</span>','<span class="red">2024/11/14 14:21:34 [error] *18844 upstream timed out (110) while reading response header</span>','<span class="red">2024/11/14 14:21:35 [error] *18901 connect() failed (111: Connection refused)</span>'].forEach(l => print(l));
+    if (killed) { blank(); print('<span class="dim">2024/11/14 14:24:10 [notice] 889#889: upstream is back at 127.0.0.1:3000</span>'); print('<span class="green">2024/11/14 14:24:10 [notice] no new errors in the last 60s</span>'); }
+    else { print('<span class="dim">... (flooding — ^C to stop)</span>'); }
+    return;
+  }
+
+  // production.log
+  if (lower.includes('production') && /^(tail|cat|less|more)/.test(lower)) {
+    if (!killed) {
+      ['<span class="red">[14:23:44] ERROR  DB connection pool exhausted (50/50 in use)</span>','<span class="red">[14:23:48] ERROR  POST /api/data — timeout after 30000ms</span>','<span class="red">[14:23:51] ERROR  POST /api/data — timeout after 30000ms</span>','<span class="dim">[14:23:55] INFO   Retrying connection... (1/3)</span>','<span class="red">[14:23:58] ERROR  All retry attempts failed</span>'].forEach(l => print(l));
+    } else {
+      ['<span class="yellow">[14:24:01] WARN   Worker PID 12847 terminated (SIGKILL)</span>','<span class="dim">[14:24:01] INFO   Releasing 48 stale DB connections...</span>','<span class="dim">[14:24:02] INFO   DB connection pool reset  (0/50 in use)</span>','<span class="green">[14:24:03] INFO   Health check: OK ✓  (latency: 38ms)</span>','<span class="green">[14:24:03] INFO   Application accepting requests normally</span>'].forEach(l => print(l));
+    }
+    return;
+  }
+
+  // curl
+  if (lower.startsWith('curl')) {
+    const verbose = lower.includes(' -v') || lower.includes(' -i') || lower.includes(' --include');
+    const isHealth = lower.includes('health') || lower.includes('localhost') || lower.includes('127.0.0.1');
+    if (isHealth) {
+      if (!killed) {
+        if (verbose) {
+          ['<span class="dim">* Trying 127.0.0.1:3000...</span>','<span class="dim">* Connection timed out after 10001 milliseconds</span>','<span class="dim">* Closing connection 0</span>','<span class="red">curl: (28) Operation timed out after 10001 milliseconds</span>'].forEach(l => print(l));
+        } else {
+          print('<span class="red">curl: (7) Failed to connect to localhost port 3000: Connection refused</span>');
+        }
+      } else {
+        if (verbose) {
+          ['<span class="dim">* Trying 127.0.0.1:3000...</span>','<span class="dim">* Connected to localhost (127.0.0.1) port 3000 (#0)</span>','<span class="dim">&gt; GET /health HTTP/1.1</span>','<span class="dim">&lt; HTTP/1.1 200 OK</span>','<span class="dim">&lt; Content-Type: application/json</span>','<span class="dim">&lt; X-Response-Time: 38ms</span>',''].forEach(l => print(l));
+        }
+        ['{','  <span class="cyan">"status"</span>:      <span class="green">"healthy"</span>,','  <span class="cyan">"db_pool"</span>:     <span class="dim">"0/50 connections used"</span>,','  <span class="cyan">"latency_ms"</span>:  <span class="green">38</span>','}'].forEach(l => print(l));
+        blank();
+        print('<span class="green">✓ Production is back!</span>');
+        endAdventure('free');
+      }
+    } else {
+      print('<span class="dim">curl: (6) Could not resolve host: ' + escapeHtml(v.split(' ').pop()) + '</span>');
+    }
+    return;
+  }
+
+  // df -h
+  if (lower === 'df -h' || lower === 'df') {
+    ['<span class="dim">Filesystem      Size  Used Avail Use% Mounted on</span>','<span class="dim">/dev/sda1        50G   18G   30G  38% /</span>','<span class="dim">tmpfs           3.9G     0  3.9G   0% /dev/shm</span>','<span class="dim">/dev/sda2       100G   42G   53G  45% /var</span>'].forEach(l => print(l)); return;
+  }
+
+  // free -m
+  if (lower === 'free -m' || lower === 'free -h' || lower === 'free') {
+    ['<span class="dim">               total        used        free      shared  buff/cache   available</span>','<span class="dim">Mem:            7972        4821         312         142        2838        2750</span>','<span class="dim">Swap:           2047           0        2047</span>'].forEach(l => print(l)); return;
+  }
+
+  // systemctl nginx
+  if (lower.includes('nginx') && lower.startsWith('systemctl')) {
+    ['<span class="green">● nginx.service - A high performance web server</span>','<span class="dim">   Loaded: loaded (/lib/systemd/system/nginx.service; enabled)</span>','<span class="green">   Active: active (running) since Mon 2023-10-28 09:00:12 UTC; 47 days ago</span>','<span class="dim">   Note:   Nginx is up — the issue is upstream of nginx.</span>'].forEach(l => print(l)); return;
+  }
+
+  // systemctl app
+  if (lower.startsWith('systemctl')) {
+    if (!killed) {
+      ['<span class="yellow">● app.service - Emily Portfolio Application</span>','<span class="dim">   Loaded: loaded (/etc/systemd/system/app.service; enabled)</span>','<span class="yellow">   Active: activating (auto-restart) since Mon 2023-11-14 14:21:30 UTC; 2min ago</span>','<span class="red">   Status: "Connection pool exhausted — worker process unresponsive"</span>'].forEach(l => print(l));
+    } else {
+      ['<span class="green">● app.service - Emily Portfolio Application</span>','<span class="dim">   Loaded: loaded (/etc/systemd/system/app.service; enabled)</span>','<span class="green">   Active: active (running) since Mon 2023-11-14 14:24:03 UTC</span>','<span class="dim">   Status: "Accepting requests normally"</span>'].forEach(l => print(l));
+    }
+    return;
+  }
+
+  // journalctl
+  if (lower.startsWith('journalctl')) {
+    if (!killed) {
+      ['<span class="dim">-- Logs begin at Sat 2023-09-28 09:00:00 UTC --</span>','<span class="red">Nov 14 14:21:30 prod-server-01 app[1024]: ERROR: DB pool exhausted</span>','<span class="red">Nov 14 14:21:33 prod-server-01 nginx[889]: upstream timed out</span>','<span class="red">Nov 14 14:21:35 prod-server-01 nginx[889]: connect() failed</span>','<span class="dim">... (repeating every ~1 second)</span>'].forEach(l => print(l));
+    } else {
+      ['<span class="dim">-- Logs begin at Sat 2023-09-28 09:00:00 UTC --</span>','<span class="yellow">Nov 14 14:24:01 prod-server-01 kernel: node[12847]: killed (SIGKILL)</span>','<span class="dim">Nov 14 14:24:02 prod-server-01 app[1024]: pool reset, connections released</span>','<span class="green">Nov 14 14:24:03 prod-server-01 app[1024]: health check OK, serving requests</span>'].forEach(l => print(l));
+    }
+    return;
+  }
+
+  // history
+  if (lower === 'history') {
+    const h = commandHistory.slice(-10);
+    h.forEach((c, i) => print(`<span class="dim">  ${commandHistory.length - h.length + i + 1}  ${escapeHtml(c)}</span>`)); return;
+  }
+
+  // unknown
+  print(`<span class="dim">bash: ${escapeHtml(v.split(' ')[0])}: command not found</span>`);
+}
+
+function abandonAdventure() {
+  adventureState = { active: false, mode: 'none', phase: 'idle', step: 0, mockCwd: '/home/emily', killed: false };
+  syncAdventureInputPrompt();
+  blank();
+  print('<span class="dim">Incident abandoned. Type <span class="accent">adventure</span> to try again.</span>');
+}
+
+function endAdventure(mode) {
+  adventureState = { active: false, mode: 'none', phase: 'idle', step: 0, mockCwd: '/home/emily', killed: false };
+  syncAdventureInputPrompt();
+  blank();
+  print('<span class="green b">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>');
+  print('<span class="green b">✅  INCIDENT RESOLVED — Total downtime: ~4 min</span>');
+  print('<span class="green b">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>');
+  blank();
+  print('<span class="accent">Root cause:</span> Runaway worker (PID 12847) held 48 DB connections open,');
+  print('exhausting the pool and timing out every request behind it.');
+  blank();
+  print('<span class="accent">What you used:</span>');
+  print('  <span class="cyan">tail -f nginx/error.log</span>  → upstream errors → problem is app-side');
+  print('  <span class="cyan">uptime</span>               → critically high load → something eating CPU');
+  print('  <span class="cyan">ps aux</span>               → runaway PID 12847 at 892% CPU');
+  print('  <span class="cyan">kill -9 12847</span>        → force-terminated (SIGKILL)');
+  print('  <span class="cyan">tail -f production.log</span> → confirmed DB pool recovery');
+  print('  <span class="cyan">curl .../health</span>      → 200 OK, production confirmed healthy');
+  blank();
+  if (mode === 'free') {
+    print('<span class="dim">You found it yourself — that\'s real SRE instinct. 🎯</span>');
+  } else {
+    print('<span class="dim">You followed the incident response playbook perfectly. 📋</span>');
+  }
+  blank();
+  print('Curious about more hidden commands? Type <span class="accent">egghunt</span> to hunt for 20+. 🥚');
+  blank();
+  renderChips(CHIP_NAMES);
 }
 
 async function boot(){
