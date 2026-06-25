@@ -1712,6 +1712,7 @@ const FS_CONTENTS = {
   '/home/emily/portfolio': [
     { name: '.egg',             type: 'file', size: '1'    },
     { name: 'about.md',         type: 'file', size: '2.3K' },
+    { name: 'changelog.md',     type: 'file', size: '1.4K' },
     { name: 'resume.pdf',       type: 'file', size: '128K' },
     { name: 'projects',         type: 'dir',  size: '4.0K' },
     { name: 'skills',           type: 'dir',  size: '4.0K' },
@@ -1746,6 +1747,34 @@ const FS_CONTENTS = {
 
 const FILE_CONTENT = {
   '/home/emily/portfolio/.egg': ['__EASTER_EGG__'],
+  '/home/emily/portfolio/changelog.md': [
+    '# CHANGELOG.md',
+    '',
+    '<span class="accent b">v1.0</span>',
+    '  • <span class="cyan">adventure</span>   — simulate a live P0 server incident in the terminal',
+    '  • <span class="cyan">testimonials</span> — dot indicators + 4.5s auto-advance carousel in reader view',
+    '  • guestbook moderation via soft-hide flag (no data deleted)',
+    '  • fixed: window drag broken after maximize → restore',
+    '  • help chips: whyhireme easter egg surfaced as a teaser',
+    '',
+    '<span class="accent b">v0.9</span>',
+    '  • <span class="cyan">egghunt</span>     — timed hunt for 20+ hidden commands, server-side scoring',
+    '  • <span class="cyan">leaderboard</span> — filter by difficulty and category',
+    '  • guestbook: rate limiting, profanity filter, link redaction',
+    '',
+    '<span class="accent b">v0.5</span>',
+    '  • <span class="cyan">quiz</span>        — trivia with difficulty picker and post-quiz review',
+    '  • themes: dark / light / brown, switchable via command or URL param',
+    '  • <span class="cyan">neofetch</span>    — system info in ASCII art',
+    '  • reader view: responsive nav, section deep-links, copy icons',
+    '',
+    '<span class="accent b">v0.1</span>',
+    '  • initial release — vanilla JS terminal portfolio',
+    '  • about, skills, projects, contact, cv commands',
+    '  • macOS window controls with minimize / maximize',
+    '',
+    '<span class="dim">→ type </span><span class="accent">credits</span><span class="dim"> to see who built this</span>',
+  ],
   '/home/emily/portfolio/about.md': [
     '# about.md', '',
     ...CONFIG.about.flatMap(p => [p, '']),
@@ -2480,6 +2509,7 @@ const commands = {
     if (currentDir === '/home/emily/portfolio') {
       print('.');
       print('├── <span class="cyan b">about.md</span>');
+      print('├── <span class="cyan b">changelog.md</span>');
       print('├── <span class="cyan b">projects</span>');
       print('│   ├── terminal-portfolio');
       print('│   ├── postgresql-calculator');
@@ -2492,7 +2522,7 @@ const commands = {
       print('├── <span class="cyan b">quotes</span>');
       print('└── <span class="cyan b">dadjokes</span>');
       blank();
-      print('<span class="dim">8 directories, 16 files</span>');
+      print('<span class="dim">8 directories, 17 files</span>');
     } else if (currentDir === '/home/emily/portfolio/projects') {
       print('.');
       print('├── terminal-portfolio');
