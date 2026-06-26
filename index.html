@@ -650,7 +650,7 @@ const TESTIMONIALS = [
   .t-slide-quote::after  { content: '"'; color: var(--magenta); font-weight: 700; font-style: normal; }
   .t-slide-full { font-size: 14px; color: var(--fg); line-height: 1.7; margin-top: 10px; display: none; }
   .t-slide-full p { margin: 0 0 0.8em; }
-  .t-dots { display:flex; justify-content:center; gap:10px; margin:12px 0 2px; }
+  .t-dots { display:flex; justify-content:center; gap:10px; }
   .t-dot  { width:20px; height:20px; border-radius:50%; background:transparent;
              border:none; cursor:pointer; padding:0; position:relative; }
   .t-dot::after { content:''; position:absolute; inset:6px; border-radius:50%;
@@ -1247,9 +1247,9 @@ function buildReader(){
       <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
       <div class="gb-book" id="t-carousel">
         <div id="t-slide"></div>
-        <div id="t-dots" class="t-dots"></div>
         <div class="gb-book-nav">
           <button class="gb-nav-btn" id="t-prev">←</button>
+          <div id="t-dots" class="t-dots"></div>
           <button class="gb-nav-btn" id="t-next">→</button>
         </div>
       </div>
