@@ -1635,7 +1635,7 @@ function sanitizeGuestbook(s){
   return String(s)
     .replace(/https?:\/\/[^\s<]+/gi, '[link removed]')
     .replace(/www\.[^\s<]+/gi, '[link removed]')
-    .replace(/\b[a-zA-Z0-9._%+-]+\.[a-z]{2,}\b/gi, match => {
+    .replace(/\b[a-zA-Z0-9_%+-]+(?:\.[a-zA-Z0-9_%+-]+)*\.[a-z]{2,}\b/gi, match => {
       // Obfuscate .com, .org, .net, etc. to prevent clickable links
       return match.replace(/\./g, '[.]');
     });
