@@ -1550,7 +1550,7 @@ function el(tag, cls, html){
   return e;
 }
 
-const CHIP_NAMES = ['about','skills','projects','strengths','contact','cv','quote','dadjoke','testimonials','quiz','leaderboard','guestbook','egghunt','neofetch','credits','theme','clear','help','adventure','whyhireme'];
+const CHIP_NAMES = ['about','whyhireme','skills','projects','strengths','contact','cv','testimonials','guestbook','quiz','adventure','theme','help'];
 
 /* ponytail: single source of truth for chips — boot + help both call this */
 function renderChips(){
@@ -3667,9 +3667,7 @@ async function runWelcome(){
   }
   blank();
   print('<span class="dim">Tip: tap a chip below, or type a command ↓</span>');
-  if (!isMobile()) {
-    print('<span class="dim">New to terminals? Click <span class="accent">▤ reader view</span> (top-right) for a plain page.</span>');
-  }
+  print('<span class="dim">New to terminals? Tap <span class="accent">▤ reader view</span> (top-right) for a plain page.</span>');
   renderChips();
 }
 
