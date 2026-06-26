@@ -1348,6 +1348,7 @@ function buildReader(){
         full.style.display = expanded ? 'none' : 'block';
         quote.style.display = expanded ? '' : 'none';
         btn.textContent = expanded ? 'read more' : 'show less';
+        if (!expanded) clearInterval(tAutoTimer); // stop permanently when reading
       });
     }
 
