@@ -5,24 +5,26 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
 ## Features
 
 * **Dual View Modes:**
+    * **Reader View (default):** A clean, accessible, scrollable layout — the first thing visitors see.
     * **Terminal View:** A fully functional, interactive CLI environment with command history, autocomplete, and fuzzy-matching for commands.
-    * **Reader View:** A clean, accessible, and readable layout for users who prefer standard web navigation.
 * **macOS Window Controls:** Functional traffic light buttons (🔴 close, 🟡 minimize, 🟢 maximize) with smooth animations, keyboard shortcuts (Esc, ⌘+M, ⌘+F), and state persistence via localStorage.
+* **Adventure Mode:** A simulated P0 server incident — `adventure` shows an overview, `adventure guide` walks through real Linux commands step-by-step, `adventure start` lets you explore freely. Teaches terminal skills while uncovering easter eggs.
 * **Interactive Trivia Quiz:**
     * Select difficulty interactively or specify: `quiz easy`, `quiz medium`, `quiz hard`, `quiz emily`
     * Questions stored in Supabase, server-side scoring via edge functions
     * Post-quiz review of incorrect answers
 * **Easter Egg Hunt:** Timed hunt for 20+ hidden commands — server-side session tracking prevents score spoofing
 * **Leaderboard:** Filter by difficulty or category — `leaderboard easy`, `leaderboard emily`, `leaderboard egg-hunt`
-* **Guestbook:** Sign and read messages — `guestbook` / `guestbook sign` (profanity filtering, link redaction, spam protection)
-* **Testimonials:** LinkedIn recommendations displayed with progressive expansion — `testimonials`, `testimonials all`
+* **Guestbook:** Sign and read messages — `guestbook` / `guestbook sign` (profanity filtering, link redaction, spam protection, soft-hide moderation via `hidden` column)
+* **Testimonials:** LinkedIn recommendations in an auto-advancing carousel (4.5s, pause on hover, dot indicators) with progressive "read more" expansion — in both reader and terminal views
+* **Mock Filesystem:** Explorable directory at `/home/emily/portfolio` — `ls`, `cat`, `tree`, `cd` all work; includes `about.md`, `changelog.md`, `status.txt`, `contact.txt`, project READMEs, and a hidden easter egg
 * **Quote Command:** Random inspirational quotes with options — `quote -n 5`, `quote --all`
 * **Dad Jokes:** Terrible jokes with options — `dadjoke -n 3`, `dadjoke --all`
 * **Linux Commands:** Authentic terminal experience with `ls`, `pwd`, `whoami`, `id`, `uname`, `cat`, `tree`, `man`, and more
 * **Command History:** Arrow keys to cycle through history, `!!` to repeat last command, `history` to view
-* **Easter Eggs:** 20+ hidden commands to discover (`resume`, `whyhireme`, `uptime`, `tail -f production.log`, `sudo make me a sandwich`, `salary`, and more)
+* **Easter Eggs:** 20+ hidden commands to discover (`whyhireme`, `uptime`, `tail -f production.log`, `sudo make me a sandwich`, `salary`, and more)
 * **Themes:** Dark, Light, and Brown themes — switchable via dot buttons in the title bar, the `theme` terminal command, or the `?theme=brown` URL parameter (useful for CV links).
-* **Responsive Design:** Fully fluid layout that adjusts from desktop terminals to mobile device touch targets.
+* **Responsive Design:** Fully fluid layout that adjusts from desktop terminals to mobile device touch targets. Reader view is the default on all devices.
 * **Performance:** Zero frontend dependencies (Supabase JS client loaded via CDN), lightning-fast loading, no build process required.
 * **Analytics:** Built-in privacy-friendly visitor tracking with referrer analysis (no cookies, no third-party services).
 
@@ -65,6 +67,7 @@ portfolio/
    - `20240101000003_add_question_status.sql` — question status/publishing
    - `20240101000004_add_page_views_tracking.sql` — analytics table
    - `20240101000005_add_egg_hunt_sessions.sql` — server-side egg hunt sessions
+   - Run manually: `ALTER TABLE guestbook ADD COLUMN IF NOT EXISTS hidden boolean NOT NULL DEFAULT false;`
 3. Deploy all edge functions:
    ```bash
    supabase functions deploy start-quiz --no-verify-jwt
@@ -168,7 +171,7 @@ ORDER BY visits DESC;
 - **XSS prevention**: all user-supplied and DB-sourced content is HTML-escaped before rendering
 - **Session ownership**: quiz sessions are bound to the creating IP hash — can't be hijacked and submitted by another IP
 - **Server-side egg hunt scoring**: each egg discovery is registered server-side; the submit endpoint reads the DB count, ignoring any client-supplied value
-- **Guestbook**: profanity filter, link redaction, honeypot field, rate limiting (5 posts/hour/IP), SHA-256 IP hashing
+- **Guestbook**: profanity filter, link redaction, honeypot field, rate limiting (5 posts/hour/IP), SHA-256 IP hashing, soft-hide moderation (`hidden` column, default false)
 - **RLS**: all tables use Row Level Security; edge functions run with the service role key server-side only
 
 ## Customization
@@ -193,6 +196,7 @@ Everything is configured via a single `CONFIG` object inside the `<script>` tag 
 | :--- | :--- |
 | `help` | Displays all available commands |
 | `about` | Shows your professional summary |
+| `whyhireme` | Makes the case for hiring you — checklist + email link |
 | `skills` | Lists your technical stack and expertise |
 | `projects` | Displays your portfolio highlights |
 | `strengths` | Shows your CliftonStrengths |
@@ -209,6 +213,9 @@ Everything is configured via a single `CONFIG` object inside the `<script>` tag 
 
 | Command | Description |
 | :--- | :--- |
+| `adventure` | Overview of the terminal tutorial & easter egg hunt |
+| `adventure guide` | Step-by-step walkthrough of real Linux/server commands |
+| `adventure start` | Free explore mode — the server is yours to investigate |
 | `quiz` | Start a trivia quiz (interactive difficulty selection) |
 | `quiz easy` / `medium` / `hard` / `emily` | Start with a specific difficulty/category |
 | `leaderboard` | View top quiz scores |
@@ -232,7 +239,7 @@ Everything is configured via a single `CONFIG` object inside the `<script>` tag 
 | `whoami` / `whoami -v` | Display current user |
 | `id` | Show user ID and groups |
 | `uname -a` | System information |
-| `cat <file>` | Read file contents (`about.md`, `contact.txt`, etc.) |
+| `cat <file>` | Read file contents (`about.md`, `changelog.md`, `contact.txt`, etc.) |
 | `tree` | Display directory structure |
 | `man <cmd>` | Show manual page |
 | `history` | View last 20 commands |
