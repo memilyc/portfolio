@@ -1550,7 +1550,7 @@ function el(tag, cls, html){
   return e;
 }
 
-const CHIP_NAMES = ['about','whyhireme','skills','projects','strengths','contact','cv','testimonials','guestbook','quiz','adventure','theme','help'];
+const CHIP_NAMES = ['about','whyhireme','skills','projects','strengths','contact','cv','testimonials','guestbook','quiz','adventure','neofetch','theme','help'];
 
 /* ponytail: single source of truth for chips — boot + help both call this */
 function renderChips(){
@@ -1867,7 +1867,7 @@ const commands = {
     print('  <span class="cyan">skills</span>             Show technical skills');
     print('  <span class="cyan">strengths</span>          Show CliftonStrengths themes');
     print('  <span class="cyan">contact</span>            Show contact information');
-    print('  <span class="cyan">cv</span>               Open my résumé in browser');
+    print('  <span class="cyan">cv</span>                 Open my résumé in browser');
     blank();
     print('  <span class="cyan">quote</span>              Print a random quote');
     print('  <span class="cyan">dadjoke</span>            Tell a random dad joke');
@@ -1878,7 +1878,7 @@ const commands = {
     print('  <span class="cyan">guestbook</span>          Read or sign the guestbook');
     print('  <span class="cyan">egghunt</span>            Hunt for hidden easter egg commands 🥚');
     blank();
-    print('  <span class="cyan">adventure</span>          Terminal tutorial & easter egg hunt');
+    print('  <span class="cyan">adventure</span>          Start a simulated server incident adventure');
     print('  <span class="cyan">adventure guide</span>    Step-by-step walkthrough of real server commands');
     print('  <span class="cyan">adventure start</span>    Free explore — the server is yours');
     print('  <span class="cyan">neofetch</span>           System information');
@@ -2364,12 +2364,12 @@ const commands = {
     if (args === 'guide') { startAdventure('guided'); return; }
     if (args === 'start') { startAdventure('free');   return; }
     blank();
-    print('<span class="accent b">adventure</span> <span class="dim">— terminal tutorial & easter egg hunt</span>');
+    print('<span class="accent b">adventure</span> <span class="dim">— Start a simulated server incident adventure</span>');
     blank();
     print('  Type <span class="accent">adventure guide</span>  for a step-by-step walkthrough of real server commands.');
     print('  Type <span class="accent">adventure start</span>  to explore freely — the server is yours to investigate.');
     blank();
-    print('<span class="dim">Either way, you\'ll uncover hidden easter eggs along the way. 🥚</span>');
+    print('<span class="dim">Some commands will help you in your easter eggs hunt. 🥚</span>');
   },
   credits(){
     print('<span class="dim">$ cat credits.txt</span>');
