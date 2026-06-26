@@ -1097,7 +1097,6 @@ function copySectionLink(section, e){
 }
 
 function buildReaderGuestbookForm(container) {
-  const PER_PAGE = 4;
   container.innerHTML = '<p class="r-gb-status dim" id="gb-loading">Loading entries...</p>';
   fetch(`${CONFIG.supabase.url}/rest/v1/guestbook?select=nickname,message,created_at&hidden=is.false&order=created_at.desc&limit=50`, {
     headers: { apikey: CONFIG.supabase.anonKey, Authorization: `Bearer ${CONFIG.supabase.anonKey}` }
@@ -1106,6 +1105,9 @@ function buildReaderGuestbookForm(container) {
 
         let bookHtml = '';
         if (Array.isArray(data) && data.length) {
+          // spread entries evenly: aim for ~5 per page, but distribute cleanly
+          const numPages = Math.max(1, Math.round(data.length / 5));
+          const PER_PAGE = Math.ceil(data.length / numPages);
           const pages = Math.ceil(data.length / PER_PAGE);
           bookHtml = `
             <div class="gb-book">
@@ -1140,16 +1142,6 @@ function buildReaderGuestbookForm(container) {
             document.getElementById('gb-next').disabled = page >= pages - 1;
           };
           renderPage(null);
-
-          // Measure every page to find the tallest, then lock that as min-height
-          const list = document.getElementById('gb-entries');
-          let maxH = 0;
-          for (let p = 0; p < pages; p++) {
-            list.innerHTML = data.slice(p * PER_PAGE, (p + 1) * PER_PAGE).map(toRow).join('');
-            maxH = Math.max(maxH, list.scrollHeight);
-          }
-          list.style.minHeight = maxH + 'px';
-          list.innerHTML = data.slice(0, PER_PAGE).map(toRow).join(''); // restore page 0
 
           document.getElementById('gb-prev').addEventListener('click', () => { page--; renderPage('prev'); });
           document.getElementById('gb-next').addEventListener('click', () => { page++; renderPage('next'); });
