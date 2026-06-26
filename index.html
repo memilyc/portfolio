@@ -1878,7 +1878,9 @@ const commands = {
     print('  <span class="cyan">guestbook</span>          Read or sign the guestbook');
     print('  <span class="cyan">egghunt</span>            Hunt for hidden easter egg commands 🥚');
     blank();
-    print('  <span class="cyan">adventure</span>          P0 incident story — save the server! (guide/free)');
+    print('  <span class="cyan">adventure</span>          Terminal tutorial & easter egg hunt');
+    print('  <span class="cyan">adventure guide</span>    Step-by-step walkthrough of real server commands');
+    print('  <span class="cyan">adventure start</span>    Free explore — the server is yours');
     print('  <span class="cyan">neofetch</span>           System information');
     print('  <span class="cyan">credits</span>            Project credits');
     print('  <span class="cyan">theme</span>              Toggle light/dark theme');
@@ -2359,7 +2361,15 @@ const commands = {
     if (adventureState.active) {
       print('<span class="dim">Adventure already in progress. Type <span class="accent">quit</span> to exit.</span>'); return;
     }
-    startAdventure(args === 'guide');
+    if (args === 'guide') { startAdventure('guided'); return; }
+    if (args === 'start') { startAdventure('free');   return; }
+    blank();
+    print('<span class="accent b">adventure</span> <span class="dim">— terminal tutorial & easter egg hunt</span>');
+    blank();
+    print('  Type <span class="accent">adventure guide</span>  for a step-by-step walkthrough of real server commands.');
+    print('  Type <span class="accent">adventure start</span>  to explore freely — the server is yours to investigate.');
+    blank();
+    print('<span class="dim">Either way, you\'ll uncover hidden easter eggs along the way. 🥚</span>');
   },
   credits(){
     print('<span class="dim">$ cat credits.txt</span>');
@@ -3426,14 +3436,6 @@ cmdline.addEventListener('keydown', e => {
       const trimmed = v.trim();
       const lower = trimmed.toLowerCase();
 
-      if (adventureState.phase === 'picking') {
-        printPromptEcho(trimmed);
-        if (lower === 'guide') { startGuided(); }
-        else if (lower === 'quit' || lower === 'exit') { abandonAdventure(); }
-        else { startFree(trimmed); }
-        return;
-      }
-
       if (adventureState.phase === 'guided-awaitEnter') {
         if (trimmed) printPromptEcho(trimmed);
         showAdventureStep(adventureState.step + 1);
@@ -3764,8 +3766,8 @@ const ADVENTURE_STEPS = [
   },
 ];
 
-function startAdventure(autoGuide = false) {
-  adventureState = { active: true, mode: 'none', phase: 'picking', step: 0, mockCwd: '/home/emily', killed: false };
+function startAdventure(mode) {
+  adventureState = { active: true, mode: 'none', phase: 'idle', step: 0, mockCwd: '/home/emily', killed: false };
   syncAdventureInputPrompt();
   blank();
   print('<span class="red b">🚨  PRODUCTION ALERT — P0 INCIDENT</span>');
@@ -3774,10 +3776,8 @@ function startAdventure(autoGuide = false) {
   print('<span class="dim">Affected users: <span class="red">1,247</span>  |  Incident started: 3 min ago</span>');
   print('<span class="dim">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>');
   blank();
-  if (autoGuide) { startGuided(); return; }
-  print("New to terminal?  Type <span class=\"accent\">guide</span>  for step-by-step help.");
-  print("Experienced?      Just start typing — the server is yours.");
-  print('<span class="dim">Type <span class="accent">quit</span> at any time to abandon the incident.</span>');
+  if (mode === 'guided') { startGuided(); return; }
+  startFree();
 }
 
 function startGuided() {
