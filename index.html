@@ -717,6 +717,7 @@ const TESTIMONIALS = [
     border-radius: 5px;
     cursor: pointer;
     transition: border-color 0.15s, color 0.15s;
+    touch-action: manipulation;
   }
   .gb-nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
   .gb-nav-btn:disabled { opacity: 0.25; cursor: default; }
@@ -2835,7 +2836,7 @@ const commands = {
     wrap.appendChild(chips);
     screen.appendChild(wrap);
     screen.scrollTop = screen.scrollHeight;
-    print('<span class="dim">Or type 1–5 / easy / medium / hard / emily:</span>');
+    print('<span class="dim">Or type 1–5 / easy / medium / hard / emily · <span class="accent">q</span> to cancel:</span>');
     quizState.phase = 'picking';
   },
 
@@ -3243,7 +3244,7 @@ function showQuizQuestion(){
   print(`  <span class="yellow b">c)</span> ${escapeHtml(q.option_c)}`);
   print(`  <span class="yellow b">d)</span> ${escapeHtml(q.option_d)}`);
   blank();
-  print('<span class="dim">Your answer (a/b/c/d):</span>');
+  print('<span class="dim">Your answer (a/b/c/d) · type <span class="accent">q</span> to quit:</span>');
 }
 
 function showWrongAnswers(){
@@ -3572,16 +3573,16 @@ cmdline.addEventListener('keydown', e => {
       const pick = v.trim().toLowerCase();
       printPromptEcho(pick);
       if (['1','2','3','4','5','easy','medium','hard','mixed','emily'].includes(pick)) { quizState.phase = 'idle'; commands._startQuiz(pick); }
-      else if (pick === 'quit' || pick === 'cancel') { quizState.phase = 'idle'; print('<span class="dim">Cancelled.</span>'); }
-      else { print('<span class="yellow">Pick 1–5, or type easy / medium / hard / mixed / emily</span>'); }
+      else if (['q','quit','cancel','exit'].includes(pick)) { quizState.phase = 'idle'; print('<span class="dim">Cancelled.</span>'); }
+      else { print('<span class="yellow">Pick 1–5, or type easy / medium / hard / mixed / emily · <span class="accent">q</span> to cancel</span>'); }
       return;
     }
 
     if (quizState.phase === 'playing') {
       const ans = v.trim().toLowerCase();
-      if (ans === 'quit') { printPromptEcho('quit'); print('<span class="yellow">Quiz abandoned.</span>'); resetQuizState(); blank(); }
+      if (['q','quit','exit'].includes(ans)) { printPromptEcho(ans); print('<span class="yellow">Quiz abandoned.</span>'); resetQuizState(); blank(); }
       else if (['a','b','c','d'].includes(ans)) { printPromptEcho(ans); submitQuizAnswer(ans); }
-      else { printPromptEcho(v); print('<span class="yellow">Type a, b, c, or d to answer. Type quit to abandon.</span>'); }
+      else { printPromptEcho(v); print('<span class="yellow">Type a, b, c, or d · <span class="accent">q</span> to quit</span>'); }
       return;
     }
 
