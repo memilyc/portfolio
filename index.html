@@ -185,7 +185,7 @@ const TESTIMONIALS = [
     border-bottom: 1px solid var(--border);
     user-select: none;
   }
-  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; border: none; }
   .dot.r { background: #ff5f57; }
   .dot.y { background: #febc2e; }
   .dot.g { background: #28c840; }
@@ -214,21 +214,6 @@ const TESTIMONIALS = [
     white-space: nowrap;
   }
   .bar-btn:hover { color: var(--accent); border-color: var(--accent); }
-  .theme-btn-group { display: flex; gap: 4px; }
-  .theme-dot-btn {
-    flex: 0 0 auto;
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: border-color 0.2s, transform 0.15s;
-    padding: 0;
-  }
-  .theme-dot-btn:hover { transform: scale(1.2); }
-  .theme-dot-btn.active { border-color: var(--accent); }
-  .theme-dot-btn[data-t="dark"]  { background: #0b0e14; }
-  .theme-dot-btn[data-t="light"] { background: #e8e3d6; }
-  .theme-dot-btn[data-t="brown"] { background: #7d7564; }
 
   /* ── Drag & Resize ─────────────────────────────────────── */
   .window.user-positioned {
@@ -307,6 +292,7 @@ const TESTIMONIALS = [
   }
 
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; }
+  #mobile-chips { display: none; }
   .chip {
     background: transparent;
     border: 1px solid var(--border);
@@ -466,6 +452,8 @@ const TESTIMONIALS = [
   .r-nav.nav-compact .r-nav-dropdown { top: auto; bottom: 100%; border-top: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0; margin-bottom: 0; }
 
   [data-view="terminal"] .reader { display: none; }
+  [data-view="terminal"] #r-nav { display: none; }
+  [data-view="reader"] #mobile-chips { display: none !important; }
   [data-view="reader"] .screen,
   [data-view="reader"] .input-row { display: none !important; }
 
@@ -846,6 +834,12 @@ const TESTIMONIALS = [
       border-top-width: 1px;
       flex-shrink: 0;
     }
+    #mobile-chips.mc-visible { display: block; flex-shrink: 0; border-top: 1px solid var(--border); background: var(--bg-bar); }
+    #mobile-chips-toggle { width: 100%; text-align: left; padding: 9px 14px; font-size: 12px; font-family: inherit; color: var(--dim); background: none; border: none; cursor: pointer; }
+    #mobile-chips-toggle:hover { color: var(--fg); }
+    #mobile-chips-grid { display: none; flex-wrap: wrap; gap: 6px; padding: 6px 13px 10px; }
+    #mobile-chips.mc-open #mobile-chips-grid { display: flex; }
+    #mobile-chips .chip { font-size: 12px; padding: 6px 10px; }
     #cmdline, .ghost { font-size: 16px; } /* 16px prevents iOS auto-zoom */
     .ps { font-size: 13px; }
     .hint { display: none; }
@@ -896,14 +890,11 @@ const TESTIMONIALS = [
       <button class="dot g" id="dotMaximize" aria-label="Maximize" title="Fill screen"></button>
       <span class="title">memilyc@portfolio: ~</span>
       <button class="bar-btn" id="viewBtn" aria-label="Switch view">▤ reader view</button>
-      <div class="theme-btn-group" aria-label="Choose theme">
-        <button class="theme-dot-btn" data-t="dark"  title="Dark theme"  aria-label="Dark theme"></button>
-        <button class="theme-dot-btn" data-t="light" title="Light theme" aria-label="Light theme"></button>
-        <button class="theme-dot-btn" data-t="brown" title="Brown theme" aria-label="Brown theme"></button>
-      </div>
+      <button class="bar-btn" id="themeCycleBtn" aria-label="Switch theme">◑ theme: dark</button>
     </div>
     <div class="screen" id="screen"></div>
     <div class="reader" id="reader"></div>
+    <div id="mobile-chips"></div>
     <div class="input-row" id="inputRow" style="display:none;">
       <span class="ps"><span>memilyc@portfolio</span>:<span class="path">~</span>$</span>
       <span class="input-wrap">
@@ -982,7 +973,7 @@ const CONFIG = {
 const screen   = document.getElementById('screen');
 const inputRow = document.getElementById('inputRow');
 const cmdline  = document.getElementById('cmdline');
-const themeDotBtns = document.querySelectorAll('.theme-dot-btn');
+const themeCycleBtn = document.getElementById('themeCycleBtn');
 const viewBtn  = document.getElementById('viewBtn');
 const reader   = document.getElementById('reader');
 const root     = document.documentElement;
@@ -1077,7 +1068,7 @@ const THEME_CYCLE = ['dark', 'light', 'brown'];
 
 function applyTheme(t){
   root.setAttribute('data-theme', t);
-  themeDotBtns.forEach(b => b.classList.toggle('active', b.dataset.t === t));
+  if (themeCycleBtn) themeCycleBtn.textContent = `◑ theme: ${t}`;
   safeSave('portfolio-theme', t);
 }
 (function initTheme(){
@@ -1087,7 +1078,11 @@ function applyTheme(t){
   if (THEME_CYCLE.includes(param)) t = param;
   applyTheme(t);
 })();
-themeDotBtns.forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.t)));
+themeCycleBtn.addEventListener('click', () => {
+  const cur = root.getAttribute('data-theme');
+  const next = THEME_CYCLE[(THEME_CYCLE.indexOf(cur) + 1) % THEME_CYCLE.length];
+  applyTheme(next);
+});
 
 /* ponytail: generate copy link icon for section headers */
 function sectionCopyIcon(section){
@@ -1599,6 +1594,42 @@ function renderChips(){
   });
   wrap.appendChild(chips);
   screen.appendChild(wrap);
+}
+function renderMobileChips(){
+  const wrap = document.getElementById('mobile-chips');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  const toggle = document.createElement('button');
+  toggle.id = 'mobile-chips-toggle';
+  toggle.textContent = '▸ recommended commands';
+  toggle.onclick = () => {
+    const open = wrap.classList.toggle('mc-open');
+    toggle.textContent = open ? '▾ recommended commands' : '▸ recommended commands';
+  };
+
+  const grid = document.createElement('div');
+  grid.id = 'mobile-chips-grid';
+  CHIP_NAMES.forEach(n => {
+    const b = el('button','chip', n);
+    b.onclick = () => {
+      runCommand(n);
+      wrap.classList.remove('mc-open');
+      toggle.textContent = '▸ commands';
+    };
+    grid.appendChild(b);
+  });
+
+  wrap.appendChild(toggle);
+  wrap.appendChild(grid);
+}
+
+let mobileChipsReady = false;
+function showMobileChips(){
+  if (mobileChipsReady || !isMobileNow()) return;
+  mobileChipsReady = true;
+  const wrap = document.getElementById('mobile-chips');
+  if (wrap) wrap.classList.add('mc-visible');
 }
 
 function print(html, cls){
@@ -3454,6 +3485,7 @@ function runCommand(raw){
     print(`<span class="red">command not found: ${escapeHtml(cmd)}</span> — type <span class="accent">help</span>`);
   }
   blank();
+  showMobileChips();
 }
 
 cmdline.addEventListener('input', () => { tab.active = false; updateGhost(); });
@@ -3706,9 +3738,10 @@ async function runWelcome(){
     commands.about();
   }
   blank();
-  print('<span class="dim">Tip: tap a chip below, or type a command ↓</span>');
+  print('<span class="dim">Tip: use the shortcuts below, or type a command ↓</span>');
   print('<span class="dim">New to terminals? Tap <span class="accent">▤ reader view</span> (top-right) for a plain page.</span>');
   renderChips();
+  renderMobileChips();
 }
 
 // ── Guided Tour ─────────────────────────────────────────────
