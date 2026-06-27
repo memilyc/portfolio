@@ -1385,9 +1385,9 @@ function buildReader(){
 
     const car = document.getElementById('t-carousel');
     car.addEventListener('mouseenter', () => clearInterval(tAutoTimer));
-    car.addEventListener('mouseleave', () => startTTimer());
+    car.addEventListener('mouseleave', () => { if (!isMobileNow()) startTTimer(); });
 
-    startTTimer();
+    if (!isMobileNow()) startTTimer();
   }
 
   // Hamburger toggle
