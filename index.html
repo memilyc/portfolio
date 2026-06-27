@@ -924,9 +924,9 @@ const CONFIG = {
   role: "Senior Support Engineer · Open to work.",
   tagline: "9 years turning complex technical chaos into clarity — for customers, for teammates, for entire companies.",
   about: [
-    "I help enterprise customers debug complex issues across PostgreSQL, Linux, Docker, and multi-cloud environments (AWS, GCP, Azure).",
-    "Before GitLab, I worked in system administration and software engineering, maintaining 99.95% uptime across Linux/Windows and building financial products like loan management and credit-scoring platforms.",
-    "I was part of a 24/7 on-call rotation, led cross-regional pairing sessions, and built internal tools and improved documentation so the same problem never bites anyone twice.",
+    "I treat support as problem-solving, not ticket-closing. Nine years of it across PostgreSQL, Linux, Docker, and multi-cloud environments on AWS, GCP, and Azure. Closing a ticket and actually solving the problem aren't always the same thing, and I try to make sure both the customer and the engineering team get what they need.",
+    "Before GitLab I was a sysadmin and software engineer, keeping 99.95% uptime across Linux and Windows and building financial products like loan management and credit-scoring platforms. High-pressure situations are honestly where I do my best thinking.",
+    "At GitLab I ran 600+ pairing sessions including cross-regions, built internal tools that got adopted org-wide, and wrote 125+ documentation updates that cut repeat ticket volume. I look past the ticket in front of me. If the same problem keeps showing up, I'd rather fix what's causing it.",
   ],
   skills: [
     ["Support",   "customer & SaaS support · incident mgmt · on-call · log analysis"],
@@ -1933,7 +1933,7 @@ const commands = {
     print(`<span class="accent b">${CONFIG.name}</span> <span class="dim">—</span> <span class="cyan">${CONFIG.role}</span>`);
     print(`<span class="dim">// ${CONFIG.tagline}</span>`);
     blank();
-    CONFIG.about.forEach(l => print(l));
+    CONFIG.about.forEach((l, i, a) => { print(l); if (i < a.length - 1) blank(); });
     blank();
     print(`Type <span class="accent">cv</span> to read my full résumé, or <span class="accent">contact</span> to reach me.`, 'dim');
   },
