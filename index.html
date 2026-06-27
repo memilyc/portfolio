@@ -1059,6 +1059,7 @@ function resetQuizState() {
 }
 
 let adventureState = { active: false, mode: 'none', phase: 'idle', step: 0, mockCwd: '/home/emily', killed: false };
+let gbPageState = null; // { data: [], page: 0, perPage: 5 }
 // mode: 'guided' | 'free'  phase: 'idle'|'picking'|'guided-awaitCmd'|'guided-awaitEnter'|'free'
 
 const BLOCKED_RE = /shit|fuck|cunt|dick|bitch|asshole|bastard|whore|slut|nigger|nigga|faggot|retard|pedo|rapist|porn|xxx|sex|dildo|pussy|penis|vagina|cum|orgasm|fetish|nsfw|wank|jizz|cock|twat|wanker|bollocks|masturbat|semen|erection|genital|horny|kys|kill.?yourself|nazi|hitler|racist|bigot|bitcoin|crypto/i;
@@ -1917,6 +1918,25 @@ const FILE_CONTENT = {
   })(),
 };
 
+function printGbPage(){
+  const { data, page, perPage } = gbPageState;
+  const total = Math.ceil(data.length / perPage);
+  const slice = data.slice(page * perPage, (page + 1) * perPage);
+  blank();
+  print(`<span class="dim">── Page ${page + 1} / ${total}  (${data.length} messages) ────────────────────</span>`);
+  blank();
+  slice.forEach(row => {
+    print(`<span class="yellow b">${escapeHtml(row.nickname)}</span> <span class="dim">${formatDate(row.created_at)}</span>`);
+    print(`  ${escapeHtml(sanitizeGuestbook(row.message))}`);
+    blank();
+  });
+  const nav = [];
+  if (page < total - 1) nav.push('<span class="accent">n</span>ext');
+  if (page > 0)         nav.push('<span class="accent">p</span>rev');
+  nav.push('<span class="accent">q</span>uit');
+  print(`<span class="dim">[ ${nav.join('  ·  ')} ]</span>`);
+}
+
 const commands = {
   help(){
     helpCount++;
@@ -2641,7 +2661,7 @@ const commands = {
       testimonials: { syn: 'testimonials [all | read <name>]', desc: 'Read what colleagues say about Emily.', opts: ['(no args)        Random testimonial', 'all              Show all testimonials', 'read <name>      Read a specific person\'s full testimonial'] },
       quiz:         { syn: 'quiz [easy|medium|hard|mixed|emily]', desc: 'Start an interactive trivia quiz. Beat the leaderboard!', opts: [] },
       leaderboard:  { syn: 'leaderboard [-n <N>] [-c <cat>] [-d <diff>]', desc: 'View the quiz high-score leaderboard.', opts: ['-n <N>       Show top N entries', '-c <cat>     Filter by category', '-d <diff>    Filter by difficulty', '-h           Help'] },
-      guestbook:    { syn: 'guestbook [sign | -h]', desc: 'Read visitor messages or leave your own.', opts: ['(no args)   View recent messages', 'sign        Sign the guestbook', '-h          Help'] },
+      guestbook:    { syn: 'guestbook [sign | -random | -all | -h]', desc: 'Browse visitor messages page by page, or sign the guestbook.', opts: ['(no args)   Browse messages page by page (n/p/q to navigate)', 'sign        Leave your own message', '-random     Show a random message', '-all        Print all messages at once', '-h          Help'] },
       resume:       { syn: 'resume', desc: 'Alias for cv — opens the résumé in a new tab.', opts: [] },
       whyhireme:    { syn: 'whyhireme', desc: 'A direct answer to the most important question.', opts: [] },
       uptime:       { syn: 'uptime', desc: 'Show how long Emily has been in the industry.', opts: [] },
@@ -2906,47 +2926,64 @@ const commands = {
 
   async guestbook(args){
     const argv = (args || '').trim().split(/\s+/).filter(Boolean);
-    // Check for help flag
     if (hasHelpFlag(argv)) {
       print('<span class="dim">$ guestbook --help</span>');
       blank();
-      print('<span class="accent b">guestbook</span> — Read or sign guest messages');
+      print('<span class="accent b">guestbook</span> — Read or sign visitor messages');
       blank();
       print('<span class="yellow b">Usage:</span>');
-      print('  <span class="cyan">guestbook</span>            View recent messages');
-      print('  <span class="cyan">guestbook sign</span>       Sign the guestbook');
-      print('  <span class="cyan">guestbook -h</span>          Show this help');
+      print('  <span class="cyan">guestbook</span>            Browse messages page by page');
+      print('  <span class="cyan">guestbook sign</span>       Leave your own message');
+      print('  <span class="cyan">guestbook -random</span>    Show a random message');
+      print('  <span class="cyan">guestbook -all</span>       Print all messages at once');
+      print('  <span class="cyan">guestbook -h</span>         Show this help');
       blank();
-      print('<span class="yellow b">Examples:</span>');
-      print('  <span class="cyan">guestbook</span>');
-      print('  <span class="cyan">guestbook sign</span>');
+      print('<span class="yellow b">Navigation (paged mode):</span>');
+      print('  <span class="cyan">n</span> / <span class="cyan">next</span>   Next page');
+      print('  <span class="cyan">p</span> / <span class="cyan">prev</span>   Previous page');
+      print('  <span class="cyan">q</span> / <span class="cyan">quit</span>   Exit paged view');
       return;
     }
-
     if (argv[0] === 'sign') {
+      gbPageState = null;
       if (quizState.gbStep !== 'idle') { print('<span class="yellow">Already signing guestbook!</span>'); return; }
-      quizState.gbStep = 'nickname';
-      quizState.gbNickname = '';
-      quizState.gbMessage = '';
+      quizState.gbStep = 'nickname'; quizState.gbNickname = ''; quizState.gbMessage = '';
       print('<span class="accent b">Sign the Guestbook</span>');
       print('Enter your nickname (3–20 chars):');
       return;
     }
     print('<span class="dim">$ cat guestbook.txt</span>');
     blank();
-    print('You\'ve reached the guestbook. Leave a message, say hello, and make your mark on this little corner of the internet.');
-    blank();
     try {
-      const data = await fetch(`${CONFIG.supabase.url}/rest/v1/guestbook?select=nickname,message,created_at&hidden=is.false&order=created_at.desc&limit=20`, { headers: { apikey: CONFIG.supabase.anonKey, Authorization: `Bearer ${CONFIG.supabase.anonKey}` } }).then(r => r.json());
+      const data = await fetch(`${CONFIG.supabase.url}/rest/v1/guestbook?select=nickname,message,created_at&hidden=is.false&order=created_at.desc&limit=200`, { headers: { apikey: CONFIG.supabase.anonKey, Authorization: `Bearer ${CONFIG.supabase.anonKey}` } }).then(r => r.json());
       if (!Array.isArray(data)) throw new Error(data.message || 'Load failed');
       if (!data.length) { print('<span class="dim">Guestbook is empty. Type <span class="accent">guestbook sign</span> to be the first!</span>'); return; }
-      data.forEach(row => {
-        const date = formatDate(row.created_at);
-        print(`<span class="yellow b">${escapeHtml(row.nickname)}</span> <span class="dim">${date}</span>`);
+
+      if (argv[0] === '-random' || argv[0] === '--random') {
+        const row = data[Math.floor(Math.random() * data.length)];
+        print(`<span class="yellow b">${escapeHtml(row.nickname)}</span> <span class="dim">${formatDate(row.created_at)}</span>`);
+        blank();
         print(`  ${escapeHtml(sanitizeGuestbook(row.message))}`);
-      });
-      blank();
-      print('<span class="dim">Type <span class="accent">guestbook sign</span> to leave a message!</span>');
+        blank();
+        print('<span class="dim">Run again for another random message. Type <span class="accent">guestbook sign</span> to leave your own.</span>');
+        return;
+      }
+
+      if (argv[0] === '-all' || argv[0] === '--all') {
+        print(`<span class="dim">${data.length} messages total</span>`);
+        blank();
+        data.forEach(row => {
+          print(`<span class="yellow b">${escapeHtml(row.nickname)}</span> <span class="dim">${formatDate(row.created_at)}</span>`);
+          print(`  ${escapeHtml(sanitizeGuestbook(row.message))}`);
+          blank();
+        });
+        print('<span class="dim">Type <span class="accent">guestbook sign</span> to leave a message!</span>');
+        return;
+      }
+
+      // Default: paged view
+      gbPageState = { data, page: 0, perPage: 5 };
+      printGbPage();
     } catch(e) { print(`<span class="red">Error loading guestbook: ${escapeHtml(e.message)}</span>`); }
   },
 
@@ -3599,6 +3636,32 @@ cmdline.addEventListener('keydown', e => {
       if (!isClean(msg)) { print('<span class="yellow">That message isn\'t allowed.</span>'); return; }
       if (/https?:\/\//i.test(msg) || /www\.[^\s]/i.test(msg) || /\b[a-zA-Z0-9._%+-]+\.[a-z]{2,}\b/i.test(msg)) print('<span class="dim">Note: links will be redacted to prevent spam.</span>');
       quizState.gbMessage = msg; submitGuestbook(); return;
+    }
+
+    if (gbPageState) {
+      const input = v.trim().toLowerCase();
+      printPromptEcho(v.trim());
+      const total = Math.ceil(gbPageState.data.length / gbPageState.perPage);
+      if (input === 'n' || input === 'next') {
+        if (gbPageState.page < total - 1) { gbPageState.page++; printGbPage(); }
+        else print('<span class="dim">Already on the last page.</span>');
+      } else if (input === 'p' || input === 'prev') {
+        if (gbPageState.page > 0) { gbPageState.page--; printGbPage(); }
+        else print('<span class="dim">Already on the first page.</span>');
+      } else if (input === 'q' || input === 'quit' || input === 'exit') {
+        gbPageState = null;
+        blank();
+        print('<span class="dim">Type <span class="accent">guestbook sign</span> to leave a message!</span>');
+      } else if (/^\d+$/.test(input)) {
+        const p = parseInt(input, 10) - 1;
+        if (p >= 0 && p < total) { gbPageState.page = p; printGbPage(); }
+        else print(`<span class="yellow">Page ${input} doesn't exist (1–${total}).</span>`);
+      } else {
+        gbPageState = null;
+        if (v.trim() && v.trim() !== '!!' && !/^!\d+$/.test(v.trim())) { commandHistory.push(v); historyIndex = commandHistory.length; }
+        runCommand(v);
+      }
+      return;
     }
 
     if (v.trim() && v.trim() !== '!!' && !/^!\d+$/.test(v.trim())) { commandHistory.push(v); historyIndex = commandHistory.length; }
