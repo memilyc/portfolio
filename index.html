@@ -721,10 +721,11 @@ const TESTIMONIALS = [
   .gb-nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
   .gb-nav-btn:disabled { opacity: 0.25; cursor: default; }
   .gb-page-info { color: var(--dim); font-size: 12px; }
-  @keyframes gb-in-right { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
-  @keyframes gb-in-left  { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: none; } }
-  .gb-flip-next { animation: gb-in-right 0.2s ease; }
-  .gb-flip-prev { animation: gb-in-left  0.2s ease; }
+  @keyframes gb-in-right { from { transform: translateX(105%); } to { transform: translateX(0); } }
+  @keyframes gb-in-left  { from { transform: translateX(-105%); } to { transform: translateX(0); } }
+  .gb-flip-next { animation: gb-in-right 0.3s ease-out; }
+  .gb-flip-prev { animation: gb-in-left  0.3s ease-out; }
+  .t-slide-wrap { overflow: hidden; }
   .r-gb-nick { color: var(--yellow); font-weight: 700; font-size: 14px; }
   .r-gb-date { color: var(--dim); font-size: 12px; margin-left: 8px; }
   .r-gb-msg  { color: var(--fg); font-size: 14px; margin-top: 4px; }
@@ -1262,7 +1263,7 @@ function buildReader(){
     <section class="r-sec" id="testimonials">
       <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
       <div class="gb-book" id="t-carousel">
-        <div id="t-slide"></div>
+        <div class="t-slide-wrap"><div id="t-slide"></div></div>
         <div class="gb-book-nav">
           <button class="gb-nav-btn" id="t-prev">←</button>
           <div id="t-dots" class="t-dots"></div>
@@ -1315,7 +1316,7 @@ function buildReader(){
       const d = document.createElement('button');
       d.className = 't-dot';
       d.setAttribute('aria-label', `Testimonial ${i + 1}`);
-      d.addEventListener('click', () => { tIdx = i; renderTSlide(i); resetTTimer(); });
+      d.addEventListener('click', () => { const dir = i > tIdx ? 'next' : 'prev'; tIdx = i; renderTSlide(i, dir); resetTTimer(); });
       dotsEl.appendChild(d);
     });
 
