@@ -1116,8 +1116,8 @@ function buildReaderGuestbookForm(container) {
 
         let bookHtml = '';
         if (Array.isArray(data) && data.length) {
-          // spread entries evenly: aim for ~5 per page, but distribute cleanly
-          const numPages = Math.max(1, Math.round(data.length / 5));
+          // spread entries evenly: aim for ~5 per page (2 on mobile), but distribute cleanly
+          const numPages = Math.max(1, Math.round(data.length / (isMobileNow() ? 2 : 5)));
           const PER_PAGE = Math.ceil(data.length / numPages);
           const pages = Math.ceil(data.length / PER_PAGE);
           bookHtml = `
@@ -1231,7 +1231,7 @@ function buildReader(){
     </div>
     <section class="r-sec" id="about">
       <h2 class="r-h" data-section="about">About ${sectionCopyIcon('about')}</h2>
-      ${c.about.map((p,i) => `<p class="r-body">${i===0?esc(p).replace('problem-solving, not ticket-closing','<span class="green b">problem-solving, not ticket-closing</span>'):esc(p)}</p>`).join('')}
+      ${c.about.map((p,i) => { let h=esc(p); if(i===0)h=h.replace('problem-solving, not ticket-closing','<span class="green b">problem-solving, not ticket-closing</span>'); if(i===1)h=h.replace('where I do my best thinking','<span class="green b">where I do my best thinking</span>'); if(i===2)h=h.replace("fix what's causing it",'<span class="green b">fix what\'s causing it</span>'); return `<p class="r-body">${h}</p>`; }).join('')}
     </section>
     <section class="r-sec" id="skills">
       <h2 class="r-h" data-section="skills">Skills ${sectionCopyIcon('skills')}</h2>
@@ -1284,8 +1284,8 @@ function buildReader(){
       <div style="font-size:13px;color:var(--dim);margin-bottom:18px;">Always open to connecting with people working on interesting problems in Customer Success Engineering, Solutions Support, or technical customer-facing roles.</div>
       <ul class="r-links">
         <li><span class="r-lk">Email</span><a class="tlink" href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>
-        <li><span class="r-lk">LinkedIn</span><a class="tlink" href="${esc(c.linkedin)}" target="_blank" rel="noopener">${esc(c.linkedin)}</a></li>
-        <li><span class="r-lk">GitHub</span><a class="tlink" href="${esc(c.github)}" target="_blank" rel="noopener">${esc(c.github)}</a></li>
+        <li><span class="r-lk">LinkedIn</span><a class="tlink" href="${esc(c.linkedin)}" target="_blank" rel="noopener">M. Emily Chang</a></li>
+        <li><span class="r-lk">GitHub</span><a class="tlink" href="${esc(c.github)}" target="_blank" rel="noopener">@memilyc</a></li>
       </ul>
     </section>
     <section class="r-sec" id="guestbook">
