@@ -916,9 +916,7 @@ const CONFIG = {
   role: "Senior Support Engineer · Open to work.",
   tagline: "Turning complex technical chaos into clarity — for customers, for teammates, for entire companies.",
   about: [
-    "I treat support as problem-solving, not ticket-closing. Nine years of it across PostgreSQL, Linux, Docker, and multi-cloud environments on AWS, GCP, and Azure. Closing a ticket and actually solving the problem aren't always the same thing, and I try to make sure both the customer and the engineering team get what they need.",
-    "Before GitLab I was a sysadmin and software engineer, keeping 99.95% uptime across Linux and Windows and building financial products like loan management and credit-scoring platforms. High-pressure situations are honestly where I do my best thinking.",
-    "At GitLab I ran 600+ pairing sessions, built internal tools that got adopted org-wide, and wrote 125+ documentation updates that cut repeat ticket volume. I look past the ticket in front of me. If the same problem keeps showing up, I'd rather fix what's causing it.",
+    "Nine years of support across PostgreSQL, Linux, Docker, and multi-cloud — AWS, GCP, Azure. Before GitLab I was a sysadmin and software engineer building financial products. At GitLab I ran 600+ pairing sessions, built org-wide internal tools, and wrote 125+ doc updates that cut repeat ticket volume. I treat support as problem-solving, not ticket-closing: if the same issue keeps showing up, I'd rather fix what's causing it.",
   ],
   skills: [
     ["Support",   "customer & SaaS support · incident mgmt · on-call · log analysis"],
@@ -956,7 +954,7 @@ const CONFIG = {
     {
   title: "📊 SQL vs NoSQL: MongoDB & MySQL Performance Study",
   stack: "MongoDB · MySQL · Python · Big Data",
-  desc: "Wrote my final year research project benchmarking MongoDB and MySQL across insert, select, update, and delete operations on up to 1 million Twitter records. My lecturer recommended submitting it to conference — it was accepted and published in Springer's Advances in Information and Communication Networks (FICC 2018). 10 citations.",
+  desc: "Benchmarked MongoDB vs MySQL on insert, select, update, and delete operations across 1 million Twitter records. Published in Springer's Advances in Information and Communication Networks (FICC 2018). 10 citations.",
   url: "https://link.springer.com/chapter/10.1007/978-3-030-03402-3_20",
   label: "Read on Springer →",
 },
@@ -965,6 +963,7 @@ const CONFIG = {
   email:    "echangw2010@gmail.com",
   linkedin: "https://linkedin.com/in/memilyc",
   github:   "https://github.com/memilyc",
+  gitlab:   "https://gitlab.com/emchang",
   readme:   "https://github.com/memilyc",
   supabase: {
     url:     'https://ugowiqdbpjyaqvtcucqh.supabase.co',
@@ -1231,7 +1230,7 @@ function buildReader(){
     </div>
     <section class="r-sec" id="about">
       <h2 class="r-h" data-section="about">About ${sectionCopyIcon('about')}</h2>
-      ${c.about.map((p,i) => { let h=esc(p); if(i===0)h=h.replace('problem-solving, not ticket-closing','<span class="green b">problem-solving, not ticket-closing</span>'); if(i===1)h=h.replace('where I do my best thinking','<span class="green b">where I do my best thinking</span>'); if(i===2)h=h.replace("fix what's causing it",'<span class="green b">fix what\'s causing it</span>'); return `<p class="r-body">${h}</p>`; }).join('')}
+      ${c.about.map((p,i) => { let h=esc(p); h=h.replace('problem-solving, not ticket-closing','<span class="green b">problem-solving, not ticket-closing</span>').replace('fix what\'s causing it','<span class="green b">fix what\'s causing it</span>'); return `<p class="r-body">${h}</p>`; }).join('')}
     </section>
     <section class="r-sec" id="skills">
       <h2 class="r-h" data-section="skills">Skills ${sectionCopyIcon('skills')}</h2>
@@ -1281,7 +1280,7 @@ function buildReader(){
     <section class="r-sec" id="contact">
       <h2 class="r-h" data-section="contact">Contact ${sectionCopyIcon('contact')}</h2>
       <div style="font-size:22px;font-weight:700;color:var(--accent);margin-bottom:6px;">Let's talk.<span class="cursor"></span></div>
-      <div style="font-size:13px;color:var(--dim);margin-bottom:18px;">Always open to connecting with people working on interesting problems in Customer Success Engineering, Solutions Support, or technical customer-facing roles.</div>
+      <div style="font-size:13px;color:var(--dim);margin-bottom:14px;">Target: Customer Success Engineering, Solutions Support. Based in Kuala Lumpur (GMT+8), open to remote and sponsorship.</div>
       <ul class="r-links">
         <li><span class="r-lk">Email</span><a class="tlink" href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>
         <li><span class="r-lk">LinkedIn</span><a class="tlink" href="${esc(c.linkedin)}" target="_blank" rel="noopener">M. Emily Chang</a></li>
@@ -1585,6 +1584,7 @@ function el(tag, cls, html){
 }
 
 const CHIP_NAMES = ['about','whyhireme','skills','projects','strengths','contact','cv','testimonials','guestbook','quiz','adventure','neofetch','theme','help'];
+const MOBILE_CHIPS_LABEL = 'recommended commands';
 
 /* ponytail: single source of truth for chips — boot + help both call this */
 function renderChips(){
@@ -1605,10 +1605,10 @@ function renderMobileChips(){
 
   const toggle = document.createElement('button');
   toggle.id = 'mobile-chips-toggle';
-  toggle.textContent = '▸ recommended commands';
+  toggle.textContent = '▸ ' + MOBILE_CHIPS_LABEL;
   toggle.onclick = () => {
     const open = wrap.classList.toggle('mc-open');
-    toggle.textContent = open ? '▾ recommended commands' : '▸ recommended commands';
+    toggle.textContent = open ? '▾ ' + MOBILE_CHIPS_LABEL : '▸ ' + MOBILE_CHIPS_LABEL;
   };
 
   const grid = document.createElement('div');
@@ -1857,9 +1857,8 @@ const FILE_CONTENT = {
     '<span class="green b">║                                      ║</span>',
     '<span class="green b">╚══════════════════════════════════════╝</span>',
     '',
-    '<span class="dim">Always open to connecting with people working on interesting</span>',
-    '<span class="dim">problems in Customer Success Engineering, Solutions Support,</span>',
-    '<span class="dim">or technical customer-facing roles.</span>',
+    '<span class="dim">Target: Customer Success Engineering, Solutions Support.</span>',
+    '<span class="dim">KL (GMT+8), open to remote and sponsorship.</span>',
     '',
     '<span class="dim">→ type </span><button class="chip" style="vertical-align:middle" onclick="runCommand(\'contact\')">contact</button><span class="dim"> to get in touch</span>',
   ],
