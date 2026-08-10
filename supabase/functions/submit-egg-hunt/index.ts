@@ -6,20 +6,9 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { CORS, NICKNAME_RE, isClean, err, json, clientIp, sha256 } from "../_shared/util.ts";
 
-const CORS = {
-  "Access-Control-Allow-Origin":  "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-const NICKNAME_RE = /^[a-zA-Z0-9 _-]{3,20}$/;
-const RATE_LIMIT  = 10; // submissions per day per IP
-
-const BLOCKED = /shit|fuck|cunt|dick|bitch|asshole|bastard|whore|slut|nigger|nigga|faggot|retard|pedo|rapist|porn|xxx|sex|dildo|pussy|penis|vagina|cum|orgasm|fetish|nsfw|wank|jizz|cock|twat|wanker|bollocks|masturbat|semen|erection|genital|horny|kys|kill.?yourself|nazi|hitler|racist|bigot/i;
-
-function isClean(s: string): boolean {
-  return !BLOCKED.test(s);
-}
+const RATE_LIMIT = 10; // submissions per day per IP
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -49,8 +38,7 @@ serve(async (req) => {
     return err("Invalid duration", 400);
   }
 
-  const ip     = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const ipHash = await sha256(ip);
+  const ipHash = await sha256(clientIp(req));
 
   // Load and verify session
   const { data: session } = await supabase
@@ -91,19 +79,5 @@ serve(async (req) => {
   await supabase.from("rate_limits").insert({ ip_hash: ipHash, action: "egg-hunt" });
   await supabase.from("egg_hunt_sessions").update({ completed: true }).eq("id", sessionId);
 
-  return new Response(JSON.stringify({ success: true, found }), {
-    headers: { ...CORS, "Content-Type": "application/json" },
-  });
+  return json({ success: true, found });
 });
-
-function err(msg: string, status: number) {
-  return new Response(JSON.stringify({ error: msg }), {
-    status, headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
-  });
-}
-
-async function sha256(msg: string): Promise<string> {
-  const buf    = new TextEncoder().encode(msg);
-  const digest = await crypto.subtle.digest("SHA-256", buf);
-  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
-}

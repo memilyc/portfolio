@@ -6,11 +6,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-
-const CORS = {
-  "Access-Control-Allow-Origin":  "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { CORS, err, json, clientIp, sha256 } from "../_shared/util.ts";
 
 const VALID_EGGS = new Set([
   "tail -f", "systemctl status emily", "git blame", "sudo",
@@ -35,8 +31,7 @@ serve(async (req) => {
   if (!sessionId || typeof sessionId !== "string") return err("Missing sessionId", 400);
   if (!egg || !VALID_EGGS.has(egg)) return err("Invalid egg", 400);
 
-  const ip     = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const ipHash = await sha256(ip);
+  const ipHash = await sha256(clientIp(req));
 
   const { data: session } = await supabase
     .from("egg_hunt_sessions")
@@ -50,9 +45,7 @@ serve(async (req) => {
 
   // Idempotent: only add if not already recorded
   if (session.found_eggs.includes(egg)) {
-    return new Response(JSON.stringify({ ok: true, found: session.found_eggs.length }), {
-      headers: { ...CORS, "Content-Type": "application/json" },
-    });
+    return json({ ok: true, found: session.found_eggs.length });
   }
 
   const newEggs = [...session.found_eggs, egg];
@@ -61,19 +54,5 @@ serve(async (req) => {
     .update({ found_eggs: newEggs })
     .eq("id", sessionId);
 
-  return new Response(JSON.stringify({ ok: true, found: newEggs.length }), {
-    headers: { ...CORS, "Content-Type": "application/json" },
-  });
+  return json({ ok: true, found: newEggs.length });
 });
-
-function err(msg: string, status: number) {
-  return new Response(JSON.stringify({ error: msg }), {
-    status, headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
-  });
-}
-
-async function sha256(msg: string): Promise<string> {
-  const buf    = new TextEncoder().encode(msg);
-  const digest = await crypto.subtle.digest("SHA-256", buf);
-  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
-}

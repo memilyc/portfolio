@@ -3,22 +3,11 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { CORS, NICKNAME_RE, isClean, err, json, clientIp, sha256 } from "../_shared/util.ts";
 
-const CORS = {
-  "Access-Control-Allow-Origin":  "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-const NICKNAME_RE  = /^[a-zA-Z0-9 _-]{3,20}$/;
-const URL_RE       = /https?:\/\//gi;
-const SPAM_RE      = /free money|buy crypto|click here|casino|forex|bitcoin investment|make money fast/i;
-const RATE_LIMIT   = 5; // posts per hour per IP
-
-const BLOCKED = /shit|fuck|cunt|dick|bitch|asshole|bastard|whore|slut|nigger|nigga|faggot|retard|pedo|rapist|porn|xxx|sex|dildo|pussy|penis|vagina|cum|orgasm|fetish|nsfw|wank|jizz|cock|twat|wanker|bollocks|masturbat|semen|erection|genital|horny|kys|kill.?yourself|nazi|hitler|racist|bigot/i;
-
-function isClean(s: string): boolean {
-  return !BLOCKED.test(s);
-}
+const URL_RE     = /https?:\/\//gi;
+const SPAM_RE    = /free money|buy crypto|click here|casino|forex|bitcoin investment|make money fast/i;
+const RATE_LIMIT = 5; // posts per hour per IP
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -61,8 +50,7 @@ serve(async (req) => {
   if (!isClean(trimmed)) return err("That message isn't allowed. Please keep it appropriate.", 400);
 
   // Rate limit: 5 posts/hour/IP
-  const ip      = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const ipHash  = await sha256(ip);
+  const ipHash  = await sha256(clientIp(req));
   const hourAgo = new Date(Date.now() - 3600000).toISOString();
 
   const { count: recentCount } = await supabase
@@ -88,19 +76,5 @@ serve(async (req) => {
   // Log rate limit
   await supabase.from("rate_limits").insert({ ip_hash: ipHash, action: "guestbook" });
 
-  return new Response(JSON.stringify({ ok: true }), {
-    headers: { ...CORS, "Content-Type": "application/json" },
-  });
+  return json({ ok: true });
 });
-
-function err(msg: string, status: number) {
-  return new Response(JSON.stringify({ error: msg }), {
-    status, headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
-  });
-}
-
-async function sha256(msg: string): Promise<string> {
-  const buf    = new TextEncoder().encode(msg);
-  const digest = await crypto.subtle.digest("SHA-256", buf);
-  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,"0")).join("");
-}

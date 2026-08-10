@@ -13,3 +13,4 @@ supabase/.temp/
 
 # Qoder auto-generated wiki docs (machine-generated, not source)
 .qoder/
+venv/

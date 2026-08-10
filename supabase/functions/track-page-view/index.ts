@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { CORS as corsHeaders, clientIp, sha256 } from "../_shared/util.ts";
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -19,13 +15,8 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Hash IP for privacy
-    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-    const encoder = new TextEncoder();
-    const data = encoder.encode(ip);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const ipHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("").substring(0, 16);
+    // Hash IP for privacy (truncated — analytics only, collisions acceptable)
+    const ipHash = (await sha256(clientIp(req))).substring(0, 16);
 
     // Get geolocation from headers (works with Cloudflare/Netlify)
     const country = req.headers.get("cf-ipcountry") || req.headers.get("x-vercel-ip-country") || null;

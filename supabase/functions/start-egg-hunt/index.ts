@@ -6,11 +6,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-
-const CORS = {
-  "Access-Control-Allow-Origin":  "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { CORS, err, json, clientIp, sha256 } from "../_shared/util.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -20,8 +16,7 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  const ip     = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  const ipHash = await sha256(ip);
+  const ipHash = await sha256(clientIp(req));
 
   const { data: session, error } = await supabase
     .from("egg_hunt_sessions")
@@ -29,19 +24,7 @@ serve(async (req) => {
     .select("id")
     .single();
 
-  if (error || !session) {
-    return new Response(JSON.stringify({ error: "Could not create session" }), {
-      status: 500, headers: { ...CORS, "Content-Type": "application/json" },
-    });
-  }
+  if (error || !session) return err("Could not create session", 500);
 
-  return new Response(JSON.stringify({ sessionId: session.id }), {
-    headers: { ...CORS, "Content-Type": "application/json" },
-  });
+  return json({ sessionId: session.id });
 });
-
-async function sha256(msg: string): Promise<string> {
-  const buf    = new TextEncoder().encode(msg);
-  const digest = await crypto.subtle.digest("SHA-256", buf);
-  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
-}
