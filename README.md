@@ -183,8 +183,9 @@ Everything is configured via a single `CONFIG` object inside the `<script>` tag 
 3. Update the fields:
     * **`name`, `role`, `tagline`**: your professional header info
     * **`about`**: array of strings for your bio paragraphs
+    * **`aboutStats`**: array of `[value, label]` pairs rendered as stat cards in the Reader About section
     * **`skills`**: nested array of `[Category, Description]` pairs
-    * **`projects`**: array of objects with `title`, `stack`, `desc`, and `url`
+    * **`projects`**: array of objects with `title`, `stack`, `desc`, `short` (one-line card blurb in Reader view), and `url`
     * **`contact`**: links for email, LinkedIn, GitHub, etc.
     * **`supabase`**: your Supabase URL and anon key
 

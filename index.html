@@ -591,16 +591,22 @@ const TESTIMONIALS = [
   .r-skill-group:last-child { margin-bottom: 0; }
   .r-skill-cat { font-size: 12px; font-weight: 700; color: var(--dim); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
   .r-skill-pills { display: flex; flex-wrap: wrap; gap: 7px; }
-  .r-pipeline { display: flex; align-items: flex-start; gap: 10px; margin: 10px 0 20px; }
-  .r-pipeline-step { flex: 1; min-width: 0; }
-  .r-pipeline-num {
-    width: 26px; height: 26px; border-radius: 50%;
-    background: var(--glow); border: 1px solid var(--accent); color: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 13px; margin-bottom: 8px;
+  .r-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 0 0 16px;
   }
-  .r-pipeline-text { font-size: 13px; color: var(--fg); line-height: 1.5; }
-  .r-pipeline-arrow { color: var(--dim); font-size: 18px; margin-top: 4px; flex: 0 0 auto; }
+  .r-stat {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-bar);
+    padding: 14px 10px 12px;
+    text-align: center;
+  }
+  .r-stat-num { font-size: clamp(22px, 3vw, 26px); font-weight: 700; color: var(--accent); line-height: 1.1; letter-spacing: -0.5px; }
+  .r-stat-unit { font-size: 13px; font-weight: 500; color: var(--dim); margin-left: 4px; letter-spacing: 0; }
+  .r-stat-label { font-size: 12px; color: var(--dim); margin-top: 6px; }
   .r-chip.green  { background: rgba(126,231,135,.10); border-color: rgba(126,231,135,.25); color: var(--accent); }
   .r-chip.cyan   { background: rgba(86,212,240,.09);  border-color: rgba(86,212,240,.25);  color: var(--cyan);   }
   .r-chip.yellow { background: rgba(227,196,106,.09); border-color: rgba(227,196,106,.25); color: var(--yellow); }
@@ -633,17 +639,20 @@ const TESTIMONIALS = [
   .r-h .copy-link:hover { color: var(--accent); background: var(--bg-bar); }
   .r-h .copy-link.copied { color: var(--accent); }
   .r-body { font-size: 15px; line-height: 1.9; color: var(--fg); margin-bottom: 1em; }
-  .r-skills, .r-links { list-style: none; }
-  .r-skills li {
-    display: flex; gap: 14px; padding: 8px 0; flex-wrap: wrap;
-    border-bottom: 1px dashed var(--border);
-  }
-  .r-skills li:last-child { border-bottom: none; }
-  .r-k { color: var(--yellow); font-weight: 700; flex: 0 0 150px; }
-  .r-v { color: var(--fg); }
+  .r-links { list-style: none; }
   .r-links li { display: flex; gap: 14px; padding: 8px 0; flex-wrap: wrap; align-items: baseline; }
   .r-lk { color: var(--magenta); font-weight: 700; flex: 0 0 90px; }
   .r-sub { font-size: 13px; color: var(--dim); margin: -8px 0 14px; }
+  .r-note { font-size: 13px; color: var(--dim); line-height: 1.7; }
+  .r-cta {
+    border: 1px dashed var(--accent);
+    border-radius: 8px;
+    padding: 18px 22px;
+    background: var(--glow);
+  }
+  .r-cta-title { font-size: 22px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .r-cta-sub { font-size: 13px; color: var(--dim); margin-bottom: 14px; line-height: 1.65; }
+  .r-cta .r-cv { margin-bottom: 14px; }
   .r-strengths { list-style: none; counter-reset: s; }
   .r-strengths li {
     counter-increment: s;
@@ -675,16 +684,84 @@ const TESTIMONIALS = [
   }
   .r-cv:hover { opacity: 0.9; transform: translateY(-1px); }
 
-  .r-projects { list-style: none; }
-  .r-projects li {
-    padding: 12px 0;
-    border-bottom: 1px dashed var(--border);
+  /* Resume preview card */
+  .r-resume-preview {
+    position: relative;
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 520px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    margin-bottom: 18px;
   }
-  .r-projects li:last-child { border-bottom: none; }
-  .r-proj-title { color: var(--cyan); font-weight: 700; font-size: 15px; }
-  .r-proj-stack { font-size: 12px; color: var(--magenta); margin: 3px 0 6px; }
-  .r-proj-desc { font-size: 14px; color: var(--fg); line-height: 1.7; }
-  .r-proj-link { font-size: 13px; margin-top: 6px; }
+  .r-resume-preview:hover { border-color: var(--accent); box-shadow: 0 0 16px var(--glow); }
+  .r-resume-preview img {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: blur(3px) brightness(0.6);
+    transform: scale(1.03);
+    transition: filter 0.2s ease, transform 0.2s ease;
+  }
+  .r-resume-preview:hover img { filter: blur(1.5px) brightness(0.75); transform: scale(1.01); }
+  .r-resume-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    pointer-events: none;
+  }
+  .r-resume-overlay-icon { font-size: 32px; line-height: 1; }
+  .r-resume-overlay-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--fg);
+    letter-spacing: 0.04em;
+    background: rgba(0,0,0,.45);
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .r-proj-grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .r-proj-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-bar);
+    padding: 16px 18px 14px;
+    display: flex;
+    flex-direction: column;
+  }
+  .r-proj-emoji { font-size: 24px; line-height: 1.2; margin-bottom: 8px; }
+  .r-proj-title { color: var(--cyan); font-weight: 700; font-size: 15px; line-height: 1.35; }
+  .r-proj-pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .r-proj-desc { font-size: 14px; color: var(--fg); line-height: 1.65; }
+  .r-proj-details { margin-top: 10px; }
+  .r-proj-details summary {
+    cursor: pointer;
+    list-style: none;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: underline;
+    user-select: none;
+  }
+  .r-proj-details summary::-webkit-details-marker { display: none; }
+  .r-proj-details summary::before { content: '+ '; }
+  .r-proj-details[open] summary::before { content: '− '; }
+  .r-proj-details p { font-size: 13px; color: var(--fg); line-height: 1.7; margin: 8px 0 0; }
+  .r-proj-link { font-size: 13px; margin-top: auto; padding-top: 12px; }
 
   .r-test-name { color: var(--cyan); font-weight: 700; font-size: 15px; margin-bottom: 4px; }
   .r-test-rel { color: var(--dim); font-weight: 400; font-size: 13px; }
@@ -707,7 +784,7 @@ const TESTIMONIALS = [
     border-top: 1px dashed var(--border);
   }
   .r-test-cta a { font-weight: 600; }
-  .r-test-readmore {
+  .r-test-readmore, .r-st-more {
     display: inline-block;
     margin-top: 6px;
     padding: 4px 12px;
@@ -719,7 +796,8 @@ const TESTIMONIALS = [
     cursor: pointer;
     text-decoration: underline;
   }
-  .r-test-readmore:hover { opacity: 0.8; }
+  .r-test-readmore:hover, .r-st-more:hover { opacity: 0.8; }
+  .r-strengths li.r-st-collapsed { display: none; }
 
   /* Guestbook in reader view */
   .r-gb-entries { list-style: none; margin: 0; }
@@ -879,10 +957,10 @@ const TESTIMONIALS = [
       padding: 26px 18px 22px;
     }
     .r-name { font-size: 30px; }
-    .r-k, .r-st { flex-basis: 130px; }
+    .r-st { flex-basis: 130px; }
     .r-cv { display: block; text-align: center; }
-    .r-pipeline { flex-direction: column; gap: 16px; }
-    .r-pipeline-arrow { display: none; }
+    .r-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .r-proj-grid { grid-template-columns: 1fr; }
     .chips { gap: 7px; }
     .chip { font-size: 12.5px; padding: 7px 11px; }
     /* Input row pinned at bottom, above safe area notch */
@@ -971,8 +1049,16 @@ const CONFIG = {
   role: "Senior Support Engineer · Open to work.",
   tagline: "Turning complex technical chaos into clarity — for customers, for teammates, for entire companies.",
   about: [
-    "Nine years of support across PostgreSQL, Linux, Docker, and multi-cloud — AWS, GCP, Azure. Before GitLab I was a sysadmin and software engineer building financial products. At GitLab I ran 600+ pairing sessions, built org-wide internal tools, and wrote 125+ doc updates that cut repeat ticket volume. I treat support as problem-solving, not ticket-closing: if the same issue keeps showing up, I'd rather fix what's causing it.",
+    "I've spent the last nine years helping people solve technical problems. Most of that time has been with databases (PostgreSQL), servers (Linux), containers (Docker), and the major cloud platforms (AWS, Google Cloud, and Azure).",
+    "Before joining GitLab, I worked as a system administrator and software engineer building financial products. At GitLab I was part of the support team that stayed on call 24/7 to handle urgent issues and customer tickets. I also ran more than 600 one-on-one and group sessions with customers and teammates, built internal tools that the whole company used, and wrote over 125 documentation updates that reduced the number of repeat questions.",
+    "I don't see support as just closing tickets. When the same problem keeps coming up, I prefer to fix the underlying cause so it stops happening.",
     ],
+  aboutStats: [
+    ["9 years", "experience"],
+    ["600+",    "pairing sessions"],
+    ["125+",    "docs shipped"],
+    ["$9M",     "ARR portfolio"],
+  ],
   skills: [
     ["Support",   "customer & SaaS support · incident mgmt · on-call · log analysis"],
     ["Systems",   "Linux admin · Docker · Kubernetes · Bash · PowerShell"],
@@ -996,6 +1082,7 @@ const CONFIG = {
       title:  "🐘 PostgreSQL Connection Calculator",
       stack:  "PostgreSQL · JavaScript",
       desc:   "Ever tried doing connection pool math during a live incident? It's rough. I built this so the team could get accurate PostgreSQL max_connections recommendations in seconds, without digging through docs mid-call.",
+      short:  "Accurate PostgreSQL pool sizing in seconds — even mid-incident.",
       url:    "https://postgresql-connection-calculator-759014.gitlab.io/",
       label:  "Open tool →",
     },
@@ -1003,6 +1090,7 @@ const CONFIG = {
       title:  "🕐 Convert UTC Bot",
       stack:  "Deno SDK · Slack Workflow · GitLab CI",
       desc:   "Working async across 65+ countries means timezone math is a daily tax. I got tired of it, so I built a Slack bot that converts any timestamp into a shareable link showing everyone's local time at once. GitLab adopted it company-wide.",
+      short:  "Turns any timestamp into everyone's local time at once — adopted company-wide.",
       url:    "https://gitlab.com/gitlab-com/support/toolbox/convert-utc-bot",
       label:  "View on GitLab →",
     },
@@ -1010,25 +1098,11 @@ const CONFIG = {
   title: "📊 SQL vs NoSQL: MongoDB & MySQL Performance Study",
   stack: "MongoDB · MySQL · Python · Big Data",
   desc: "Benchmarked MongoDB vs MySQL on insert, select, update, and delete operations across 1 million Twitter records. Published in Springer's Advances in Information and Communication Networks (FICC 2018). 10 citations.",
+  short: "MongoDB vs MySQL benchmarked on 1M records — published in Springer's FICC 2018.",
   url: "https://link.springer.com/chapter/10.1007/978-3-030-03402-3_20",
   label: "Read on Springer →",
 },
   ],
-  consulting: {
-    intro: "I've come from GitLab support, supporting the product itself: incident response, scaling problems, pairing with engineers under pressure. These days I take on a limited number of consulting engagements outside that job, working on other people's infrastructure instead of GitLab's.",
-    services: [
-      ["Deployment", "Site's built but not live? I'll handle hosting, domain, and CI/CD so it's actually live."],
-      ["Scaling",    "I'll review your stack and flag what breaks first as you grow, before it actually breaks."],
-      ["GitLab",     "Team switching to GitLab, or not using it well? I run hands-on training so people actually use it."],
-      ["AI Tools",   "Practical, no-hype training on what Claude can actually do for your team's day-to-day work."],
-    ],
-    howItWorks: [
-      "Reach out and tell me what you're working with and what's actually not working.",
-      "I'll scope the work and send a proposal, so you know the plan and the estimate before anything starts.",
-      "Then I get to work, hands-on, documenting as I go.",
-    ],
-    projects: [],
-  },
   cv:       "https://memilyc.github.io",
   email:    "echangw2010@gmail.com",
   linkedin: "https://linkedin.com/in/memilyc",
@@ -1163,11 +1237,23 @@ function renderProjectCard(p, fallbackText){
   const link = p.url && p.url !== 'TODO_URL'
     ? `<div class="r-proj-link"><a class="tlink" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.label)}</a></div>`
     : (fallbackText ? `<div class="r-proj-link" style="color:var(--dim);font-size:12px;">${fallbackText}</div>` : '');
+  // leading emoji becomes the card's visual anchor; the rest is the title
+  const m = p.title.match(/^(\p{Extended_Pictographic}(?:\u200D\p{Extended_Pictographic})*)\s+(.+)$/u);
+  const emoji = m ? m[1] : '';
+  const title = m ? m[2] : p.title;
+  const pills = p.stack.split('·').map(s => s.trim()).filter(Boolean)
+    .map((s, i) => `<span class="r-chip ${['green','cyan','yellow'][i % 3]}">${escapeHtml(s)}</span>`).join('');
   return `
-          <li>
-            <div class="r-proj-title">${escapeHtml(p.title)}</div>
-            <div class="r-proj-stack">${escapeHtml(p.stack)}</div>
-            <div class="r-proj-desc">${escapeHtml(p.desc)}</div>
+          <li class="r-proj-card">
+            ${emoji ? `<div class="r-proj-emoji" aria-hidden="true">${emoji}</div>` : ''}
+            <div class="r-proj-title">${escapeHtml(title)}</div>
+            <div class="r-proj-pills">${pills}</div>
+            <div class="r-proj-desc">${escapeHtml(p.short || p.desc)}</div>
+            ${p.short && p.short !== p.desc ? `
+            <details class="r-proj-details">
+              <summary>Details</summary>
+              <p>${escapeHtml(p.desc)}</p>
+            </details>` : ''}
             ${link}
           </li>`;
 }
@@ -1280,9 +1366,9 @@ function buildReaderGuestbookForm(container) {
 function buildReader(){
   const c = CONFIG;
   const esc = escapeHtml;
+  const SKILL_ICONS = { Support: '🎧', Systems: '🖥', Cloud: '☁️', Databases: '🗄️', Code: '💻', Tooling: '⚙️' };
   const R_NAV_SECTIONS = [
     ['about','About'], ['skills','Skills'], ['projects','Projects'],
-    ['consulting','Consulting'],
     ['strengths','Strengths'], ['testimonials','Testimonials'],
     ['resume','Résumé'], ['contact','Contact'], ['guestbook','Guestbook']
   ];
@@ -1304,23 +1390,26 @@ function buildReader(){
     <div class="r-role">${esc(c.role)}</div>
     <p class="r-tag">${esc(c.tagline)}</p>
     <div class="r-chips">
+      <span class="r-chip green">Open to work</span>
+      <span class="r-chip yellow">Open to consulting</span>
       <span class="r-chip green">PostgreSQL</span>
       <span class="r-chip cyan">AWS · GCP · Azure</span>
       <span class="r-chip yellow">Incident Response</span>
       <span class="r-chip green">Customer-Facing</span>
       <span class="r-chip cyan">Documentation</span>
-      <a class="r-chip yellow" href="#consulting" style="text-decoration:none;">Open to Consulting Projects</a>
     </div>
     <section class="r-sec" id="about">
       <h2 class="r-h" data-section="about">About ${sectionCopyIcon('about')}</h2>
-      ${c.about.map((p,i) => { let h=esc(p); h=linkifyCmx(h.replace('problem-solving, not ticket-closing','<span class="green b">problem-solving, not ticket-closing</span>').replace('fix what\'s causing it','<span class="green b">fix what\'s causing it</span>')); return `<p class="r-body">${h}</p>`; }).join('')}
+      <p class="r-body">I've spent the last nine years helping people solve technical problems. Most of that time has been with databases (PostgreSQL), servers (Linux), containers (Docker), and the major cloud platforms (AWS, Google Cloud, and Azure).</p>
+      <p class="r-body">Before joining GitLab, I worked as a system administrator and software engineer building financial products. At GitLab I was part of the team that stayed on call 24/7 to handle urgent issues. I also ran more than 600 one-on-one sessions with customers and teammates, built internal tools that the whole company used, and wrote over 125 documentation updates that reduced the number of repeat questions.</p>
+      <p class="r-body">I don't see support as just closing tickets. When the same problem keeps coming up, I prefer to <span class="green b">fix the underlying cause</span> so it stops happening.</p>
     </section>
     <section class="r-sec" id="skills">
       <h2 class="r-h" data-section="skills">Skills ${sectionCopyIcon('skills')}</h2>
       <div class="r-skill-groups">
         ${c.skills.map(([k,v], i) => `
           <div class="r-skill-group">
-            <div class="r-skill-cat">${esc(k)}</div>
+            <div class="r-skill-cat">${SKILL_ICONS[k] ? SKILL_ICONS[k] + ' ' : ''}${esc(k)}</div>
             <div class="r-skill-pills">
               ${v.split('·').map(s => s.trim()).filter(Boolean).map(s => `<span class="r-chip ${['green','cyan','yellow'][i % 3]}">${esc(s)}</span>`).join('')}
             </div>
@@ -1330,39 +1419,17 @@ function buildReader(){
     </section>
     <section class="r-sec" id="projects">
       <h2 class="r-h" data-section="projects">Projects ${sectionCopyIcon('projects')}</h2>
-      <ul class="r-projects">
+      <ul class="r-proj-grid">
         ${c.projects.map(p => renderProjectCard(p, '// link coming soon')).join('')}
       </ul>
-    </section>
-    <section class="r-sec" id="consulting">
-      <h2 class="r-h" data-section="consulting">Consulting ${sectionCopyIcon('consulting')}</h2>
-      <p class="r-body">${esc(c.consulting.intro)}</p>
-      <ul class="r-skills">
-        ${c.consulting.services.map(([k,v]) => `<li><span class="r-k">${esc(k)}</span><span class="r-v">${esc(v)}</span></li>`).join('')}
-      </ul>
-      <p class="r-sub">How it works</p>
-      <div class="r-pipeline">
-        ${c.consulting.howItWorks.map((step, i) => `
-          <div class="r-pipeline-step">
-            <div class="r-pipeline-num">${i + 1}</div>
-            <div class="r-pipeline-text">${esc(step)}</div>
-          </div>
-          ${i < c.consulting.howItWorks.length - 1 ? '<div class="r-pipeline-arrow">→</div>' : ''}
-        `).join('')}
-      </div>
-      ${c.consulting.projects.length > 0 ? `
-      <ul class="r-projects">
-        ${c.consulting.projects.map(p => renderProjectCard(p)).join('')}
-      </ul>` : ''}
-      <p class="r-body"><a class="tlink" href="#testimonials">See what colleagues say about working with me →</a></p>
-      <p class="r-body"><a class="tlink" href="mailto:${esc(c.email)}?subject=Consulting%20inquiry">Have a project in mind? →</a></p>
     </section>
     <section class="r-sec" id="strengths">
       <h2 class="r-h" data-section="strengths">Strengths ${sectionCopyIcon('strengths')}</h2>
       <p class="r-sub">${esc(c.strengths.source)}</p>
-      <ol class="r-strengths">
+      <ol class="r-strengths" id="r-strengths-list">
         ${c.strengths.themes.map(([t,d]) => `<li><span class="r-st">${esc(t)}</span><span class="r-sd">${esc(d)}</span></li>`).join('')}
       </ol>
+
     </section>
     ${TESTIMONIALS.length > 0 ? `
     <section class="r-sec" id="testimonials">
@@ -1380,17 +1447,28 @@ function buildReader(){
     ` : ''}
     <section class="r-sec" id="resume">
       <h2 class="r-h" data-section="resume">Résumé ${sectionCopyIcon('resume')}</h2>
-      <a class="r-cv" href="${esc(c.cv)}" target="_blank" rel="noopener">Read my full CV →</a>
+      <div style="display:flex; justify-content:center;">
+        <a class="r-resume-preview" href="${esc(c.cv)}" target="_blank" rel="noopener" aria-label="Open full résumé in a new tab" style="max-width:380px;">
+          <img src="assets/preview-resume.png" alt="Résumé preview" loading="lazy">
+          <div class="r-resume-overlay">
+            <div class="r-resume-overlay-icon">📄</div>
+            <div class="r-resume-overlay-label">View full résumé →</div>
+          </div>
+        </a>
+      </div>
     </section>
     <section class="r-sec" id="contact">
       <h2 class="r-h" data-section="contact">Contact ${sectionCopyIcon('contact')}</h2>
-      <div style="font-size:22px;font-weight:700;color:var(--accent);margin-bottom:6px;">Let's talk.<span class="cursor"></span></div>
-      <div style="font-size:13px;color:var(--dim);margin-bottom:14px;">Target: Customer Success Engineering, Solutions Support. Based in Kuala Lumpur (GMT+8), open to remote, sponsorship, and consulting projects.</div>
-      <ul class="r-links">
-        <li><span class="r-lk">Email</span><a class="tlink" href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>
-        <li><span class="r-lk">LinkedIn</span><a class="tlink" href="${esc(c.linkedin)}" target="_blank" rel="noopener">M. Emily Chang</a></li>
-        <li><span class="r-lk">GitHub</span><a class="tlink" href="${esc(c.github)}" target="_blank" rel="noopener">@memilyc</a></li>
-      </ul>
+      <div class="r-cta">
+        <div class="r-cta-title">Let's talk.<span class="cursor"></span></div>
+        <p class="r-cta-sub">Target: Customer Success Engineering, Solutions Support. Based in Kuala Lumpur (GMT+8), open to remote, sponsorship, and consulting projects.</p>
+        <a class="r-cv" href="mailto:${esc(c.email)}">Email me →</a>
+        <ul class="r-links">
+          <li><span class="r-lk">Email</span><a class="tlink" href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>
+          <li><span class="r-lk">LinkedIn</span><a class="tlink" href="${esc(c.linkedin)}" target="_blank" rel="noopener">M. Emily Chang</a></li>
+          <li><span class="r-lk">GitHub</span><a class="tlink" href="${esc(c.github)}" target="_blank" rel="noopener">@memilyc</a></li>
+        </ul>
+      </div>
     </section>
     <section class="r-sec" id="guestbook">
       <h2 class="r-h" data-section="guestbook">Guestbook ${sectionCopyIcon('guestbook')}</h2>
@@ -1490,6 +1568,8 @@ function buildReader(){
 
     if (!isMobileNow()) startTTimer();
   }
+
+
 
   // Hamburger toggle
   const dropdown = document.getElementById('r-nav-dropdown');
@@ -1688,7 +1768,7 @@ function el(tag, cls, html){
   return e;
 }
 
-const CHIP_NAMES = ['about','whyhireme','skills','projects','consulting','strengths','contact','cv','testimonials','guestbook','quiz','adventure','neofetch','theme','help'];
+const CHIP_NAMES = ['about','whyhireme','skills','projects','strengths','contact','cv','testimonials','guestbook','quiz','adventure','neofetch','theme','help'];
 const MOBILE_CHIPS_LABEL = 'recommended commands';
 
 /* ponytail: single source of truth for chips — boot + help both call this */
@@ -2059,7 +2139,6 @@ const commands = {
     blank();
     print('  <span class="cyan">about</span>              Display information about me');
     print('  <span class="cyan">projects</span>           List my projects');
-    print('  <span class="cyan">consulting</span>         IT consulting services & how to reach me');
     print('  <span class="cyan">skills</span>             Show technical skills');
     print('  <span class="cyan">strengths</span>          Show CliftonStrengths themes');
     print('  <span class="cyan">contact</span>            Show contact information');
@@ -2129,17 +2208,6 @@ const commands = {
       }
       if (i < CONFIG.projects.length - 1) blank();
     });
-  },
-  consulting(){
-    print('<span class="dim">$ cat consulting.txt</span>');
-    blank();
-    print(CONFIG.consulting.intro, 'dim');
-    blank();
-    CONFIG.consulting.services.forEach(([k,v]) => {
-      print(`<span class="yellow b">${k.padEnd(16,' ')}</span><span class="dim">${v}</span>`);
-    });
-    blank();
-    print(`Type <span class="accent">testimonials</span> to see what colleagues say, or type <span class="accent">contact</span> if you have a project in mind.`, 'dim');
   },
   strengths(){
     print('<span class="dim">$ cat strengths.txt</span>');
@@ -2758,7 +2826,6 @@ const commands = {
       about:        { syn: 'about', desc: 'Display a summary of who Emily is — role, background, and experience.', opts: [] },
       skills:       { syn: 'skills', desc: 'List technical skills grouped by category.', opts: [] },
       projects:     { syn: 'projects', desc: 'Browse selected projects with stack, description, and links.', opts: [] },
-      consulting:   { syn: 'consulting', desc: 'Show IT consulting services offered and how to get in touch.', opts: [] },
       strengths:    { syn: 'strengths', desc: 'Show top CliftonStrengths themes with descriptions.', opts: [] },
       contact:      { syn: 'contact', desc: 'Print email, LinkedIn, GitHub, and README links.', opts: [] },
       cv:           { syn: 'cv', desc: 'Open the full résumé PDF in a new tab.', opts: [] },
