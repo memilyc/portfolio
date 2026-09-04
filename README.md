@@ -24,6 +24,7 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
 * **Command History:** Arrow keys to cycle through history, `!!` to repeat last command, `history` to view
 * **Easter Eggs:** 20+ hidden commands to discover (`whyhireme`, `uptime`, `tail -f production.log`, `sudo make me a sandwich`, `salary`, and more)
 * **Themes:** Dark, Light, and Brown themes — switchable via dot buttons in the title bar, the `theme` terminal command, or the `?theme=brown` URL parameter (useful for CV links).
+* **Résumé Preview:** A blurred preview card in the Reader view — clicking it opens the full PDF in a new tab.
 * **Responsive Design:** Fully fluid layout that adjusts from desktop terminals to mobile device touch targets. Reader view is the default on all devices.
 * **Performance:** Zero frontend dependencies (Supabase JS client loaded via CDN), lightning-fast loading, no build process required.
 * **Analytics:** Built-in privacy-friendly visitor tracking with referrer analysis (no cookies, no third-party services).
@@ -42,7 +43,8 @@ portfolio/
 ├── index.html              # Entire frontend — single file, no build step
 ├── assets/
 │   ├── em.png              # Avatar / OG image / apple-touch-icon
-│   └── em.ico              # Favicon
+│   ├── em.ico              # Favicon
+│   └── preview-resume.png  # Blurred résumé preview shown in Reader view
 ├── supabase/
 │   ├── functions/          # Deno edge functions (deployed to Supabase)
 │   │   ├── start-quiz/
@@ -182,8 +184,7 @@ Everything is configured via a single `CONFIG` object inside the `<script>` tag 
 2. Locate the `const CONFIG = { ... }` block
 3. Update the fields:
     * **`name`, `role`, `tagline`**: your professional header info
-    * **`about`**: array of strings for your bio paragraphs
-    * **`aboutStats`**: array of `[value, label]` pairs rendered as stat cards in the Reader About section
+    * **`about`**: array of strings — each string becomes a paragraph in both Reader view and the terminal `about` command
     * **`skills`**: nested array of `[Category, Description]` pairs
     * **`projects`**: array of objects with `title`, `stack`, `desc`, `short` (one-line card blurb in Reader view), and `url`
     * **`contact`**: links for email, LinkedIn, GitHub, etc.
