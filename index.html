@@ -1947,10 +1947,14 @@ function renderMobileChips(){
 
 let mobileChipsReady = false;
 function showMobileChips(){
-  if (mobileChipsReady || !isMobileNow()) return;
-  mobileChipsReady = true;
   const wrap = document.getElementById('mobile-chips');
-  if (wrap) wrap.classList.add('mc-visible');
+  if (!wrap) return;
+  if (isMobileNow()) {
+    mobileChipsReady = true;
+    wrap.classList.add('mc-visible');
+  } else {
+    wrap.classList.remove('mc-visible');
+  }
 }
 
 function print(html, cls){
@@ -4058,8 +4062,8 @@ if (vv) {
   vv.addEventListener('resize', fitToViewport);
   vv.addEventListener('scroll', fitToViewport);
 }
-window.addEventListener('resize',            fitToViewport);
-window.addEventListener('orientationchange', () => setTimeout(fitToViewport, 300));
+window.addEventListener('resize', () => { fitToViewport(); showMobileChips(); });
+window.addEventListener('orientationchange', () => setTimeout(() => { fitToViewport(); showMobileChips(); }, 300));
 fitToViewport();
 
 cmdline.addEventListener('focus', () => {
@@ -4638,7 +4642,8 @@ async function boot(){
       document.querySelector('.bar').addEventListener('click', restoreWindow, { once: true });
     }
   }
-  
+
+  showMobileChips();
 }
 
 function armSkip(){
