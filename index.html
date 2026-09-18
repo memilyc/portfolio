@@ -215,6 +215,15 @@ const TESTIMONIALS = [
     position: relative;
     animation: bootIn 0.5s cubic-bezier(.2,.8,.2,1);
   }
+  @media (min-width: 601px) {
+    body {
+      --window-vertical-gap: clamp(12px, 2dvh, 24px);
+      padding-block: var(--window-vertical-gap);
+    }
+    .window {
+      height: calc(100dvh - 2 * var(--window-vertical-gap));
+    }
+  }
   @keyframes bootIn {
     from { opacity: 0; transform: translateY(14px) scale(0.985); }
     to   { opacity: 1; transform: none; }
@@ -784,6 +793,20 @@ const TESTIMONIALS = [
   .r-proj-details p { font-size: 13px; color: var(--fg); line-height: 1.7; margin: 8px 0 0; }
   .r-proj-link { font-size: 13px; margin-top: auto; padding-top: 12px; }
 
+  .t-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-bottom: 16px;
+  }
+  .t-section-heading .r-h { flex: 1; min-width: 190px; margin-bottom: 0; }
+  #t-pause { font-size: 12px; min-height: 36px; white-space: nowrap; }
+  @media (max-width: 600px) {
+    .t-section-heading { align-items: flex-start; flex-direction: column; }
+    .t-section-heading .r-h { width: 100%; }
+  }
   .r-test-name { color: var(--cyan); font-weight: 700; font-size: 15px; margin-bottom: 4px; }
   .r-test-rel { color: var(--dim); font-weight: 400; font-size: 13px; }
   .t-slide-quote { font-size: 14px; color: var(--fg); line-height: 1.7; font-style: italic; margin: 10px 0 0; }
@@ -855,6 +878,28 @@ const TESTIMONIALS = [
       color-mix(in srgb, var(--border) 45%, transparent) 28px
     );
   }
+  .gb-browser {
+    height: clamp(260px, calc(100svh - 240px), 460px);
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) 65px;
+    overflow-anchor: none;
+  }
+  .gb-entries-viewport {
+    min-height: 0;
+    overflow: hidden;
+    padding: 10px 8px;
+    scroll-behavior: auto;
+  }
+  #reader-guestbook .gb-book-nav {
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr) 80px;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 12px;
+  }
+  #reader-guestbook .gb-page-info { text-align: center; }
+  #reader-guestbook .gb-nav-btn { min-height: 44px; padding: 6px 8px; white-space: nowrap; }
+  #reader-guestbook .gb-nav-btn:hover:not(:disabled) { transform: none; }
   .r-gb-entries {
     list-style: none; margin: 0; padding: 0;
     display: grid;
@@ -927,6 +972,8 @@ const TESTIMONIALS = [
   .t-slide-wrap { overflow: hidden; }
   #t-carousel { clip-path: none; filter: none; }
   @media (prefers-reduced-motion: reduce) {
+    .gb-flip-next,
+    .gb-flip-prev,
     #t-slide.t-slide-in-next,
     #t-slide.t-slide-in-prev { animation: none; }
   }
@@ -1387,48 +1434,120 @@ function buildReaderGuestbookForm(container) {
         let bookHtml = '';
         if (Array.isArray(data) && data.length) {
           const [latest, ...rest] = data;
-          const todaySeed = Math.floor(Date.now() / 86400000);
-          const shuffled = rest.map((r, i) => ({ r, s: ((i * 9301 + 49297 + todaySeed) % 233280) / 233280 }))
-                               .sort((a, b) => a.s - b.s)
-                               .map(x => x.r);
-          const totalOther = shuffled.length;
-          const numPages = Math.max(1, Math.round(totalOther / (isMobileNow() ? 3 : 5)));
-          const OTHER_PER_PAGE = Math.max(1, Math.ceil(totalOther / numPages));
-          const pages = numPages;
+          // Shuffle once per load so navigating back preserves each page.
+          const shuffled = [...rest];
+          for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+          }
+          const entries = [latest, ...shuffled];
+          let pageEntries = [];
           bookHtml = `
-            <ul class="r-gb-entries" id="gb-entries"></ul>
+            <div class="gb-browser">
+            <div class="gb-entries-viewport" id="gb-entries-viewport" role="region" aria-label="Guestbook entries" tabindex="0">
+              <ul class="r-gb-entries" id="gb-entries"></ul>
+            </div>
             <div class="gb-book-nav">
               <button class="gb-nav-btn" id="gb-prev">← Prev</button>
-              <span class="gb-page-info" id="gb-page-info"></span>
+              <span class="gb-page-info" id="gb-page-info" role="status" tabindex="-1"></span>
               <button class="gb-nav-btn" id="gb-next">Next →</button>
+            </div>
             </div>`;
           container.innerHTML = bookHtml + `
             <p class="r-gb-cta">Leave a little note before you go — add your digital footprint to this tiny corner of the internet 🌱</p>
             <div class="r-gb-form" id="gb-form">
-              <input id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
-              <textarea id="gb-msg" placeholder="Leave a message... (2–300 chars)" maxlength="300"></textarea>
+              <label for="gb-nick">Nickname (3–20 letters, numbers, spaces, underscores or hyphens)</label>
+              <input aria-describedby="gb-status" id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
+              <label for="gb-msg">Message (2–300 characters)</label>
+              <textarea aria-describedby="gb-status gb-link-warn" id="gb-msg" placeholder="Leave a message... (2–300 chars)" maxlength="300"></textarea>
               <p class="r-gb-status dim" id="gb-link-warn" style="font-size:12px;margin:2px 0 4px;display:none;">Links will be redacted to prevent spam.</p>
               <button class="r-gb-btn" id="gb-submit">Sign guestbook →</button>
-              <span class="r-gb-status" id="gb-status" style="display:none;"></span>
+              <span class="r-gb-status" id="gb-status" role="status" aria-live="polite"></span>
             </div>`;
 
           let page = 0;
+          const viewport = document.getElementById('gb-entries-viewport');
+          const list = document.getElementById('gb-entries');
+          const paginate = () => {
+            if (!container.isConnected || !viewport.clientHeight) return;
+            list.classList.remove('gb-flip-next', 'gb-flip-prev');
+            const available = viewport.clientHeight - 20;
+            const fits = rows => {
+              list.innerHTML = rows.map((r, i) => toRow(r, i, r === latest)).join('');
+              return list.scrollHeight <= available;
+            };
+            pageEntries = [];
+            let current = [];
+            const pending = [...entries];
+            while (pending.length) {
+              const row = pending.shift();
+              if (fits([...current, row])) {
+                current.push(row);
+                continue;
+              }
+              if (current.length) {
+                pageEntries.push(current);
+                current = [];
+                pending.unshift(row);
+                continue;
+              }
+              // Very small screens may need one long message across pages.
+              let low = 1, high = row.message.length, length = 0;
+              while (low <= high) {
+                const mid = Math.floor((low + high) / 2);
+                if (fits([{ ...row, message: row.message.slice(0, mid) }])) {
+                  length = mid;
+                  low = mid + 1;
+                } else high = mid - 1;
+              }
+              if (!length) {
+                // Keep the entry readable at unusually large text sizes.
+                viewport.style.overflowY = 'auto';
+                pageEntries.push([row]);
+                continue;
+              }
+              const boundary = row.message.lastIndexOf(' ', length);
+              if (boundary > length / 2) length = boundary + 1;
+              const part = { ...row, message: row.message.slice(0, length) };
+              pageEntries.push([part]);
+              if (row === latest) part.isLatestPart = true;
+              pending.unshift({ ...row, nickname: row.nickname.replace(/ \(continued\)$/, '') + ' (continued)', message: row.message.slice(length) });
+            }
+            if (current.length) pageEntries.push(current);
+            page = Math.min(page, pageEntries.length - 1);
+            renderPage(null);
+          };
           const renderPage = (dir) => {
             const el = document.getElementById('gb-entries');
-            const start = page * OTHER_PER_PAGE;
-            const end = Math.min(start + OTHER_PER_PAGE, totalOther);
-            const pageItems = [toRow(latest, 0, true), ...shuffled.slice(start, end).map((r, i) => toRow(r, i + 1))];
+            const pageItems = (pageEntries[page] || [])
+              .map((r, i) => toRow(r, i, page === 0 && (r === latest || r.isLatestPart)));
             el.innerHTML = pageItems.join('');
+            document.getElementById('gb-entries-viewport').scrollTop = 0;
             if (dir) {
               el.classList.remove('gb-flip-next', 'gb-flip-prev');
               void el.offsetWidth;
               el.classList.add(dir === 'next' ? 'gb-flip-next' : 'gb-flip-prev');
             }
-            document.getElementById('gb-page-info').textContent = `Page ${page + 1} of ${pages}`;
-            document.getElementById('gb-prev').disabled = page === 0;
-            document.getElementById('gb-next').disabled = page >= pages - 1;
+            const pageInfo = document.getElementById('gb-page-info');
+            const previousButton = document.getElementById('gb-prev');
+            const nextButton = document.getElementById('gb-next');
+            const focusedControl = document.activeElement;
+            pageInfo.textContent = `Page ${page + 1} of ${pageEntries.length}`;
+            previousButton.disabled = page === 0;
+            nextButton.disabled = page >= pageEntries.length - 1;
+            if ((focusedControl === previousButton && previousButton.disabled) ||
+                (focusedControl === nextButton && nextButton.disabled)) {
+              pageInfo.focus({ preventScroll: true });
+            }
           };
-          renderPage(null);
+          paginate();
+          const resizeObserver = new ResizeObserver(() => {
+            if (!container.isConnected) { resizeObserver.disconnect(); return; }
+            viewport.style.overflowY = '';
+            paginate();
+          });
+          resizeObserver.observe(viewport);
+          document.fonts.ready.then(paginate);
 
           document.getElementById('gb-prev').addEventListener('click', () => { page--; renderPage('prev'); });
           document.getElementById('gb-next').addEventListener('click', () => { page++; renderPage('next'); });
@@ -1544,13 +1663,16 @@ function buildReader(){
     </section>
     ${TESTIMONIALS.length > 0 ? `
     <section class="r-sec" id="testimonials">
-      <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
-      <div class="gb-book" id="t-carousel">
-        <div class="t-slide-wrap"><div id="t-slide"></div></div>
+      <div class="t-section-heading">
+        <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
+        <button class="gb-nav-btn" id="t-pause" aria-label="Auto-advance testimonials" aria-pressed="false" aria-controls="t-carousel">Auto-advance: Off</button>
+      </div>
+      <div class="gb-book" id="t-carousel" role="region" aria-label="Testimonials" aria-roledescription="carousel">
+        <div class="t-slide-wrap"><div id="t-slide" aria-live="polite" aria-atomic="true"></div></div>
         <div class="gb-book-nav">
-          <button class="gb-nav-btn" id="t-prev">←</button>
+          <button class="gb-nav-btn" id="t-prev" aria-label="Previous testimonial">←</button>
           <div id="t-dots" class="t-dots"></div>
-          <button class="gb-nav-btn" id="t-next">→</button>
+          <button class="gb-nav-btn" id="t-next" aria-label="Next testimonial">→</button>
         </div>
       </div>
       ${testimonialCTA(true)}
@@ -1626,11 +1748,14 @@ function buildReader(){
     const tOrder = [TESTIMONIALS[0], ...shuffle(TESTIMONIALS.slice(1))];
     let tIdx = 0;
     let tAutoTimer;
-    let tPausedByUser = false;
+    let tPausedByUser = true;
 
     function pauseTCarousel() {
       tPausedByUser = true;
       clearInterval(tAutoTimer);
+      document.getElementById('t-pause').textContent = 'Auto-advance: Off';
+      document.getElementById('t-pause').setAttribute('aria-pressed', 'false');
+      document.getElementById('t-slide').setAttribute('aria-live', 'polite');
     }
 
     function nextTIndex(dir) {
@@ -1659,10 +1784,10 @@ function buildReader(){
       slide.innerHTML = `
         <div class="r-test-name">${escapeHtml(t.name)} <span class="r-test-rel">${escapeHtml(t.relationship)}</span></div>
         <div class="t-slide-quote">${escapeHtml(t.highlight)}</div>
-        <div class="t-slide-full">${t.text.split('\n\n').map(p => `<p>${escapeHtml(p)}</p>`).join('')}</div>
-        <button class="r-test-readmore" id="t-readmore">read more</button>
+        <div class="t-slide-full" id="t-full">${t.text.split('\n\n').map(p => `<p>${escapeHtml(p)}</p>`).join('')}</div>
+        <button class="r-test-readmore" id="t-readmore" aria-expanded="false" aria-controls="t-full">read more</button>
       `;
-      document.querySelectorAll('.t-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+      document.querySelectorAll('.t-dot').forEach((d, i) => (d.classList.toggle('active', i === idx), d.setAttribute('aria-pressed', String(i === idx))));
       document.getElementById('t-prev').disabled = false;
       document.getElementById('t-next').disabled = false;
 
@@ -1681,6 +1806,7 @@ function buildReader(){
         full.style.display = expanded ? 'none' : 'block';
         quote.style.display = expanded ? '' : 'none';
         btn.textContent = expanded ? 'read more' : 'show less';
+        btn.setAttribute('aria-expanded', String(!expanded));
       });
     }
 
@@ -1718,6 +1844,15 @@ function buildReader(){
     });
 
     const car = document.getElementById('t-carousel');
+    document.getElementById('t-pause').addEventListener('click', () => {
+      if (!tPausedByUser) { pauseTCarousel(); return; }
+      tPausedByUser = false;
+      document.getElementById('t-pause').textContent = 'Auto-advance: On';
+      document.getElementById('t-pause').setAttribute('aria-pressed', 'true');
+      document.getElementById('t-slide').setAttribute('aria-live', 'off');
+      startTTimer();
+    });
+    car.addEventListener('focusin', e => { if (e.target.id !== 't-pause') pauseTCarousel(); });
     car.addEventListener('mouseenter', () => clearInterval(tAutoTimer));
     car.addEventListener('mouseleave', () => { if (!isMobileNow() && !tPausedByUser) startTTimer(); });
 
