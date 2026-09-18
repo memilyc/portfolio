@@ -1,0 +1,412 @@
+{
+  "date": "2026-09-18",
+  "scope": "Local portfolio, headless Chromium, mocked backend responses",
+  "scans": [
+    {
+      "name": "reader 1280x1024 dark",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 1280x1024 light",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 1280x1024 brown",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 1280x1024 purple",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 1280x1024 dark",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 1280x1024 light",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 1280x1024 brown",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 1280x1024 purple",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 320x800 dark",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 320x800 light",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 320x800 brown",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 320x800 purple",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 320x800 dark",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 320x800 light",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 320x800 brown",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 320x800 purple",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 390x844 dark",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 390x844 light",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 390x844 brown",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 390x844 purple",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 390x844 dark",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 390x844 light",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 390x844 brown",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 390x844 purple",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 600x350 dark",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 600x350 light",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 600x350 brown",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 600x350 purple",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 600x350 dark",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 600x350 light",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 600x350 brown",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 600x350 purple",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 320x256 dark",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 320x256 light",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 320x256 brown",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "reader 320x256 purple",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 320x256 dark",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 320x256 light",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 320x256 brown",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "terminal 320x256 purple",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "Reader mobile open menu",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "Reader guestbook invalid",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "Reader expanded testimonial",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "Terminal open settings",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "Terminal about via chip",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "Terminal mocked quiz question",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "Terminal adventure introduction",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "Terminal neofetch",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "Reader short viewport simulated 200% text",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    },
+    {
+      "name": "Terminal short viewport simulated 200% text",
+      "violations": [],
+      "incompleteRules": [
+        "color-contrast"
+      ]
+    }
+  ],
+  "checks": {
+    "guestbookInvalid": {
+      "focus": "gb-nick",
+      "invalid": "true"
+    },
+    "guestbookLastPage": {
+      "focus": "BODY",
+      "nextDisabled": true
+    },
+    "carouselPausedOnFocus": "Play testimonials",
+    "settingsKeyboardFocus": {
+      "focus": "cmdline",
+      "open": true
+    },
+    "settingsTapFocus": "cmdline",
+    "commandChipFocus": {
+      "focus": "about",
+      "visible": false
+    },
+    "quizPhase": "playing",
+    "enlargedShortReader": {
+      "menu": {
+        "x": 0,
+        "y": 157,
+        "width": 320,
+        "height": 115.1875
+      },
+      "reader": {
+        "x": 0,
+        "y": 103,
+        "width": 320,
+        "height": 153
+      }
+    },
+    "enlargedShortTerminal": {
+      "screen": {
+        "x": 0,
+        "y": 214.796875,
+        "width": 320,
+        "height": 16
+      },
+      "input": {
+        "x": 62.21875,
+        "y": 239.796875,
+        "width": 244.78125,
+        "height": 43
+      },
+      "options": {
+        "x": 12,
+        "y": 138,
+        "width": 296,
+        "height": 76.796875
+      }
+    }
+  },
+  "errors": []
+}

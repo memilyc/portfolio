@@ -1,0 +1,260 @@
+{
+  "date": "2026-09-18",
+  "checks": [
+    "Guestbook first and last page focus retained on page status.",
+    "Output settings keeps focus; Tab reaches first option.",
+    "Collapsed command shortcuts focus their visible toggle.",
+    {
+      "scenario": "320x256 simulated 200% text, expanded settings",
+      "input": {
+        "x": 62.21875,
+        "y": 213,
+        "width": 244.78125,
+        "height": 43
+      },
+      "workspace": {
+        "x": 0,
+        "y": 103,
+        "width": 320,
+        "height": 101
+      },
+      "outputReachable": {
+        "x": 0,
+        "y": 124,
+        "width": 320,
+        "height": 80
+      }
+    }
+  ],
+  "scans": [
+    {
+      "width": 320,
+      "height": 256,
+      "view": "reader",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "width": 320,
+      "height": 256,
+      "view": "reader",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "width": 320,
+      "height": 256,
+      "view": "reader",
+      "theme": "brown",
+      "violations": []
+    },
+    {
+      "width": 320,
+      "height": 256,
+      "view": "reader",
+      "theme": "purple",
+      "violations": []
+    },
+    {
+      "width": 320,
+      "height": 256,
+      "view": "terminal",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "width": 320,
+      "height": 256,
+      "view": "terminal",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "width": 320,
+      "height": 256,
+      "view": "terminal",
+      "theme": "brown",
+      "violations": []
+    },
+    {
+      "width": 320,
+      "height": 256,
+      "view": "terminal",
+      "theme": "purple",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "view": "reader",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "view": "reader",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "view": "reader",
+      "theme": "brown",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "view": "reader",
+      "theme": "purple",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "view": "terminal",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "view": "terminal",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "view": "terminal",
+      "theme": "brown",
+      "violations": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "view": "terminal",
+      "theme": "purple",
+      "violations": []
+    },
+    {
+      "width": 600,
+      "height": 350,
+      "view": "reader",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "width": 600,
+      "height": 350,
+      "view": "reader",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "width": 600,
+      "height": 350,
+      "view": "reader",
+      "theme": "brown",
+      "violations": []
+    },
+    {
+      "width": 600,
+      "height": 350,
+      "view": "reader",
+      "theme": "purple",
+      "violations": []
+    },
+    {
+      "width": 600,
+      "height": 350,
+      "view": "terminal",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "width": 600,
+      "height": 350,
+      "view": "terminal",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "width": 600,
+      "height": 350,
+      "view": "terminal",
+      "theme": "brown",
+      "violations": []
+    },
+    {
+      "width": 600,
+      "height": 350,
+      "view": "terminal",
+      "theme": "purple",
+      "violations": []
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "view": "reader",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "view": "reader",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "view": "reader",
+      "theme": "brown",
+      "violations": []
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "view": "reader",
+      "theme": "purple",
+      "violations": []
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "view": "terminal",
+      "theme": "dark",
+      "violations": []
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "view": "terminal",
+      "theme": "light",
+      "violations": []
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "view": "terminal",
+      "theme": "brown",
+      "violations": []
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "view": "terminal",
+      "theme": "purple",
+      "violations": []
+    },
+    {
+      "scenario": "Enlarged short terminal",
+      "violations": []
+    }
+  ],
+  "errors": []
+}
