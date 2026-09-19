@@ -24,7 +24,7 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
 * **Command History:** Arrow keys to cycle through history, `!!` to repeat last command, `history` to view
 * **Easter Eggs:** 20+ hidden commands to discover (`whyhireme`, `uptime`, `tail -f production.log`, `sudo make me a sandwich`, `salary`, and more)
 * **Themes:** Dark, Light, and Brown themes — switchable via dot buttons in the title bar, the `theme` terminal command, or the `?theme=brown` URL parameter (useful for CV links).
-* **Résumé Preview:** A blurred preview card in the Reader view — clicking it opens the full PDF in a new tab.
+* **Résumé Preview:** A blurred preview card in the Reader view — clicking it opens the canonical PDF from `assets/download/` in a new tab.
 * **Responsive Design:** Fully fluid layout that adjusts from desktop terminals to mobile device touch targets. Reader view is the default on all devices.
 * **Performance:** Zero frontend dependencies (Supabase JS client loaded via CDN), lightning-fast loading, no build process required.
 * **Analytics:** Built-in privacy-friendly visitor tracking with referrer analysis (no cookies, no third-party services).
@@ -42,9 +42,12 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
 portfolio/
 ├── index.html              # Entire frontend — single file, no build step
 ├── assets/
-│   ├── em.png              # Avatar / OG image / apple-touch-icon
+│   ├── download/
+│   │   └── Emily_Chang_Resume.pdf # Canonical public résumé
+│   ├── em.png              # Avatar / apple-touch-icon
 │   ├── em.ico              # Favicon
-│   └── preview-resume.png  # Blurred résumé preview shown in Reader view
+│   ├── preview-resume.png  # Blurred résumé preview shown in Reader view
+│   └── social-preview.png  # 1200x630 social sharing image
 ├── supabase/
 │   ├── functions/          # Deno edge functions (deployed to Supabase)
 │   │   ├── start-quiz/
