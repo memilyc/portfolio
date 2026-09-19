@@ -1411,12 +1411,6 @@ const CONFIG = {
       highlights: [],
     },
   ],
-  incidentStory: {
-    severity: "High-severity customer outage",
-    systems: "Application, database, cloud infrastructure, and integrations",
-    role: "Led technical triage, kept the customer and internal teams aligned, reproduced the failure, and partnered with Engineering on the fix.",
-    outcome: "Restored the customer’s development workflow, then turned the findings into product, process, and documentation improvements to reduce repeat escalations.",
-  },
   skills: [
     ["Support",   "customer & SaaS support · incident mgmt · on-call · log analysis"],
     ["Systems",   "Linux admin · Docker · Kubernetes · Bash · PowerShell"],
@@ -1904,16 +1898,6 @@ function buildReader(){
           </li>
         `).join('')}
       </ol>
-    </section>
-    <section class="r-sec" id="incident-story">
-      <h2 class="r-h" data-section="incident-story">How I work an incident ${sectionCopyIcon('incident-story')}</h2>
-      <p class="r-sub">A sanitized example; no customer or confidential details.</p>
-      <dl class="r-case-grid">
-        <div class="r-case-step"><dt>Severity</dt><dd>${esc(c.incidentStory.severity)}</dd></div>
-        <div class="r-case-step"><dt>Systems</dt><dd>${esc(c.incidentStory.systems)}</dd></div>
-        <div class="r-case-step"><dt>My role</dt><dd>${esc(c.incidentStory.role)}</dd></div>
-        <div class="r-case-step"><dt>Outcome + follow-up</dt><dd>${esc(c.incidentStory.outcome)}</dd></div>
-      </dl>
     </section>
     <section class="r-sec" id="projects">
       <h2 class="r-h" data-section="projects">Selected work ${sectionCopyIcon('projects')}</h2>
