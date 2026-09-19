@@ -3,17 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
-<title>M. Emily Chang | Senior Support Engineer · Open to Work</title>
-<meta name="description" content="M. Emily Chang — Senior Support Engineer with 9+ years in enterprise SaaS, fintech, and DevSecOps. Open to work." />
-<meta property="og:title" content="M. Emily Chang | Senior Support Engineer" />
-<meta property="og:description" content="9+ years in enterprise technical support. Open to work." />
-<meta property="og:image" content="https://memilyc.github.io/portfolio/assets/em.png" />
+<title>M. Emily Chang | Senior Support Engineer Portfolio · Open to Work</title>
+<meta name="description" content="Meet M. Emily Chang, a Senior Support Engineer who turns complex incidents into clear fixes, useful tools, and better documentation. Open to work." />
+<meta property="og:title" content="M. Emily Chang | Senior Support Engineer Portfolio" />
+<meta property="og:description" content="A personality-forward look at the support work, tools, and calm problem-solving behind the résumé. Open to work." />
+<meta property="og:image" content="https://memilyc.github.io/portfolio/assets/social-preview.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="M. Emily Chang, Senior Support Engineer — portfolio and open-to-work profile" />
 <meta property="og:url" content="https://memilyc.github.io/portfolio/" />
 <meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary" />
-<meta name="twitter:title" content="M. Emily Chang | Senior Support Engineer" />
-<meta name="twitter:description" content="9+ years in enterprise technical support. Open to work." />
-<meta name="twitter:image" content="https://memilyc.github.io/portfolio/assets/em.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="M. Emily Chang | Senior Support Engineer Portfolio" />
+<meta name="twitter:description" content="Support work, useful tools, calm problem-solving, and a few terminal easter eggs. Open to work." />
+<meta name="twitter:image" content="https://memilyc.github.io/portfolio/assets/social-preview.png" />
+<meta name="twitter:image:alt" content="M. Emily Chang, Senior Support Engineer — portfolio and open-to-work profile" />
 <link rel="icon" type="image/x-icon" href="assets/em.ico" />
 <link rel="icon" type="image/png" href="assets/em.png" />
 <link rel="shortcut icon" href="assets/em.ico" />
@@ -1445,19 +1449,24 @@ const CONFIG = {
       stack:  "Deno SDK · Slack Workflow · GitLab CI",
       desc:   "Built and deployed a Deno-powered Slack workflow that converts timestamps to UTC and generates shareable local-time links for colleagues working asynchronously around the world.",
       short:  "Removed a recurring timezone-conversion task with a Slack bot used across a globally distributed company operating in 65+ countries.",
+      caseStudy: [
+        ["Problem", "Distributed teams repeatedly converted timestamps by hand, creating friction and avoidable ambiguity in asynchronous conversations."],
+        ["Approach", "I built and deployed a Deno-powered Slack workflow that converts timestamps to UTC and creates shareable local-time links."],
+        ["Result", "A recurring coordination task became a quick, consistent workflow available across a company operating in 65+ countries."],
+      ],
       url:    "https://gitlab.com/gitlab-com/support/toolbox/convert-utc-bot",
       label:  "View on GitLab →",
     },
     {
       title:  "📊 SQL vs NoSQL: MongoDB & MySQL Performance Study",
       stack:  "MongoDB · MySQL · Python · Big Data",
-      desc:   "Designed and ran a reproducible comparison of MongoDB and MySQL CRUD performance across 1 million semi-structured records, then documented the methodology and findings for publication.",
-      short:  "Compared MongoDB and MySQL performance across 1 million records in a study published by Springer.",
+      desc:   "Co-authored with Hui Na Chua and published by Springer in 2019. The study compares MongoDB and MySQL CRUD performance across 1 million semi-structured records.",
+      short:  "2019 Springer publication with Hui Na Chua comparing MongoDB and MySQL performance across 1 million records.",
       url:    "https://link.springer.com/chapter/10.1007/978-3-030-03402-3_20",
       label:  "Read on Springer →",
     },
   ],
-  cv:       "https://memilyc.github.io/assets/download/Emily_Chang_Resume.pdf",
+  cv:       "assets/download/Emily_Chang_Resume.pdf",
   email:    "echangw2010@gmail.com",
   linkedin: "https://linkedin.com/in/memilyc",
   github:   "https://github.com/memilyc",
@@ -1974,7 +1983,7 @@ function buildReader(){
     <footer class="r-footer">
       <p>Cookie-free page-view analytics record the page path, referrer, browser user agent, coarse location headers, and a shortened hash of the visitor IP. Guestbook entries are public, so submit only what you are comfortable sharing.</p>
       <p><button class="r-privacy-btn" onclick="toggleAnalyticsOptOut()" id="analytics-optout-btn">Disable analytics tracking</button></p>
-      <p class="r-footer-credit">Built with HTML, CSS, JavaScript, curiosity, and a little vibe coding.</p>
+      <p class="r-footer-credit">A static, accessible terminal-and-reader portfolio built with HTML, CSS, and JavaScript.</p>
     </footer>
     </div>`;
 
@@ -3322,6 +3331,7 @@ const commands = {
     print('  <span class="yellow">◆</span> <span class="accent b">Qoder</span> — implementation + integration');
     print(`  <span class="magenta">◆</span> <span class="accent b">Avatars in Pixels</span> — pixel avatar · ${newTabLink('https://www.avatarsinpixels.com/minipix/clothing/Body', 'avatarsinpixels.com')}`);
     blank();
+    print('<span class="dim">Built with curiosity, careful iteration, and a little vibe coding.</span>');
     print('<span class="dim">All ideas, direction, and questionable jokes are Emily\'s own.</span>');
   },
   whoami(args){
