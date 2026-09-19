@@ -1,6 +1,8 @@
 # Accessibility audit — 18 September 2026
 
 Target: [WCAG 2.2 Level AA](https://www.w3.org/TR/WCAG22/).
+
+Latest content-restructure verification: [audits/accessibility-content-restructure-2026-09-19.md](audits/accessibility-content-restructure-2026-09-19.md).
 Status: accessibility improvements implemented; full conformance has not been established.
 These changes are local and have not been deployed.
 

@@ -123,7 +123,7 @@ const TESTIMONIALS = [
     --path:      #136878;
     --accent:    #30692e;
     --cyan:      #136878;
-    --yellow:    #8a6100;
+    --yellow:    #755000;
     --red:       #c4314b;
     --magenta:   #6b3d82;
     --green:     #246d44;
@@ -139,15 +139,15 @@ const TESTIMONIALS = [
     --bg-window: #5e5449;
     --bg-bar:    #4d453b;
     --fg:        #efe7da;
-    --dim:       #cabfae;
-    --prompt:    #a8c98a;
-    --path:      #aecaeb;
-    --accent:    #ffb36b;
-    --cyan:      #aecaeb;
-    --yellow:    #e0b96a;
-    --red:       #ffabab;
-    --magenta:   #d09aee;
-    --green:     #a8c98a;
+    --dim:       #e0d5c5;
+    --prompt:    #c9e6af;
+    --path:      #c8e0f5;
+    --accent:    #ffd09a;
+    --cyan:      #c8e0f5;
+    --yellow:    #f5d28d;
+    --red:       #ffc8c8;
+    --magenta:   #f0c8ff;
+    --green:     #c9e6af;
     --border:    rgba(30,25,20,.45);
     --glow:      rgba(234,123,35,0.15);
     --scan:      rgba(0,0,0,0.03);
@@ -240,9 +240,9 @@ const TESTIMONIALS = [
     user-select: none;
   }
   .dot { width: 12px; height: 12px; border-radius: 50%; border: none; }
-  .dot.r { background: #ff5f57; }
-  .dot.y { background: #febc2e; }
-  .dot.g { background: #28c840; }
+  .dot.r { background-color: #ff5f57; }
+  .dot.y { background-color: #febc2e; }
+  .dot.g { background-color: #28c840; }
   .bar .title {
     flex: 1;
     text-align: center;
@@ -261,7 +261,9 @@ const TESTIMONIALS = [
     color: var(--dim);
     font-family: inherit;
     font-size: 11px;
-    padding: 4px 9px;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 6px 10px;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -613,6 +615,8 @@ const TESTIMONIALS = [
   }
   .r-role { margin-top: 8px; font-size: 15px; color: var(--accent); font-weight: 500; }
   .r-tag  { margin-top: 12px; font-size: 15px; color: var(--dim); max-width: 60ch; line-height: 1.6; }
+  .r-context { margin-top: 10px; max-width: 72ch; color: var(--fg); font-size: 14px; line-height: 1.7; }
+  .r-availability { margin-top: 12px; color: var(--dim); font-size: 13px; line-height: 1.65; }
   .r-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
   .r-chip  { font-size: 12px; padding: 4px 11px; border-radius: 4px; border: 1px solid; }
   a.r-chip { display: inline-block; transition: box-shadow .15s ease, transform .15s ease; }
@@ -637,6 +641,25 @@ const TESTIMONIALS = [
   .r-stat-num { font-size: clamp(22px, 3vw, 26px); font-weight: 700; color: var(--accent); line-height: 1.1; letter-spacing: -0.5px; }
   .r-stat-unit { font-size: 13px; font-weight: 500; color: var(--dim); margin-left: 4px; letter-spacing: 0; }
   .r-stat-label { font-size: 12px; color: var(--dim); margin-top: 6px; }
+  .r-exp-list { display: grid; gap: 14px; list-style: none; }
+  .r-exp-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-bar);
+    padding: 18px 20px;
+  }
+  .r-exp-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px 18px; flex-wrap: wrap; }
+  .r-exp-role { color: var(--cyan); font-size: 16px; line-height: 1.4; }
+  .r-exp-period { color: var(--dim); font-size: 12px; }
+  .r-exp-company { margin-top: 3px; color: var(--yellow); font-weight: 700; }
+  .r-exp-meta { margin-top: 3px; color: var(--dim); font-size: 12px; }
+  .r-exp-summary { margin-top: 12px; color: var(--fg); font-size: 14px; line-height: 1.7; }
+  .r-exp-highlights { margin: 10px 0 0 1.2rem; color: var(--fg); font-size: 13px; line-height: 1.7; }
+  .r-exp-highlights li + li { margin-top: 5px; }
+  .r-case-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+  .r-case-step { border-left: 2px solid var(--border); padding-left: 12px; }
+  .r-case-step dt { color: var(--yellow); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+  .r-case-step dd { margin: 6px 0 0; color: var(--fg); font-size: 13px; line-height: 1.7; }
   .r-chip.green  { background: rgba(126,231,135,.10); border-color: rgba(126,231,135,.25); color: var(--accent); }
   .r-chip.cyan   { background: rgba(86,212,240,.09);  border-color: rgba(86,212,240,.25);  color: var(--cyan);   }
   .r-chip.yellow { background: rgba(227,196,106,.09); border-color: rgba(227,196,106,.25); color: var(--yellow); }
@@ -732,22 +755,23 @@ const TESTIMONIALS = [
     display: block;
     width: 100%;
     height: auto;
-    filter: blur(3px) brightness(0.6);
-    transform: scale(1.03);
-    transition: filter 0.2s ease, transform 0.2s ease;
+    filter: none;
+    transform: none;
+    transition: transform 0.2s ease;
   }
-  .r-resume-preview:hover img { filter: blur(1.5px) brightness(0.75); transform: scale(1.01); }
+  .r-resume-preview:hover img { transform: scale(1.01); }
   .r-resume-overlay {
     position: absolute;
-    inset: 0;
+    right: 12px;
+    bottom: 12px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-end;
+    justify-content: flex-end;
     gap: 10px;
     pointer-events: none;
   }
-  .r-resume-overlay-icon { font-size: 32px; line-height: 1; }
+  .r-resume-overlay-icon { display: none; }
   .r-resume-overlay-label {
     font-size: 14px;
     font-weight: 700;
@@ -773,6 +797,13 @@ const TESTIMONIALS = [
     display: flex;
     flex-direction: column;
   }
+  .r-proj-card.featured {
+    grid-column: 1 / -1;
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--glow), var(--bg-bar) 60%);
+  }
+  .r-proj-card.featured .r-proj-desc { max-width: 72ch; }
+  .r-proj-case { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); }
   .r-proj-emoji { font-size: 24px; line-height: 1.2; margin-bottom: 8px; }
   .r-proj-title { color: var(--cyan); font-weight: 700; font-size: 15px; line-height: 1.35; }
   .r-proj-pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
@@ -845,6 +876,10 @@ const TESTIMONIALS = [
   }
   .r-test-readmore:hover, .r-st-more:hover { opacity: 0.8; }
   .r-strengths li.r-st-collapsed { display: none; }
+  .r-footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; color: var(--dim); font-size: 12px; line-height: 1.7; }
+  .r-footer p + p { margin-top: 10px; }
+  .r-privacy-btn { min-height: 44px; background: none; border: 1px solid var(--dim); color: var(--fg); padding: 8px 14px; border-radius: 6px; cursor: pointer; font: inherit; }
+  .r-footer-credit { font-size: 11px; }
 
   /* ── Scroll reveal ───────────────────────────────── */
   .r-reveal {
@@ -898,8 +933,12 @@ const TESTIMONIALS = [
     padding-top: 12px;
   }
   #reader-guestbook .gb-page-info { text-align: center; }
+  #reader-guestbook > .r-gb-status,
+  #reader-guestbook > .r-gb-cta,
+  #reader-guestbook .gb-page-info { color: var(--gb-ink); }
   #reader-guestbook .gb-nav-btn { min-height: 44px; padding: 6px 8px; white-space: nowrap; }
-  #reader-guestbook .gb-nav-btn:hover:not(:disabled) { transform: none; }
+  #reader-guestbook .gb-nav-btn { color: var(--gb-ink); }
+  #reader-guestbook .gb-nav-btn:hover:not(:disabled) { color: var(--gb-ink); border-color: var(--gb-ink); transform: none; }
   .r-gb-entries {
     list-style: none; margin: 0; padding: 0;
     display: grid;
@@ -1110,6 +1149,7 @@ const TESTIMONIALS = [
     .r-cv { display: block; text-align: center; }
     .r-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .r-proj-grid { grid-template-columns: 1fr; }
+    .r-case-grid { grid-template-columns: 1fr; }
     .chips { gap: 7px; }
     .chip { font-size: 12.5px; padding: 7px 11px; }
     /* Input row pinned at bottom, above safe area notch */
@@ -1141,6 +1181,10 @@ const TESTIMONIALS = [
       align-items: flex-start !important;
       gap: 15px !important;
     }
+    .r-strengths li { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: start; }
+    .r-strengths li::before { grid-row: 1 / span 2; }
+    .r-st { grid-column: 2; min-width: 0; }
+    .r-sd { grid-column: 2; min-width: 0; }
   }
   .neofetch-container {
     display: flex;
@@ -1161,7 +1205,16 @@ const TESTIMONIALS = [
   :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
   #cmdline:focus-visible { outline-offset: -3px; }
   button, .r-nav-link { min-width: 24px; min-height: 24px; }
-  .dot { width: 24px; height: 24px; flex-shrink: 0; }
+  .dot {
+    box-sizing: border-box;
+    width: 24px;
+    height: 24px;
+    padding: 6px;
+    background-clip: content-box;
+    flex-shrink: 0;
+  }
+  .gb-nav-btn { min-width: 24px; min-height: 24px; }
+  #analytics-optout-btn { min-width: 24px; min-height: 44px; padding: 8px 14px; }
   .t-dot { width: 24px; height: 24px; }
   .t-dots, .gb-book-nav { flex-wrap: wrap; }
   .r-nav-link { text-decoration: none; }
@@ -1310,7 +1363,6 @@ const TESTIMONIALS = [
       </span>
       <span class="hint" id="hint"></span>
     </div>
-    <div class="credit">// built with <span class="accent">vibe coding</span> <span class="red">&lt;3</span></div>
   </div>
 
 <script>
@@ -1318,11 +1370,43 @@ const CONFIG = {
   user: "memilyc",
   host: "portfolio",
   name: "M. Emily Chang",
-  role: "Senior Support Engineer · Open to work.",
+  role: "Senior Support Engineer",
   tagline: "Turning complex technical chaos into clarity — for customers, for teammates, for entire companies.",
+  context: "Most recently: Senior Support Engineer at GitLab, supporting self-managed enterprise customers across APAC.",
+  availability: "Kuala Lumpur (GMT+8) · Open to remote roles, sponsorship, and consulting · Exploring Technical Services, AI Support, and Customer Success Engineering roles.",
   about: [
-    "I help make technology work better for the people who build it, support it, and depend on it. With 9+ years across enterprise SaaS, fintech, cloud infrastructure, and DevSecOps, I specialize in solving recurring technical problems and turning them into lasting improvements: better tooling, automation, documentation, and product fixes.",
+    "I bring 9+ years across software engineering, systems administration, and technical support, most recently supporting GitLab's self-managed platform across APAC. I work across applications, databases, cloud infrastructure, and customer communication, and I am at my best when a difficult incident becomes a lasting improvement: a product fix, tool, automation, or clearer documentation.",
     ],
+  experience: [
+    {
+      role: "Senior Support Engineer",
+      company: "GitLab",
+      period: "Feb 2024 – Jun 2026",
+      meta: "Support Engineer: Aug 2020 – Feb 2024 · APAC · Self-managed enterprise DevSecOps",
+      summary: "Supported complex production environments across application, database, authentication, integration, and infrastructure layers while partnering with customers and Engineering.",
+      highlights: [
+        "Promoted in 2024; supported customer portfolios worth up to US$9M ARR and participated in the 24/7 Customer Emergency On-Call rotation.",
+        "Reproduced defects, coordinated high-severity escalations, and translated incident findings into product, process, and documentation improvements.",
+        "Authored 125+ documentation updates, led 600+ technical pairing sessions, and built tools adopted across a company operating in 65+ countries.",
+      ],
+    },
+    {
+      role: "Systems Administrator",
+      company: "Arvato Systems Malaysia",
+      period: "Feb 2019 – Aug 2020",
+      meta: "Associate Systems Administrator: May 2018 – Feb 2019 · Enterprise infrastructure",
+      summary: "Maintained 99.95% availability for systems supporting 3,000+ developers and helped reduce downtime by 40% through platform upgrades, migrations, monitoring, and automation.",
+      highlights: [],
+    },
+    {
+      role: "Software Engineer / Systems Analyst",
+      company: "Juris Technologies",
+      period: "Sep 2017 – May 2018",
+      meta: "Enterprise fintech · Software delivery and workflow systems",
+      summary: "Developed and supported loan-management workflows using Oracle PL/SQL and IBM DB2, translated client requirements, and contributed to Agile delivery as Scrum Master.",
+      highlights: [],
+    },
+  ],
   skills: [
     ["Support",   "customer & SaaS support · incident mgmt · on-call · log analysis"],
     ["Systems",   "Linux admin · Docker · Kubernetes · Bash · PowerShell"],
@@ -1345,29 +1429,35 @@ const CONFIG = {
     {
       title:  "🐘 PostgreSQL Connection Calculator",
       stack:  "PostgreSQL · JavaScript",
-      desc:   "During incidents, things can get chaotic, so I built a guided PostgreSQL calculator that gives teams connection pool sizing recommendations in seconds.",
-      short:  "During incidents, things can get chaotic, so I built a guided PostgreSQL calculator that gives teams connection pool sizing recommendations in seconds.",
+      featured: true,
+      desc:   "Connection limits depend on several PostgreSQL and application settings. I translated that recurring support knowledge into a guided calculator with explicit inputs, validation, and reusable sizing guidance.",
+      short:  "Turned a repeated incident-time calculation into a guided tool that produces PostgreSQL connection-pool sizing recommendations in seconds.",
+      caseStudy: [
+        ["Problem", "During incidents, connection-pool sizing involved several interdependent settings when teams had the least time and attention to spare."],
+        ["Approach", "I translated the troubleshooting logic into a guided JavaScript tool with explicit inputs, validation, and clear recommendations."],
+        ["Result", "The calculation became consistent, quick to repeat, and reusable beyond a single customer ticket or incident."],
+      ],
       url:    "https://postgresql-connection-calculator-759014.gitlab.io/",
       label:  "Open tool →",
     },
     {
       title:  "🕐 Convert UTC Bot",
       stack:  "Deno SDK · Slack Workflow · GitLab CI",
-      desc:   "Built a Deno-powered Slack bot that converts timestamps to UTC and also generates shareable local-time links, removing a daily coordination tax for GitLab's globally distributed teams.",
-      short:  "Built a Deno-powered Slack bot that converts timestamps to UTC and also generates shareable local-time links, removing a daily coordination tax for GitLab's globally distributed teams.",
+      desc:   "Built and deployed a Deno-powered Slack workflow that converts timestamps to UTC and generates shareable local-time links for colleagues working asynchronously around the world.",
+      short:  "Removed a recurring timezone-conversion task with a Slack bot used across a globally distributed company operating in 65+ countries.",
       url:    "https://gitlab.com/gitlab-com/support/toolbox/convert-utc-bot",
       label:  "View on GitLab →",
     },
     {
       title:  "📊 SQL vs NoSQL: MongoDB & MySQL Performance Study",
       stack:  "MongoDB · MySQL · Python · Big Data",
-      desc:   "Benchmarked MongoDB and MySQL across 1 million records to compare real CRUD performance; the study was published by Springer and cited 10 times.",
-      short:  "Benchmarked MongoDB and MySQL across 1 million records to compare real CRUD performance; the study was published by Springer and cited 10 times.",
+      desc:   "Designed and ran a reproducible comparison of MongoDB and MySQL CRUD performance across 1 million semi-structured records, then documented the methodology and findings for publication.",
+      short:  "Compared MongoDB and MySQL performance across 1 million records in a study published by Springer.",
       url:    "https://link.springer.com/chapter/10.1007/978-3-030-03402-3_20",
       label:  "Read on Springer →",
     },
   ],
-  cv:       "https://memilyc.github.io",
+  cv:       "https://memilyc.github.io/assets/download/Emily_Chang_Resume.pdf",
   email:    "echangw2010@gmail.com",
   linkedin: "https://linkedin.com/in/memilyc",
   github:   "https://github.com/memilyc",
@@ -1415,7 +1505,7 @@ function updateAnalyticsOptOutButton() {
   const optedOut = localStorage.getItem('analytics-opt-out') === 'true';
   btn.textContent = optedOut ? 'Enable analytics tracking' : 'Disable analytics tracking';
   btn.title = optedOut 
-    ? 'Click to enable anonymous analytics tracking' 
+    ? 'Click to enable cookie-free analytics tracking'
     : 'Click to disable analytics tracking';
 }
 
@@ -1497,9 +1587,13 @@ function sectionCopyIcon(section){
   return `<button class="copy-link" onclick="copySectionLink('${section}', event)" aria-label="Copy link to ${section}" title="Copy link to this section">🔗</button>`;
 }
 
+function newTabLink(href, label, className = 'tlink') {
+  return `<a class="${escapeHtml(className)}" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}<span class="sr-only"> (opens in a new tab)</span></a>`;
+}
+
 function renderProjectCard(p, fallbackText){
   const link = p.url && p.url !== 'TODO_URL'
-    ? `<div class="r-proj-link"><a class="tlink" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.label)}</a></div>`
+    ? `<div class="r-proj-link">${newTabLink(p.url, p.label)}</div>`
     : (fallbackText ? `<div class="r-proj-link" style="color:var(--dim);font-size:12px;">${fallbackText}</div>` : '');
   // leading emoji becomes the card's visual anchor; the rest is the title
   const m = p.title.match(/^(\p{Extended_Pictographic}(?:\u200D\p{Extended_Pictographic})*)\s+(.+)$/u);
@@ -1507,17 +1601,24 @@ function renderProjectCard(p, fallbackText){
   const title = m ? m[2] : p.title;
   const pills = p.stack.split('·').map(s => s.trim()).filter(Boolean)
     .map((s, i) => `<span class="r-chip ${['green','cyan','yellow'][i % 3]}">${escapeHtml(s)}</span>`).join('');
+  const caseStudy = p.caseStudy?.length ? `
+            <details class="r-proj-details r-proj-case">
+              <summary>Read case study</summary>
+              <dl class="r-case-grid">
+                ${p.caseStudy.map(([label, text]) => `<div class="r-case-step"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(text)}</dd></div>`).join('')}
+              </dl>
+            </details>` : '';
   return `
-          <li class="r-proj-card">
+          <li class="r-proj-card${p.featured ? ' featured' : ''}">
             ${emoji ? `<div class="r-proj-emoji" aria-hidden="true">${emoji}</div>` : ''}
             <div class="r-proj-title">${escapeHtml(title)}</div>
             <div class="r-proj-pills">${pills}</div>
             <div class="r-proj-desc">${escapeHtml(p.short || p.desc)}</div>
-            ${p.short && p.short !== p.desc ? `
+            ${caseStudy || (p.short && p.short !== p.desc ? `
             <details class="r-proj-details">
               <summary>Details</summary>
               <p>${escapeHtml(p.desc)}</p>
-            </details>` : ''}
+            </details>` : '')}
             ${link}
           </li>`;
 }
@@ -1731,8 +1832,8 @@ function buildReader(){
   const esc = escapeHtml;
   const SKILL_ICONS = { Support: '🎧', Systems: '🖥', Cloud: '☁️', Databases: '🗄️', Code: '👾', Tooling: '⚙️' };
   const R_NAV_SECTIONS = [
-    ['about','About'], ['skills','Skills'], ['projects','Projects'],
-    ['strengths','Strengths'], ['testimonials','Testimonials'],
+    ['about','About'], ['experience','Experience'], ['projects','Work'],
+    ['testimonials','Testimonials'], ['skills','Skills'], ['strengths','Strengths'],
     ['resume','Résumé'], ['contact','Contact'], ['guestbook','Guestbook']
   ];
   reader.innerHTML = `
@@ -1752,6 +1853,7 @@ function buildReader(){
     </header>
     <div class="r-role">${esc(c.role)}</div>
     <p class="r-tag">${esc(c.tagline)}</p>
+    <p class="r-context">${esc(c.context)}</p>
     <div class="r-chips">
       <span class="r-chip green">Open to work</span>
       <span class="r-chip yellow">Open to consulting</span>
@@ -1761,6 +1863,7 @@ function buildReader(){
       <span class="r-chip green">Customer-Facing</span>
       <span class="r-chip cyan">Documentation</span>
     </div>
+    <p class="r-availability">${esc(c.availability)}</p>
     <section class="r-sec" id="about">
       <h2 class="r-h" data-section="about">About ${sectionCopyIcon('about')}</h2>
       ${c.about.map(p => {
@@ -1768,6 +1871,48 @@ function buildReader(){
         return `<p class="r-body">${html}</p>`;
       }).join('')}
     </section>
+    <section class="r-sec" id="experience">
+      <h2 class="r-h" data-section="experience">Experience ${sectionCopyIcon('experience')}</h2>
+      <ol class="r-exp-list">
+        ${c.experience.map(job => `
+          <li>
+            <article class="r-exp-card">
+              <div class="r-exp-head">
+                <h3 class="r-exp-role">${esc(job.role)}</h3>
+                <span class="r-exp-period">${esc(job.period)}</span>
+              </div>
+              <div class="r-exp-company">${esc(job.company)}</div>
+              <div class="r-exp-meta">${esc(job.meta)}</div>
+              <p class="r-exp-summary">${esc(job.summary)}</p>
+              ${job.highlights.length ? `<ul class="r-exp-highlights">${job.highlights.map(item => `<li>${esc(item)}</li>`).join('')}</ul>` : ''}
+            </article>
+          </li>
+        `).join('')}
+      </ol>
+    </section>
+    <section class="r-sec" id="projects">
+      <h2 class="r-h" data-section="projects">Selected work ${sectionCopyIcon('projects')}</h2>
+      <ul class="r-proj-grid">
+        ${c.projects.map(p => renderProjectCard(p, '// link coming soon')).join('')}
+      </ul>
+    </section>
+    ${TESTIMONIALS.length > 0 ? `
+    <section class="r-sec" id="testimonials">
+      <div class="t-section-heading">
+        <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
+        <button class="gb-nav-btn" id="t-pause" type="button" aria-label="Play testimonial animation" aria-controls="t-carousel">▶ Play</button>
+      </div>
+      <div class="gb-book" id="t-carousel" role="region" aria-label="Testimonials" aria-roledescription="carousel">
+        <div class="t-slide-wrap"><div id="t-slide" aria-live="polite" aria-atomic="true"></div></div>
+        <div class="gb-book-nav">
+          <button class="gb-nav-btn" id="t-prev" aria-label="Previous testimonial">←</button>
+          <div id="t-dots" class="t-dots"></div>
+          <button class="gb-nav-btn" id="t-next" aria-label="Next testimonial">→</button>
+        </div>
+      </div>
+      ${testimonialCTA(true)}
+    </section>
+    ` : ''}
     <section class="r-sec" id="skills">
       <h2 class="r-h" data-section="skills">Skills ${sectionCopyIcon('skills')}</h2>
       <div class="r-skill-groups">
@@ -1781,45 +1926,21 @@ function buildReader(){
         `).join('')}
       </div>
     </section>
-    <section class="r-sec" id="projects">
-      <h2 class="r-h" data-section="projects">Projects ${sectionCopyIcon('projects')}</h2>
-      <ul class="r-proj-grid">
-        ${c.projects.map(p => renderProjectCard(p, '// link coming soon')).join('')}
-      </ul>
-    </section>
     <section class="r-sec" id="strengths">
       <h2 class="r-h" data-section="strengths">Strengths ${sectionCopyIcon('strengths')}</h2>
       <p class="r-sub">${esc(c.strengths.source)}</p>
       <ol class="r-strengths" id="r-strengths-list">
         ${c.strengths.themes.map(([t,d]) => `<li><span class="r-st">${esc(t)}</span><span class="r-sd">${esc(d)}</span></li>`).join('')}
       </ol>
-
     </section>
-    ${TESTIMONIALS.length > 0 ? `
-    <section class="r-sec" id="testimonials">
-      <div class="t-section-heading">
-        <h2 class="r-h" data-section="testimonials">Testimonials ${sectionCopyIcon('testimonials')}</h2>
-        <button class="gb-nav-btn" id="t-pause" aria-label="Auto-advance testimonials" aria-pressed="false" aria-controls="t-carousel">Auto-advance: Off</button>
-      </div>
-      <div class="gb-book" id="t-carousel" role="region" aria-label="Testimonials" aria-roledescription="carousel">
-        <div class="t-slide-wrap"><div id="t-slide" aria-live="polite" aria-atomic="true"></div></div>
-        <div class="gb-book-nav">
-          <button class="gb-nav-btn" id="t-prev" aria-label="Previous testimonial">←</button>
-          <div id="t-dots" class="t-dots"></div>
-          <button class="gb-nav-btn" id="t-next" aria-label="Next testimonial">→</button>
-        </div>
-      </div>
-      ${testimonialCTA(true)}
-    </section>
-    ` : ''}
     <section class="r-sec" id="resume">
       <h2 class="r-h" data-section="resume">Résumé ${sectionCopyIcon('resume')}</h2>
       <div style="display:flex; justify-content:center;">
-        <a class="r-resume-preview" href="${esc(c.cv)}" target="_blank" rel="noopener" aria-label="Open full résumé in a new tab" style="max-width:380px;">
-          <img src="assets/preview-resume.png" alt="Résumé preview" loading="lazy">
+        <a class="r-resume-preview" href="${esc(c.cv)}" target="_blank" rel="noopener noreferrer" aria-label="Open résumé PDF in a new tab" style="max-width:380px;">
+          <img src="assets/preview-resume.png" alt="Preview of Emily Chang's résumé" loading="lazy">
           <div class="r-resume-overlay">
             <div class="r-resume-overlay-icon">📄</div>
-            <div class="r-resume-overlay-label">View full résumé →</div>
+            <div class="r-resume-overlay-label">Open résumé PDF →</div>
           </div>
         </a>
       </div>
@@ -1828,12 +1949,12 @@ function buildReader(){
       <h2 class="r-h" data-section="contact">Contact ${sectionCopyIcon('contact')}</h2>
       <div class="r-cta">
         <div class="r-cta-title">Let's talk.<span class="cursor"></span></div>
-        <p class="r-cta-sub">Target: Customer Success Engineering, Solutions Support. Based in Kuala Lumpur (GMT+8), open to remote, sponsorship, and consulting projects.</p>
+        <p class="r-cta-sub">Senior Support Engineer based in Kuala Lumpur (GMT+8). Open to remote roles, sponsorship, and consulting, with particular interest in Technical Services, AI Support, and Customer Success Engineering.</p>
         <a class="r-cv" href="mailto:${esc(c.email)}">Email me →</a>
         <ul class="r-links">
           <li><span class="r-lk">Email</span><a class="tlink" href="mailto:${esc(c.email)}">${esc(c.email)}</a></li>
-          <li><span class="r-lk">LinkedIn</span><a class="tlink" href="${esc(c.linkedin)}" target="_blank" rel="noopener">M. Emily Chang</a></li>
-          <li><span class="r-lk">GitHub</span><a class="tlink" href="${esc(c.github)}" target="_blank" rel="noopener">@memilyc</a></li>
+          <li><span class="r-lk">LinkedIn</span>${newTabLink(c.linkedin, 'M. Emily Chang')}</li>
+          <li><span class="r-lk">GitHub</span>${newTabLink(c.github, '@memilyc')}</li>
         </ul>
       </div>
     </section>
@@ -1850,9 +1971,10 @@ function buildReader(){
       <p class="r-body">This site targets WCAG 2.2 Level AA. If you notice an accessibility issue or have trouble using anything, please let me know.</p>
       <a class="r-cv r-accessibility-email" href="mailto:${esc(c.email)}?subject=Accessibility%20feedback%20on%20your%20portfolio">Email me about accessibility →</a>
     </section>
-    <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; color: var(--dim); font-size: 12px;">
-      <p style="margin-bottom: 8px;">This portfolio uses privacy-friendly analytics to understand visitor sources (no cookies, no personal data).</p>
-      <p><button onclick="toggleAnalyticsOptOut()" id="analytics-optout-btn" style="background: none; border: 1px solid var(--border); color: var(--dim); padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-family: inherit;">Disable analytics tracking</button></p>
+    <footer class="r-footer">
+      <p>Cookie-free page-view analytics record the page path, referrer, browser user agent, coarse location headers, and a shortened hash of the visitor IP. Guestbook entries are public, so submit only what you are comfortable sharing.</p>
+      <p><button class="r-privacy-btn" onclick="toggleAnalyticsOptOut()" id="analytics-optout-btn">Disable analytics tracking</button></p>
+      <p class="r-footer-credit">Built with HTML, CSS, JavaScript, curiosity, and a little vibe coding.</p>
     </footer>
     </div>`;
 
@@ -1864,7 +1986,7 @@ function buildReader(){
   // stagger children within each section
   document.querySelectorAll('.r-sec').forEach(sec => {
     const kids = sec.querySelectorAll(
-      '.r-chip, .r-skill-group, .r-proj-card, .r-strengths li, .t-slide-wrap, #reader-guestbook, .r-gb-form, .r-cta'
+      '.r-chip, .r-exp-card, .r-proj-card, .r-case-step, .r-skill-group, .r-strengths li, .t-slide-wrap, #reader-guestbook, .r-gb-form, .r-cta'
     );
     kids.forEach((kid, i) => {
       const delayClass = `r-reveal-d${Math.min(i + 1, 6)}`;
@@ -1892,8 +2014,8 @@ function buildReader(){
     function pauseTCarousel() {
       tPausedByUser = true;
       clearInterval(tAutoTimer);
-      document.getElementById('t-pause').textContent = 'Auto-advance: Off';
-      document.getElementById('t-pause').setAttribute('aria-pressed', 'false');
+      document.getElementById('t-pause').textContent = '▶ Play';
+      document.getElementById('t-pause').setAttribute('aria-label', 'Play testimonial animation');
       document.getElementById('t-slide').setAttribute('aria-live', 'polite');
     }
 
@@ -1986,8 +2108,8 @@ function buildReader(){
     document.getElementById('t-pause').addEventListener('click', () => {
       if (!tPausedByUser) { pauseTCarousel(); return; }
       tPausedByUser = false;
-      document.getElementById('t-pause').textContent = 'Auto-advance: On';
-      document.getElementById('t-pause').setAttribute('aria-pressed', 'true');
+      document.getElementById('t-pause').textContent = '⏸ Pause';
+      document.getElementById('t-pause').setAttribute('aria-label', 'Pause testimonial animation');
       document.getElementById('t-slide').setAttribute('aria-live', 'off');
       startTTimer();
     });
@@ -2002,14 +2124,25 @@ function buildReader(){
 
   // Hamburger toggle
   const dropdown = document.getElementById('r-nav-dropdown');
-  document.getElementById('r-nav-toggle').addEventListener('click', e => {
+  const navToggle = document.getElementById('r-nav-toggle');
+  navToggle.addEventListener('click', e => {
     e.stopPropagation();
     const open = dropdown.classList.toggle('open');
     e.currentTarget.setAttribute('aria-expanded', String(open));
   });
-  const closeSections = () => { dropdown.classList.remove('open'); document.getElementById('r-nav-toggle').setAttribute('aria-expanded', 'false'); };
-  document.addEventListener('click', closeSections);
-  dropdown.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeSections(); document.getElementById('r-nav-toggle').focus(); } });
+  const closeSections = (restoreFocus = false) => {
+    dropdown.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) navToggle.focus();
+  };
+  document.addEventListener('click', () => closeSections());
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && dropdown.classList.contains('open')) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeSections(true);
+    }
+  });
 
   // Nav click → smooth scroll + close dropdown
   document.querySelectorAll('.r-nav-link').forEach(link => {
@@ -2156,6 +2289,17 @@ function enterUserPositioned() {
 }
 
 // Discrete button controls provide the same layout operations without dragging.
+const windowLayout = document.getElementById('window-layout');
+const windowLayoutSummary = windowLayout.querySelector('summary');
+windowLayout.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && windowLayout.open) {
+    event.preventDefault();
+    event.stopPropagation();
+    windowLayout.open = false;
+    windowLayoutSummary.focus();
+  }
+});
+
 document.querySelectorAll('[data-layout]').forEach(button => {
   button.addEventListener('click', () => {
     const action = button.dataset.layout;
@@ -2372,15 +2516,15 @@ function promptHtml(path){
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 const CMX_URL = 'https://events.cmxhub.com/the-digital-nomad-cmx-community/';
-function linkifyCmx(s){ return s.replace(CMX_URL, `<a class="tlink" href="${CMX_URL}" target="_blank" rel="noopener">${CMX_URL}</a>`); }
+function linkifyCmx(s){ return s.replace(CMX_URL, newTabLink(CMX_URL, CMX_URL)); }
 function highlightAbout(s){
   return linkifyCmx(escapeHtml(s))
-    .replace('technology work better', '<span class="green b">technology work better</span>')
     .replace('9+ years', '<span class="accent b">9+ years</span>')
-    .replace('enterprise SaaS, fintech, cloud infrastructure, and DevSecOps', '<span class="cyan b">enterprise SaaS, fintech, cloud infrastructure, and DevSecOps</span>')
-    .replace('recurring technical problems', '<span class="yellow b">recurring technical problems</span>')
-    .replace('lasting improvements', '<span class="green b">lasting improvements</span>')
-    .replace('tooling, automation, documentation, and product fixes', '<span class="accent b">tooling, automation, documentation, and product fixes</span>');
+    .replace('software engineering, systems administration, and technical support', '<span class="cyan b">software engineering, systems administration, and technical support</span>')
+    .replace("GitLab's self-managed platform across APAC", '<span class="yellow b">GitLab\'s self-managed platform across APAC</span>')
+    .replace('applications, databases, cloud infrastructure, and customer communication', '<span class="green b">applications, databases, cloud infrastructure, and customer communication</span>')
+    .replace('lasting improvement', '<span class="accent b">lasting improvement</span>')
+    .replace('product fix, tool, automation, or clearer documentation', '<span class="accent b">product fix, tool, automation, or clearer documentation</span>');
 }
 function validateNickname(nick){ return nick && nick.length >= 3 && nick.length <= 20 && /^[a-zA-Z0-9 _-]+$/.test(nick); }
 function hasHelpFlag(argv){ return argv.includes('-h') || argv.includes('--help') || argv.includes('-help'); }
@@ -2404,7 +2548,7 @@ function testimonialCTA(forReader = false){
   const tag = forReader ? 'p' : 'span';
   const or = ' or';
   const dot = forReader ? '' : '<span class="dim">.</span>';
-  return `<${tag} class="${cls}">Worked with Emily and want to add your testimonial? <a class="tlink" href="${escapeHtml(CONFIG.linkedin)}" target="_blank" rel="noopener">Add a LinkedIn recommendation</a>${or} <a class="tlink" href="mailto:${escapeHtml(CONFIG.email)}?subject=Add%20testimonial%20to%20Emily's%20portfolio">email me</a>${dot}</${tag}>`;
+  return `<${tag} class="${cls}">Worked with Emily and want to add your testimonial? ${newTabLink(CONFIG.linkedin, 'Add a LinkedIn recommendation')}${or} <a class="tlink" href="mailto:${escapeHtml(CONFIG.email)}?subject=Add%20testimonial%20to%20Emily's%20portfolio">email me</a>${dot}</${tag}>`;
 }
 
 /* Sanitize guestbook messages: strip URLs and obfuscate domain patterns */
@@ -2521,7 +2665,7 @@ const FILE_CONTENT = {
     '',
     '<span class="accent b">v1.0</span>',
     '  • <span class="cyan">adventure</span>   — simulate a live P0 server incident in the terminal',
-    '  • <span class="cyan">testimonials</span> — dot indicators + 4.5s auto-advance carousel in reader view',
+    '  • <span class="cyan">testimonials</span> — user-controlled carousel with optional playback in reader view',
     '  • guestbook moderation via soft-hide flag (no data deleted)',
     '  • fixed: window drag broken after maximize → restore',
     '  • help chips: whyhireme easter egg surfaced as a teaser',
@@ -2564,7 +2708,7 @@ const FILE_CONTENT = {
     '<span class="green b">║                                      ║</span>',
     '<span class="green b">╚══════════════════════════════════════╝</span>',
     '',
-    '<span class="dim">Target: Customer Success Engineering, Solutions Support.</span>',
+    '<span class="dim">Exploring: Technical Services, AI Support, and Customer Success Engineering.</span>',
     '<span class="dim">KL (GMT+8), open to remote, sponsorship, and consulting projects.</span>',
     '',
     '<span class="dim">→ type </span><button class="chip" style="vertical-align:middle" onclick="runCommand(\'contact\')">contact</button><span class="dim"> to get in touch</span>',
@@ -2602,7 +2746,7 @@ const FILE_CONTENT = {
     'Built this portfolio as a static terminal-and-reader experience so visitors can explore my support engineering work like a working system, not just a resume page.',
     '',
     '<span class="accent">stack</span>   Vanilla JS · HTML · CSS · Supabase',
-    '<span class="accent">link</span>    <a class="tlink" href="https://memilyc.github.io" target="_blank" rel="noopener">https://memilyc.github.io</a>',
+    `<span class="accent">link</span>    ${newTabLink('https://memilyc.github.io/portfolio/', 'https://memilyc.github.io/portfolio/')}`,
   ],
   '/home/emily/portfolio/projects/postgresql-calculator/README.md': (() => {
     const p = CONFIG.projects.find(x => x.title.toLowerCase().includes('postgresql'));
@@ -2611,7 +2755,7 @@ const FILE_CONTENT = {
       escapeHtml(p.desc),
       '',
       `<span class="accent">stack</span>   ${escapeHtml(p.stack)}`,
-      `<span class="accent">link</span>    <a class="tlink" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.url)}</a>`,
+      `<span class="accent">link</span>    ${newTabLink(p.url, p.url)}`,
     ] : ['<span class="dim">(no content)</span>'];
   })(),
   '/home/emily/portfolio/projects/convert-utc-bot/README.md': (() => {
@@ -2621,7 +2765,7 @@ const FILE_CONTENT = {
       escapeHtml(p.desc),
       '',
       `<span class="accent">stack</span>   ${escapeHtml(p.stack)}`,
-      `<span class="accent">link</span>    <a class="tlink" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.url)}</a>`,
+      `<span class="accent">link</span>    ${newTabLink(p.url, p.url)}`,
     ] : ['<span class="dim">(no content)</span>'];
   })(),
 };
@@ -2722,7 +2866,7 @@ const commands = {
       print(`<span class="dim">     stack  </span><span class="magenta">${escapeHtml(p.stack)}</span>`);
       print(`<span class="dim">     desc   </span>${escapeHtml(p.desc)}`);
       if (p.url && p.url !== 'TODO_URL'){
-        print(`<span class="dim">     link   </span><a class="tlink" href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.url)}</a>`);
+        print(`<span class="dim">     link   </span>${newTabLink(p.url, p.url)}`);
       } else {
         print(`<span class="dim">     link   // coming soon</span>`);
       }
@@ -2741,12 +2885,12 @@ const commands = {
     //print('<span class="dim">Available for Senior Support / Solutions Engineering roles.</span>');
     blank();
     print(`<span class="magenta">email   </span> <a class="tlink" href="mailto:${CONFIG.email}">${CONFIG.email}</a>`);
-    print(`<span class="magenta">linkedin</span> <a class="tlink" href="${CONFIG.linkedin}" target="_blank" rel="noopener">${CONFIG.linkedin}</a>`);
-    print(`<span class="magenta">github  </span> <a class="tlink" href="${CONFIG.github}" target="_blank" rel="noopener">${CONFIG.github}</a>`);
-    print(`<span class="magenta">cv      </span> <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`);
+    print(`<span class="magenta">linkedin</span> ${newTabLink(CONFIG.linkedin, CONFIG.linkedin)}`);
+    print(`<span class="magenta">github  </span> ${newTabLink(CONFIG.github, CONFIG.github)}`);
+    print(`<span class="magenta">cv      </span> ${newTabLink(CONFIG.cv, CONFIG.cv)}`);
   },
   cv(){
-    print(`Opening résumé → <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`, 'cyan');
+    print(`Opening résumé → ${newTabLink(CONFIG.cv, CONFIG.cv)}`, 'cyan');
     window.open(CONFIG.cv, '_blank', 'noopener');
   },
   theme(args){
@@ -3120,25 +3264,25 @@ const commands = {
     blank();
     print('<span class="accent b">Privacy & Analytics</span>');
     blank();
-    print('This portfolio uses privacy-friendly analytics to understand');
+    print('This portfolio uses cookie-free analytics to understand');
     print('where visitors come from (LinkedIn, Twitter, Google, etc.)');
     blank();
     print('<span class="yellow b">What we track:</span>');
     print('  • Referrer URL (where you clicked from)');
     print('  • Page path (which section you viewed)');
-    print('  • Anonymized IP (SHA-256 hashed, not reversible)');
-    print('  • Browser type and country');
+    print('  • Shortened SHA-256 hash of the visitor IP');
+    print('  • Browser user agent and coarse country/city headers, when available');
     blank();
     print('<span class="yellow b">What we DON\'T track:</span>');
-    print('  • Names, emails, or personal data');
+    print('  • Names or email addresses through analytics');
     print('  • Cookies or session identifiers');
     print('  • Mouse movements, clicks, or scroll behavior');
     print('  • Time spent on page');
     blank();
-    print('<span class="yellow b">Your rights:</span>');
-    print('  • GDPR, CCPA, LGPD, PIPEDA compliant');
-    print('  • No consent banner needed (no cookies/personal data)');
-    print('  • You can opt out anytime');
+    print('<span class="yellow b">Your controls:</span>');
+    print('  • You can opt out or opt back in anytime');
+    print('  • The preference stays in localStorage on this device');
+    print('  • Guestbook entries are public and should not contain sensitive information');
     blank();
     
     const optedOut = localStorage.getItem('analytics-opt-out') === 'true';
@@ -3176,7 +3320,7 @@ const commands = {
     print('  <span class="cyan">◆</span> <span class="accent b">Claude</span> <span class="dim">(Anthropic)</span> — design + build partner');
     print('  <span class="green">◆</span> <span class="accent b">ChatGPT</span> <span class="dim">(OpenAI)</span> — brainstorming + refinement');
     print('  <span class="yellow">◆</span> <span class="accent b">Qoder</span> — implementation + integration');
-    print('  <span class="magenta">◆</span> <span class="accent b">Avatars in Pixels</span> — pixel avatar · <a class="tlink" href="https://www.avatarsinpixels.com/minipix/clothing/Body" target="_blank" rel="noopener">avatarsinpixels.com</a>');
+    print(`  <span class="magenta">◆</span> <span class="accent b">Avatars in Pixels</span> — pixel avatar · ${newTabLink('https://www.avatarsinpixels.com/minipix/clothing/Body', 'avatarsinpixels.com')}`);
     blank();
     print('<span class="dim">All ideas, direction, and questionable jokes are Emily\'s own.</span>');
   },
@@ -3501,7 +3645,7 @@ const commands = {
       `<span class="yellow">Role</span>:    ${CONFIG.role}`,
       `<span class="yellow">Shell</span>:   bash`,
       `<span class="yellow">Uptime</span>:  always ready to help`,
-      `<span class="yellow">CV</span>:      <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`,
+      `<span class="yellow">CV</span>:      ${newTabLink(CONFIG.cv, CONFIG.cv)}`,
     ];
     const container = el('div', 'neofetch-container');
     const img = document.createElement('img');
@@ -3698,7 +3842,7 @@ const commands = {
   },
 
   resume(){
-    print(`Opening résumé → <a class="tlink" href="${CONFIG.cv}" target="_blank" rel="noopener">${CONFIG.cv}</a>`, 'cyan');
+    print(`Opening résumé → ${newTabLink(CONFIG.cv, CONFIG.cv)}`, 'cyan');
     window.open(CONFIG.cv, '_blank', 'noopener');
   },
 
@@ -5034,8 +5178,8 @@ async function boot(){
 
   blank();
   
-  // Privacy notice for terminal view (GDPR/CCPA compliant)
-  print('<span class="dim" style="font-size: 11px;">🔒 Privacy: This site uses anonymous analytics (no cookies, no personal data). Type <span class="accent">privacy</span> to learn more or opt out.</span>');
+  // Privacy notice for terminal view
+  print('<span class="dim" style="font-size: 11px;">🔒 Privacy: This site uses cookie-free page-view analytics. Type <span class="accent">privacy</span> to see what is recorded or opt out.</span>');
   
   inputRow.style.display = 'flex';
   fitToViewport();

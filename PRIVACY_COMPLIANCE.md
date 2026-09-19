@@ -1,31 +1,19 @@
-# Privacy Compliance Summary
+# Privacy Implementation Notes
 
-## ✅ Your Analytics Implementation is Legally Compliant
+This document describes the current implementation. It is not legal advice or a formal determination of compliance with any privacy law.
 
-Your portfolio analytics now comply with major privacy regulations:
+## Data Recorded
 
-### GDPR (European Union)
-- ✅ **Lawful basis**: Legitimate interest (anonymous analytics)
-- ✅ **Opt-out mechanism**: User can disable tracking
-- ✅ **Privacy notice**: Footer informs users about tracking
-- ✅ **No consent banner needed**: Because you're not using cookies or collecting personal data
-- ✅ **Data minimization**: Only collecting what's necessary
-- ✅ **IP anonymization**: Hashed, not stored raw
+- Page path
+- Referrer URL
+- Browser user agent
+- A shortened SHA-256 hash of the visitor IP
+- Country and city headers when supplied by the hosting or proxy layer
+- Timestamp
 
-### CCPA (California, USA)
-- ✅ **No "sale" of data**: Data stays in your Supabase
-- ✅ **Opt-out right**: Users can disable tracking
-- ✅ **No personal information**: Only technical metadata
-- ✅ **Transparent notice**: Footer explains what's tracked
+The guestbook separately stores the nickname and message a visitor chooses to submit, plus an IP hash used for rate limiting. Published guestbook entries are intentionally public.
 
-### Other Regulations
-- ✅ **LGPD (Brazil)**: Compliant
-- ✅ **PIPEDA (Canada)**: Compliant
-- ✅ **UK GDPR**: Compliant
-
----
-
-## What Makes You Compliant
+## Privacy and Security Controls
 
 ### 1. No Cookies
 You're not storing any cookies. The opt-out preference uses `localStorage`, which is:
@@ -33,18 +21,9 @@ You're not storing any cookies. The opt-out preference uses `localStorage`, whic
 - Only stores the opt-out boolean
 - Not used for tracking
 
-### 2. No Personal Data
-You're only collecting:
-- Referrer URL (technical metadata)
-- Page path (technical metadata)
-- User agent (technical metadata)
-- Hashed IP (anonymized identifier)
-- Country/city (from CDN headers)
+### 2. Data Minimization
 
-**This is NOT personal data** under GDPR because:
-- Cannot identify a specific person
-- No names, emails, or contact info
-- IP is hashed (one-way, not reversible)
+The raw IP address is not stored. The Edge Function hashes it and stores only a shortened value for analytics. However, hashed identifiers and technical metadata may still be regulated data depending on jurisdiction and context, so the public notice describes what is recorded rather than calling it “no personal data.”
 
 ### 3. User Control
 Users can:
@@ -54,10 +33,12 @@ Users can:
 - Opt back in if they change their mind
 
 ### 4. Data Security
-- Row Level Security prevents public access
-- Only you (authenticated) can read analytics
-- Data never leaves your Supabase project
-- No third-party sharing
+- Row Level Security prevents anonymous public reads of analytics
+- Authenticated access is required to read analytics under the current migration policy
+- The application code sends analytics rows to the configured Supabase project
+- Retention and authenticated-user access should be reviewed in the deployed Supabase project
+
+Guestbook inserts go through an Edge Function using server-side service-role credentials. The function validates content, applies spam controls, and limits submissions by IP hash. Anonymous clients can read published guestbook rows but have no direct insert policy.
 
 ---
 
@@ -72,19 +53,9 @@ Users can:
 
 ---
 
-## Do You Need a Cookie Banner?
+## Legal Review
 
-**NO** - You don't need a cookie banner because:
-
-1. **No cookies are used** - Only localStorage for opt-out preference
-2. **No personal data collected** - Only anonymous technical metadata
-3. **Legitimate interest** - Analytics is a legitimate business interest
-4. **Opt-out available** - Users can disable if they want
-
-However, you should still:
-- ✅ Keep the privacy notice in the footer
-- ✅ Keep the opt-out button
-- ✅ Mention analytics in your privacy policy (if you have one)
+Cookie and privacy requirements vary by jurisdiction and can depend on hosting, retention, access, and how identifiers are used. Keep the footer notice and opt-out control, set an appropriate retention period in Supabase, and obtain qualified legal advice if formal compliance assurance is required.
 
 ---
 
@@ -92,27 +63,10 @@ However, you should still:
 
 If you need to add this to a privacy policy:
 
-> **Analytics**: This site uses anonymous analytics to understand where visitors come from. We do not use cookies or collect personal information. We track page views, referrer URLs, and anonymized IP addresses (hashed). You can opt out of analytics tracking using the button in the site footer. Data is stored securely and never shared with third parties.
+> **Analytics**: This site uses cookie-free analytics to understand page visits and referral sources. It records the page path, referrer, browser user agent, coarse location headers when available, and a shortened hash of the visitor IP. You can opt out using the control in the site footer. The preference is stored in localStorage on your device.
 
 ---
 
-## Comparison with Other Analytics
+## Summary
 
-| Feature | Your Solution | Google Analytics | Plausible |
-|---------|---------------|------------------|-----------|
-| Cookies | ❌ No | ✅ Yes | ❌ No |
-| Personal Data | ❌ No | ✅ Yes | ❌ No |
-| IP Storage | Hashed only | Full IP | Hashed |
-| Opt-out | ✅ Yes | ✅ Yes | ✅ Yes |
-| Consent Banner | ❌ Not needed | ✅ Required | ❌ Not needed |
-| GDPR Compliant | ✅ Yes | ⚠️ With effort | ✅ Yes |
-| CCPA Compliant | ✅ Yes | ⚠️ With effort | ✅ Yes |
-| Third-party | ❌ No | ✅ Yes | ✅ Yes |
-
----
-
-## Bottom Line
-
-Your implementation is **more privacy-friendly than most analytics tools** and complies with major privacy laws without requiring a cookie consent banner. The opt-out mechanism gives users control, and the privacy notice keeps you transparent.
-
-**You're good to go!** 🎉
+The implementation avoids cookies, limits direct public database permissions, hashes IP addresses before storage, and provides an opt-out. The public explanation must continue to describe the actual fields collected and should not promise legal compliance without a jurisdiction-specific review.
