@@ -504,6 +504,9 @@ const TESTIMONIALS = [
   .r-nav.nav-compact .r-nav-links { display: none; }
   .r-nav.nav-compact .r-nav-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; margin: 0; padding: 10px 16px; }
   .r-nav.nav-compact .r-nav-dropdown { top: auto; bottom: 100%; border-top: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0; margin-bottom: 0; }
+  @media (min-width: 601px) {
+    .r-nav.nav-compact { position: sticky; top: 0; right: auto; bottom: auto; width: 100%; border-radius: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
+  }
 
   [data-view="terminal"] .reader { display: none; }
   [data-view="terminal"] #r-nav { display: none; }
@@ -1307,24 +1310,45 @@ const TESTIMONIALS = [
   .terminal-help { padding: 8px 0 0; }
   #terminal-stop { min-height: 44px; font-size: 12px; }
   #terminal-stop[hidden] { display: none; }
-  .r-nav.nav-compact { position: sticky; top: 0; inset-inline: auto; width: 100%; flex-wrap: wrap; border-radius: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.18); border-bottom: 1px solid var(--border); }
+  .r-nav.nav-compact { position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); top: auto; inset-inline: auto; width: fit-content; max-width: calc(100vw - 24px); flex-wrap: wrap; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); border-bottom: 1px solid var(--border); z-index: 40; }
   .r-nav.nav-compact .r-nav-toggle { width: 100%; min-height: 44px; margin: 0; border: 0; border-radius: 0; justify-content: flex-start; }
   .r-nav.nav-compact .r-nav-dropdown { position: static; inset: auto; width: 100%; max-height: min(240px, 45dvh); overflow-y: auto; overscroll-behavior: contain; border-radius: 0; box-shadow: none; }
   .r-nav-dropdown .r-nav-link { min-height: 44px; white-space: normal; }
   .r-body-wrap { padding-bottom: 24px; }
   @media (max-width: 600px) {
-    .reader { padding: 0 0 22px; }
-    .r-nav { position: sticky; top: 0; inset: auto; width: 100%; border-radius: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
+    .reader { padding: 0 0 110px; }
+    .r-nav { position: relative; inset: auto; width: 100%; border-radius: 0; box-shadow: none; }
     .r-body-wrap { padding-top: 18px; }
     #mobile-chips-toggle { min-height: 44px; }
     #mobile-chips-grid { max-height: min(140px, 25dvh); overflow-y: auto; }
     .bar .dot, .bar .title, .resize-handle { display: none; }
     .bar { justify-content: space-between; flex-wrap: wrap; }
     .bar-btn { min-height: 44px; font-size: 12px; }
-    .a11y-launcher { flex: 1 0 100%; }
+    .a11y-launcher { flex: 0 0 auto; }
+    .r-nav.nav-compact { position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); top: auto; width: fit-content; max-width: calc(100vw - 24px); z-index: 40; }
+    .r-nav.nav-compact .r-nav-dropdown { max-height: min(45dvh, 320px); overflow-y: auto; }
+    .reader { scroll-padding-bottom: 88px; }
     .window:has(#terminal-settings[open]) #mobile-chips { display: none; }
     .input-row .ps { font-size: 12px; }
     .input-row .ps > span:first-child { display: none; }
+  }
+
+  /* Desktop keeps Sections in the window-layout header flow. This comes
+     after the shared compact rules so PC never inherits mobile positioning. */
+  @media (min-width: 601px) {
+    .r-nav.nav-compact {
+      position: sticky;
+      top: 0;
+      right: auto;
+      bottom: auto;
+      inset-inline: auto;
+      width: 100%;
+      max-width: none;
+      border-radius: 0;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      z-index: 30;
+    }
   }
 
   /* The command row stays outside the scrollable terminal workspace. */
@@ -1788,7 +1812,7 @@ function buildReaderGuestbookForm(container) {
             </div>
             </div>`;
           container.innerHTML = bookHtml + `
-            <p class="r-gb-cta">Want to leave something for Emily and other visitors? Share what brought you here or what stood out. A sentence is enough.</p>
+            <p class="r-gb-cta">Want to leave something for Emily and other visitors? Share what brought you here or what stood out.</p>
             <div class="r-gb-form" id="gb-form">
               <label for="gb-nick">Nickname (3–20 letters, numbers, spaces, underscores or hyphens)</label>
               <input aria-describedby="gb-status" id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
@@ -1887,7 +1911,7 @@ function buildReaderGuestbookForm(container) {
           document.getElementById('gb-next').addEventListener('click', () => { page++; renderPage('next'); });
         } else {
           container.innerHTML = `<p class="r-gb-status dim" style="margin-bottom:16px;">No entries yet — be the first!</p>
-            <p class="r-gb-cta">Want to leave something for Emily and other visitors? Share what brought you here or what stood out. A sentence is enough.</p>
+            <p class="r-gb-cta">Want to leave something for Emily and other visitors? Share what brought you here or what stood out.</p>
             <div class="r-gb-form" id="gb-form">
               <label for="gb-nick">Nickname (3–20 letters, numbers, spaces, underscores or hyphens)</label>
               <input aria-describedby="gb-status" id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
@@ -2043,13 +2067,13 @@ function buildReader(){
         <p><a class="tlink" href="https://events.cmxhub.com/the-digital-nomad-cmx-community/" target="_blank" rel="noopener noreferrer">Visit the community →</a></p>
       </article>
       <article class="r-exp-card">
-        <div class="r-exp-company">🎙️ guest | tech tarik talks podcast</div>
+        <div class="r-exp-company">🎙️ Guest | tech tarik talks Podcast</div>
         <p class="r-exp-summary">Discussed moving from a technical role with no direct customer experience into Senior Support Engineering, handling complex cases with global teams while working remotely from Malaysia.</p>
         <p><a class="tlink" href="https://youtube.com/watch?si=dHQJYx1ZVrZ7UElC&amp;v=C7T2Us5cYgA&amp;feature=youtu.be" target="_blank" rel="noopener noreferrer">Listen to the episode →</a></p>
       </article>
     </section>
     <section class="r-sec" id="skills">
-      <h2 class="r-h" data-section="skills">Capabilities ${sectionCopyIcon('skills')}</h2>
+      <h2 class="r-h" data-section="skills">Skills ${sectionCopyIcon('skills')}</h2>
       <div class="r-skill-groups">
         ${c.skills.map(([k,v], i) => `
           <div class="r-skill-group">
@@ -2091,12 +2115,12 @@ function buildReader(){
     <section class="r-sec" id="guestbook">
       <h2 class="r-h" data-section="guestbook">Write in guestbook ${sectionCopyIcon('guestbook')}</h2>
       <p class="r-body">Good support work rarely ends when the ticket is closed. It ends when the explanation is clearer, the next person is less blocked, and the system is a little easier to use.</p>
-      <p class="r-body">What brought you here, which idea stood out, or what would you like to leave for Emily and other visitors? A sentence is enough.</p>
+      <p class="r-body">What brought you here, which idea stood out, or what would you like to leave for Emily and other visitors?</p>
       <div id="reader-guestbook"></div>
     </section>
     <section class="r-sec" style="border: 1px dashed var(--accent); border-radius: 8px; padding: 18px 22px; background: var(--glow);">
       <h2 class="r-h" style="border-bottom: none; margin-bottom: 8px; padding-bottom: 0;">Try the Interactive Terminal</h2>
-      <p class="r-body" style="font-size: 14px;">Switch to <strong>terminal view</strong> (click <em>❯ terminal view</em> top-right) to play a <strong>trivia quiz</strong> with a leaderboard and discover hidden <strong>easter egg</strong> commands. Try <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">quiz</code>, <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">egghunt</code>, or <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">dadjoke</code> to get started!</p>
+      <p class="r-body" style="font-size: 14px;">Switch to <strong>terminal view</strong> using the view button in the title bar to play a <strong>trivia quiz</strong> with a leaderboard and discover hidden <strong>easter egg</strong> commands. Try <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">quiz</code>, <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">egghunt</code>, or <code style="background:var(--bg-bar);padding:2px 6px;border-radius:4px;">dadjoke</code> to get started!</p>
     </section>
     <section class="r-sec r-accessibility" id="accessibility" aria-labelledby="accessibility-heading">
       <h2 class="r-h" id="accessibility-heading">Accessibility</h2>
@@ -4815,7 +4839,7 @@ async function runWelcome(){
   }
   blank();
   print('<span class="dim">Tip: use the shortcuts below, or type a command ↓</span>');
-  print('<span class="dim">New to terminals? Tap <span class="accent">▤ reader view</span> (top-right) for a plain page.</span>');
+  print('<span class="dim">New to terminals? Tap <span class="accent">▤ reader view</span> in the title bar for a plain page.</span>');
   renderChips();
   renderMobileChips();
 }
