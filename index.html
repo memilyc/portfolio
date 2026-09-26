@@ -258,6 +258,8 @@ const TESTIMONIALS = [
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  .bar { min-width: 0; }
+  .bar .bar-btn { flex: 0 0 auto; }
   .bar-btn {
     flex: 0 0 auto;
     background: transparent;
@@ -621,6 +623,9 @@ const TESTIMONIALS = [
   .r-tag  { margin-top: 12px; font-size: 15px; color: var(--dim); max-width: 60ch; line-height: 1.6; }
   .r-context { margin-top: 10px; max-width: 72ch; color: var(--fg); font-size: 14px; line-height: 1.7; }
   .r-availability { margin-top: 12px; color: var(--dim); font-size: 13px; line-height: 1.65; }
+  .r-hero-proof { margin-top: 12px; color: var(--fg); font-size: 13px; line-height: 1.7; }
+  .r-hero-proof strong { color: var(--accent); font-weight: 700; }
+  .r-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 16px; }
   .r-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
   .r-chip  { font-size: 12px; padding: 4px 11px; border-radius: 4px; border: 1px solid; }
   a.r-chip { display: inline-block; transition: box-shadow .15s ease, transform .15s ease; }
@@ -660,7 +665,7 @@ const TESTIMONIALS = [
   .r-exp-summary { margin-top: 12px; color: var(--fg); font-size: 14px; line-height: 1.7; }
   .r-exp-highlights { margin: 10px 0 0 1.2rem; color: var(--fg); font-size: 13px; line-height: 1.7; }
   .r-exp-highlights li + li { margin-top: 5px; }
-  .r-case-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+  .r-case-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 18px; }
   .r-case-step { border-left: 2px solid var(--border); padding-left: 12px; }
   .r-case-step dt { color: var(--yellow); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
   .r-case-step dd { margin: 6px 0 0; color: var(--fg); font-size: 13px; line-height: 1.7; }
@@ -790,7 +795,7 @@ const TESTIMONIALS = [
   .r-proj-grid {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 12px;
   }
   .r-proj-card {
@@ -826,6 +831,7 @@ const TESTIMONIALS = [
   .r-proj-details summary::before { content: '+ '; }
   .r-proj-details[open] summary::before { content: '− '; }
   .r-proj-details p { font-size: 13px; color: var(--fg); line-height: 1.7; margin: 8px 0 0; }
+  .r-h-inline { display: inline-block; font-size: 18px; font-weight: 700; color: var(--fg); }
   .r-proj-link { font-size: 13px; margin-top: auto; padding-top: 12px; }
 
   .t-section-heading {
@@ -1174,7 +1180,7 @@ const TESTIMONIALS = [
     .hint { display: none; }
     .credit { padding: 4px 13px env(safe-area-inset-bottom, 4px); font-size: 10px; flex-shrink: 0; }
     .r-nav-links { display: none; }
-    .r-nav { position: absolute; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); right: 16px; top: auto; width: fit-content; border-bottom: none; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+    .r-nav { position: sticky; top: 0; right: auto; bottom: auto; width: 100%; border-bottom: 1px solid var(--border); border-radius: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
     .r-nav-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; margin: 0; padding: 10px 16px; }
     .r-nav-dropdown { top: auto; bottom: 100%; border-top: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0; margin-bottom: 0; }
     #t-carousel .t-dots { gap: 5px; }
@@ -1253,6 +1259,31 @@ const TESTIMONIALS = [
   .r-accessibility { margin-top: 32px; padding: 22px; border: 1px solid var(--dim); border-radius: 10px; background: var(--bg-bar); }
   .r-accessibility-email { display: block; width: 100%; min-height: 48px; padding: 16px 24px; text-align: center; }
 
+  /* Accessibility preferences live beside view and theme controls in the title bar. */
+  .a11y-launcher { position: relative; flex: 0 0 auto; min-height: 44px; padding: 8px 12px; border: 1px solid var(--dim); border-radius: 7px; background: var(--bg-window); color: var(--fg); font: inherit; font-size: 12px; cursor: pointer; }
+  .a11y-launcher:hover { border-color: var(--accent); }
+  .a11y-panel { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 68px); right: max(12px, env(safe-area-inset-right)); z-index: 10000; width: min(300px, calc(100vw - 24px)); max-height: min(80vh, 560px); overflow-y: auto; padding: 16px; border: 1px solid var(--dim); border-radius: 10px; background: var(--bg-window); color: var(--fg); box-shadow: 0 12px 34px rgba(0,0,0,.35); }
+  .a11y-panel[hidden] { display: none; }
+  .a11y-panel h2 { margin: 0 0 12px; font-size: 15px; }
+  .a11y-panel fieldset { border: 0; padding: 0; margin: 0 0 14px; }
+  .a11y-panel legend { margin-bottom: 6px; color: var(--dim); font-size: 12px; }
+  .a11y-option { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 5px 0; cursor: pointer; font-size: 13px; }
+  .a11y-option input { width: 22px; height: 22px; accent-color: var(--accent); }
+  .a11y-reset { min-height: 44px; padding: 9px 12px; border: 1px solid var(--dim); background: transparent; color: inherit; font: inherit; cursor: pointer; }
+  html[data-a11y-text="large"] .reader,
+  html[data-a11y-text="large"] .reader :where(p, li, dd, dt, a, button, label, input, textarea, summary, .r-body, .r-note, .r-sub, .r-tag, .r-context, .r-availability, .r-exp-summary, .r-exp-highlights, .r-case-step, .r-proj-desc, .r-proj-link, .r-test-name, .r-test-rel, .t-slide-quote, .t-slide-full, .r-gb-msg, .r-gb-status),
+  html[data-a11y-text="large"] .screen, html[data-a11y-text="large"] .screen *, html[data-a11y-text="large"] .terminal-controls, html[data-a11y-text="large"] .terminal-help { font-size: 1.125em !important; }
+  html[data-a11y-text="largest"] .reader,
+  html[data-a11y-text="largest"] .reader :where(p, li, dd, dt, a, button, label, input, textarea, summary, .r-body, .r-note, .r-sub, .r-tag, .r-context, .r-availability, .r-exp-summary, .r-exp-highlights, .r-case-step, .r-proj-desc, .r-proj-link, .r-test-name, .r-test-rel, .t-slide-quote, .t-slide-full, .r-gb-msg, .r-gb-status),
+  html[data-a11y-text="largest"] .screen, html[data-a11y-text="largest"] .screen *, html[data-a11y-text="largest"] .terminal-controls, html[data-a11y-text="largest"] .terminal-help { font-size: 1.25em !important; }
+  html[data-a11y-links="true"] a { text-decoration: underline !important; text-decoration-thickness: .12em; text-underline-offset: .16em; }
+  html[data-a11y-contrast="high"] { --bg: #000; --bg-window: #000; --bg-bar: #111; --fg: #fff; --dim: #fff; --border: #fff; --accent: #ffeb3b; --cyan: #6deaff; --yellow: #ffef75; --red: #ff8a8a; --magenta: #f2b5ff; --green: #91ff9d; --prompt: #91ff9d; --path: #6deaff; --glow: transparent; }
+  html[data-a11y-contrast="high"] .r-chip, html[data-a11y-contrast="high"] .tlink, html[data-a11y-contrast="high"] a { color: #fff !important; }
+  html[data-a11y-contrast="high"] button, html[data-a11y-contrast="high"] input, html[data-a11y-contrast="high"] textarea, html[data-a11y-contrast="high"] select { border-color: #fff !important; }
+  html[data-a11y-motion="reduce"] *, html[data-a11y-motion="reduce"] *::before, html[data-a11y-motion="reduce"] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  html[data-a11y-motion="reduce"] .r-reveal { opacity: 1 !important; transform: none !important; }
+  @media (max-width: 600px) { .a11y-launcher { min-height: 44px; padding-inline: 9px; font-size: 10px; } .a11y-panel { top: calc(env(safe-area-inset-top, 0px) + 54px); right: 8px; width: min(300px, calc(100vw - 16px)); } }
+
   body { cursor: auto; }
   #mouse-cursor { display: none; }
   @media (max-width: 600px) { .bar { flex-wrap: wrap; } .title { min-width: 0; } .r-body-wrap { padding-left: 16px; padding-right: 16px; } }
@@ -1276,20 +1307,21 @@ const TESTIMONIALS = [
   .terminal-help { padding: 8px 0 0; }
   #terminal-stop { min-height: 44px; font-size: 12px; }
   #terminal-stop[hidden] { display: none; }
-  .r-nav.nav-compact { position: relative; inset: auto; width: 100%; flex-wrap: wrap; border-radius: 0; box-shadow: none; border-bottom: 1px solid var(--border); }
+  .r-nav.nav-compact { position: sticky; top: 0; inset-inline: auto; width: 100%; flex-wrap: wrap; border-radius: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.18); border-bottom: 1px solid var(--border); }
   .r-nav.nav-compact .r-nav-toggle { width: 100%; min-height: 44px; margin: 0; border: 0; border-radius: 0; justify-content: flex-start; }
   .r-nav.nav-compact .r-nav-dropdown { position: static; inset: auto; width: 100%; max-height: min(240px, 45dvh); overflow-y: auto; overscroll-behavior: contain; border-radius: 0; box-shadow: none; }
   .r-nav-dropdown .r-nav-link { min-height: 44px; white-space: normal; }
   .r-body-wrap { padding-bottom: 24px; }
   @media (max-width: 600px) {
     .reader { padding: 0 0 22px; }
-    .r-nav { position: relative; inset: auto; width: 100%; border-radius: 0; box-shadow: none; }
+    .r-nav { position: sticky; top: 0; inset: auto; width: 100%; border-radius: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
     .r-body-wrap { padding-top: 18px; }
     #mobile-chips-toggle { min-height: 44px; }
     #mobile-chips-grid { max-height: min(140px, 25dvh); overflow-y: auto; }
     .bar .dot, .bar .title, .resize-handle { display: none; }
-    .bar { justify-content: space-between; }
+    .bar { justify-content: space-between; flex-wrap: wrap; }
     .bar-btn { min-height: 44px; font-size: 12px; }
+    .a11y-launcher { flex: 1 0 100%; }
     .window:has(#terminal-settings[open]) #mobile-chips { display: none; }
     .input-row .ps { font-size: 12px; }
     .input-row .ps > span:first-child { display: none; }
@@ -1310,6 +1342,19 @@ const TESTIMONIALS = [
 </head>
 <body>
   <a class="skip-link" href="#reader">Skip to content</a>
+  <section class="a11y-panel" id="a11y-panel" aria-labelledby="a11y-heading" hidden>
+    <h2 id="a11y-heading">Accessibility settings</h2>
+    <fieldset>
+      <legend>Text size</legend>
+      <label class="a11y-option"><input type="radio" name="a11y-text" value="default" checked> Default</label>
+      <label class="a11y-option"><input type="radio" name="a11y-text" value="large"> Larger text</label>
+      <label class="a11y-option"><input type="radio" name="a11y-text" value="largest"> Largest text</label>
+    </fieldset>
+    <label class="a11y-option"><input id="a11y-contrast" type="checkbox"> High contrast</label>
+    <label class="a11y-option"><input id="a11y-links" type="checkbox"> Underline links</label>
+    <label class="a11y-option"><input id="a11y-motion" type="checkbox"> Reduce motion</label>
+    <button class="a11y-reset" id="a11y-reset" type="button">Reset preferences</button>
+  </section>
   <button id="restore-window" hidden>Restore portfolio window</button>
   <div class="window" id="window">
     <div class="resize-handle resize-n"></div>
@@ -1327,6 +1372,7 @@ const TESTIMONIALS = [
       <span class="title">memilyc@portfolio: ~</span>
       <button class="bar-btn" id="viewBtn" aria-label="Switch view">▤ reader view</button>
       <button class="bar-btn" id="themeCycleBtn">◑ theme: dark</button>
+      <button class="a11y-launcher" id="a11y-launcher" type="button" aria-controls="a11y-panel" aria-expanded="false">Accessibility</button>
     </div>
     <details id="window-layout">
       <summary>Window layout</summary>
@@ -1375,11 +1421,11 @@ const CONFIG = {
   host: "portfolio",
   name: "M. Emily Chang",
   role: "Senior Support Engineer",
-  tagline: "Turning complex technical chaos into clarity — for customers, for teammates, for entire companies.",
+  tagline: "I turn difficult enterprise incidents into clear fixes, useful tools, and better product experiences.",
   context: "Most recently: Senior Support Engineer at GitLab, supporting self-managed enterprise customers across APAC.",
-  availability: "Kuala Lumpur (GMT+8) · Open to remote roles, sponsorship, and consulting · Exploring Technical Services, AI Support, and Customer Success Engineering roles.",
+  availability: "Based in Kuala Lumpur (GMT+8) · Open to remote APAC/global roles in Senior Support, Technical Services, and Customer Success Engineering.",
   about: [
-    "I bring 9+ years across software engineering, systems administration, and technical support, most recently supporting GitLab's self-managed platform across APAC. I work across applications, databases, cloud infrastructure, and customer communication, and I am at my best when a difficult incident becomes a lasting improvement: a product fix, tool, automation, or clearer documentation.",
+    "My career has moved progressively closer to the hardest point in the system: where software, infrastructure, and people meet. I bring 9+ years across software engineering, systems administration, and technical support, most recently supporting GitLab's self-managed platform across APAC. I am at my best when a difficult incident becomes a lasting improvement — a product fix, useful tool, automation, or clearer explanation for the next person.",
     ],
   experience: [
     {
@@ -1434,12 +1480,14 @@ const CONFIG = {
       title:  "🐘 PostgreSQL Connection Calculator",
       stack:  "PostgreSQL · JavaScript",
       featured: true,
-      desc:   "Connection limits depend on several PostgreSQL and application settings. I translated that recurring support knowledge into a guided calculator with explicit inputs, validation, and reusable sizing guidance.",
-      short:  "Turned a repeated incident-time calculation into a guided tool that produces PostgreSQL connection-pool sizing recommendations in seconds.",
+      desc:   "During a customer performance war room, I traced connection errors across GitLab's single-node architecture, Sidekiq workload, Puma capacity, and PostgreSQL resources. I recommended safer concurrency settings without pushing a resource-constrained host past its connection budget, then created the calculator I wished I had during the incident so other engineers could handle similar situations more consistently.",
+      short:  "Led a performance war room from ambiguous slowness to safer PostgreSQL capacity guidance, then built the calculator I wished I had during the incident.",
       caseStudy: [
-        ["Problem", "During incidents, connection-pool sizing involved several interdependent settings when teams had the least time and attention to spare."],
-        ["Approach", "I translated the troubleshooting logic into a guided JavaScript tool with explicit inputs, validation, and clear recommendations."],
-        ["Result", "The calculation became consistent, quick to repeat, and reusable beyond a single customer ticket or incident."],
+        ["Situation", "I was paged into a customer war room after GitLab performance worsened ahead of an upcoming deployment. The customer described slow performance broadly, so I broke it down by workflow while teammates analysed logs in parallel."],
+        ["Investigation", "We found database connection errors on a single instance running web and database services together. I cross-checked GitLab's PostgreSQL tuning guidance, reviewed resources and configuration, and traced the pressure to an increased Sidekiq migration workload."],
+        ["Action", "I recommended reducing the migration workload and setting a reasonable explicit Puma limit so application concurrency stayed within a safe database-connection budget. We did not recommend increasing the connection limit beyond what the server could safely support."],
+        ["Outcome", "Connection errors stopped, page loads became faster, server computing load decreased, and developers could continue using GitLab. The longer-term plan was to move PostgreSQL to a separate database instance."],
+        ["Durable improvement", "I created the PostgreSQL Connection Calculator because it was the tool I wished I had during the incident, giving other engineers reusable guidance for similar situations."],
       ],
       url:    "https://postgresql-connection-calculator-759014.gitlab.io/",
       label:  "Open tool →",
@@ -1483,6 +1531,59 @@ const themeCycleBtn = document.getElementById('themeCycleBtn');
 const viewBtn  = document.getElementById('viewBtn');
 const reader   = document.getElementById('reader');
 const root     = document.documentElement;
+
+// ── Progressive accessibility preferences ──────────────────
+const a11yLauncher = document.getElementById('a11y-launcher');
+const a11yPanel = document.getElementById('a11y-panel');
+const a11yDefaults = { text: 'default', contrast: false, links: false, motion: matchMedia('(prefers-reduced-motion: reduce)').matches };
+function readA11yPrefs() {
+  try { return { ...a11yDefaults, ...JSON.parse(localStorage.getItem('portfolio-a11y') || '{}') }; }
+  catch { return { ...a11yDefaults }; }
+}
+function applyA11yPrefs(prefs, save = true) {
+  const next = { ...a11yDefaults, ...prefs };
+  const previousText = root.dataset.a11yText;
+  const previousMotion = root.dataset.a11yMotion;
+  root.dataset.a11yText = next.text;
+  root.dataset.a11yContrast = String(Boolean(next.contrast));
+  root.dataset.a11yLinks = String(Boolean(next.links));
+  root.dataset.a11yMotion = String(Boolean(next.motion));
+  document.querySelectorAll('input[name="a11y-text"]').forEach(input => { input.checked = input.value === next.text; });
+  document.getElementById('a11y-contrast').checked = Boolean(next.contrast);
+  document.getElementById('a11y-links').checked = Boolean(next.links);
+  document.getElementById('a11y-motion').checked = Boolean(next.motion);
+  if (save) safeSave('portfolio-a11y', JSON.stringify(next));
+  if (previousText !== root.dataset.a11yText) document.dispatchEvent(new CustomEvent('a11y-text-change'));
+  if (previousMotion !== root.dataset.a11yMotion) document.dispatchEvent(new CustomEvent('a11y-motion-change'));
+}
+function closeA11yPanel(returnFocus = true) {
+  a11yPanel.hidden = true;
+  a11yLauncher.setAttribute('aria-expanded', 'false');
+  if (returnFocus) a11yLauncher.focus();
+}
+a11yLauncher.addEventListener('click', () => {
+  const opening = a11yPanel.hidden;
+  a11yPanel.hidden = !opening;
+  a11yLauncher.setAttribute('aria-expanded', String(opening));
+  if (opening) a11yPanel.querySelector('input:checked, input')?.focus();
+});
+a11yPanel.addEventListener('change', () => applyA11yPrefs({
+  text: document.querySelector('input[name="a11y-text"]:checked').value,
+  contrast: document.getElementById('a11y-contrast').checked,
+  links: document.getElementById('a11y-links').checked,
+  motion: document.getElementById('a11y-motion').checked,
+}));
+document.getElementById('a11y-reset').addEventListener('click', () => {
+  applyA11yPrefs(a11yDefaults);
+  try { localStorage.removeItem('portfolio-a11y'); } catch {}
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !a11yPanel.hidden) { e.preventDefault(); closeA11yPanel(); }
+});
+document.addEventListener('click', e => {
+  if (!a11yPanel.hidden && !a11yPanel.contains(e.target) && e.target !== a11yLauncher) closeA11yPanel(false);
+});
+applyA11yPrefs(readA11yPrefs(), false);
 
 function trackPageView() {
   if (!CONFIG.supabase?.url || localStorage.getItem('analytics-opt-out') === 'true') return;
@@ -1687,14 +1788,14 @@ function buildReaderGuestbookForm(container) {
             </div>
             </div>`;
           container.innerHTML = bookHtml + `
-            <p class="r-gb-cta">Leave a little note before you go — add your digital footprint to this tiny corner of the internet 🌱</p>
+            <p class="r-gb-cta">Want to leave something for Emily and other visitors? Share what brought you here or what stood out. A sentence is enough.</p>
             <div class="r-gb-form" id="gb-form">
               <label for="gb-nick">Nickname (3–20 letters, numbers, spaces, underscores or hyphens)</label>
               <input aria-describedby="gb-status" id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
               <label for="gb-msg">Message (2–300 characters)</label>
               <textarea aria-describedby="gb-status gb-link-warn" id="gb-msg" placeholder="Leave a message... (2–300 chars)" maxlength="300"></textarea>
               <p class="r-gb-status dim" id="gb-link-warn" style="font-size:12px;margin:2px 0 4px;display:none;">Links will be redacted to prevent spam.</p>
-              <button class="r-gb-btn" id="gb-submit">Sign guestbook →</button>
+              <button class="r-gb-btn" id="gb-submit">Write in guestbook →</button>
               <span class="r-gb-status" id="gb-status" role="status" aria-live="polite"></span>
             </div>`;
 
@@ -1786,14 +1887,14 @@ function buildReaderGuestbookForm(container) {
           document.getElementById('gb-next').addEventListener('click', () => { page++; renderPage('next'); });
         } else {
           container.innerHTML = `<p class="r-gb-status dim" style="margin-bottom:16px;">No entries yet — be the first!</p>
-            <p class="r-gb-cta">Leave a little note before you go — add your digital footprint to this tiny corner of the internet 🌱</p>
+            <p class="r-gb-cta">Want to leave something for Emily and other visitors? Share what brought you here or what stood out. A sentence is enough.</p>
             <div class="r-gb-form" id="gb-form">
               <label for="gb-nick">Nickname (3–20 letters, numbers, spaces, underscores or hyphens)</label>
               <input aria-describedby="gb-status" id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
               <label for="gb-msg">Message (2–300 characters)</label>
               <textarea aria-describedby="gb-status gb-link-warn" id="gb-msg" placeholder="Leave a message... (2–300 chars)" maxlength="300"></textarea>
               <p class="r-gb-status dim" id="gb-link-warn" style="font-size:12px;margin:2px 0 4px;display:none;">Links will be redacted to prevent spam.</p>
-              <button class="r-gb-btn" id="gb-submit">Sign guestbook →</button>
+              <button class="r-gb-btn" id="gb-submit">Write in guestbook →</button>
               <span class="r-gb-status" id="gb-status" role="status" aria-live="polite"></span>
             </div>`;
         }
@@ -1841,9 +1942,9 @@ function buildReader(){
   const esc = escapeHtml;
   const SKILL_ICONS = { Support: '🎧', Systems: '🖥', Cloud: '☁️', Databases: '🗄️', Code: '👾', Tooling: '⚙️' };
   const R_NAV_SECTIONS = [
-    ['about','About'], ['experience','Experience'], ['projects','Work'],
-    ['testimonials','Testimonials'], ['skills','Skills'], ['strengths','Strengths'],
-    ['resume','Résumé'], ['contact','Contact'], ['guestbook','Guestbook']
+    ['about','About'], ['experience','Experience'], ['impact-loop','How I work'], ['projects','Work'],
+    ['testimonials','Testimonials'], ['community','Community'], ['skills','Skills'], ['strengths','Strengths'],
+    ['resume','Résumé'], ['contact','Contact'], ['guestbook','Write in guestbook']
   ];
   reader.innerHTML = `
     <nav class="r-nav" id="r-nav" aria-label="Portfolio sections">
@@ -1862,23 +1963,27 @@ function buildReader(){
     </header>
     <div class="r-role">${esc(c.role)}</div>
     <p class="r-tag">${esc(c.tagline)}</p>
-    <p class="r-context">${esc(c.context)}</p>
-    <div class="r-chips">
-      <span class="r-chip green">Open to work</span>
-      <span class="r-chip yellow">Open to consulting</span>
-      <span class="r-chip green">PostgreSQL</span>
-      <span class="r-chip cyan">AWS · GCP · Azure</span>
-      <span class="r-chip yellow">Incident Response</span>
-      <span class="r-chip green">Customer-Facing</span>
-      <span class="r-chip cyan">Documentation</span>
+    <p class="r-availability">Based in Kuala Lumpur · Open to remote APAC/global roles</p>
+    <p class="r-hero-proof">With <strong>9+ years</strong> across engineering, systems, and support, I help enterprise customers solve complex issues across applications, databases, and infrastructure, then turn recurring problems into clearer guidance, useful tools, and better practices.</p>
+    <div class="r-hero-actions">
+      <a class="r-cv" href="#projects">View featured impact →</a>
+      <a class="tlink" href="${esc(c.cv)}" target="_blank" rel="noopener noreferrer">Download résumé →</a>
     </div>
-    <p class="r-availability">${esc(c.availability)}</p>
     <section class="r-sec" id="about">
       <h2 class="r-h" data-section="about">About ${sectionCopyIcon('about')}</h2>
-      ${c.about.map(p => {
-        const html = highlightAbout(p);
-        return `<p class="r-body">${html}</p>`;
-      }).join('')}
+      <p class="r-body">My career moved from software engineering to systems administration and then into technical support, bringing me closer to the point where software, infrastructure, and people meet.</p>
+      <p class="r-body">That background helps me investigate beyond the visible symptom while keeping the person on the other side of the incident informed. Today, I support enterprise customers through complex cases and turn what I learn into improvements that help the next engineer or customer.</p>
+    </section>
+    <section class="r-sec" id="impact-loop">
+      <h2 class="r-h" data-section="impact-loop">From customer problem to durable improvement ${sectionCopyIcon('impact-loop')}</h2>
+      <p class="r-body">I move from customer impact to technical evidence, a safe resolution, and something reusable for the next person.</p>
+      <ol class="r-strengths" aria-label="Emily's support impact loop">
+        <li><span class="r-st">Listen</span><span class="r-sd">Understand what is blocked and what matters now.</span></li>
+        <li><span class="r-st">Investigate</span><span class="r-sd">Trace symptoms across the application, database, infrastructure, and configuration.</span></li>
+        <li><span class="r-st">Explain</span><span class="r-sd">Make the evidence and next action clear to customers and Engineering.</span></li>
+        <li><span class="r-st">Improve</span><span class="r-sd">Turn recurring problems into guidance, tools, documentation, or better process.</span></li>
+      </ol>
+      <p class="r-sub"><strong>Beyond individual cases:</strong> 125+ documentation updates · 600+ technical pairing sessions</p>
     </section>
     <section class="r-sec" id="experience">
       <h2 class="r-h" data-section="experience">Experience ${sectionCopyIcon('experience')}</h2>
@@ -1900,7 +2005,7 @@ function buildReader(){
       </ol>
     </section>
     <section class="r-sec" id="projects">
-      <h2 class="r-h" data-section="projects">Selected work ${sectionCopyIcon('projects')}</h2>
+      <h2 class="r-h" data-section="projects">Selected impact ${sectionCopyIcon('projects')}</h2>
       <ul class="r-proj-grid">
         ${c.projects.map(p => renderProjectCard(p, '// link coming soon')).join('')}
       </ul>
@@ -1922,8 +2027,29 @@ function buildReader(){
       ${testimonialCTA(true)}
     </section>
     ` : ''}
+    <section class="r-sec" id="community">
+      <h2 class="r-h" data-section="community">Community and public work ${sectionCopyIcon('community')}</h2>
+      <article class="r-exp-card">
+        <div class="r-exp-head">
+          <h3 class="r-exp-role">💼 Co-director</h3>
+          <span class="r-exp-period">Since Aug 2026</span>
+        </div>
+        <div class="r-exp-company">The Digital Nomad CMX Community</div>
+        <p class="r-exp-summary">I create global community experiences from start to finish, including Bevy setup, speaker coordination, slides, scripts, hosting, and post-event communication.</p>
+        <ul class="r-exp-highlights">
+          <li>Hosted a Global Community Mixer with participants from five continents.</li>
+          <li>Invited and hosted a talk with a speaker from San Francisco.</li>
+        </ul>
+        <p><a class="tlink" href="https://events.cmxhub.com/the-digital-nomad-cmx-community/" target="_blank" rel="noopener noreferrer">Visit the community →</a></p>
+      </article>
+      <article class="r-exp-card">
+        <div class="r-exp-company">🎙️ guest | tech tarik talks podcast</div>
+        <p class="r-exp-summary">Discussed moving from a technical role with no direct customer experience into Senior Support Engineering, handling complex cases with global teams while working remotely from Malaysia.</p>
+        <p><a class="tlink" href="https://youtube.com/watch?si=dHQJYx1ZVrZ7UElC&amp;v=C7T2Us5cYgA&amp;feature=youtu.be" target="_blank" rel="noopener noreferrer">Listen to the episode →</a></p>
+      </article>
+    </section>
     <section class="r-sec" id="skills">
-      <h2 class="r-h" data-section="skills">Skills ${sectionCopyIcon('skills')}</h2>
+      <h2 class="r-h" data-section="skills">Capabilities ${sectionCopyIcon('skills')}</h2>
       <div class="r-skill-groups">
         ${c.skills.map(([k,v], i) => `
           <div class="r-skill-group">
@@ -1936,23 +2062,18 @@ function buildReader(){
       </div>
     </section>
     <section class="r-sec" id="strengths">
-      <h2 class="r-h" data-section="strengths">Strengths ${sectionCopyIcon('strengths')}</h2>
-      <p class="r-sub">${esc(c.strengths.source)}</p>
-      <ol class="r-strengths" id="r-strengths-list">
-        ${c.strengths.themes.map(([t,d]) => `<li><span class="r-st">${esc(t)}</span><span class="r-sd">${esc(d)}</span></li>`).join('')}
-      </ol>
+      <details class="r-proj-details">
+        <summary><span class="r-h-inline">Strengths ${sectionCopyIcon('strengths')}</span></summary>
+        <p class="r-sub">${esc(c.strengths.source)}</p>
+        <ol class="r-strengths" id="r-strengths-list">
+          ${c.strengths.themes.map(([t,d]) => `<li><span class="r-st">${esc(t)}</span><span class="r-sd">${esc(d)}</span></li>`).join('')}
+        </ol>
+      </details>
     </section>
     <section class="r-sec" id="resume">
       <h2 class="r-h" data-section="resume">Résumé ${sectionCopyIcon('resume')}</h2>
-      <div style="display:flex; justify-content:center;">
-        <a class="r-resume-preview" href="${esc(c.cv)}" target="_blank" rel="noopener noreferrer" aria-label="Open résumé PDF in a new tab" style="max-width:380px;">
-          <img src="assets/preview-resume.png" alt="Preview of Emily Chang's résumé" loading="lazy">
-          <div class="r-resume-overlay">
-            <div class="r-resume-overlay-icon">📄</div>
-            <div class="r-resume-overlay-label">Open résumé PDF →</div>
-          </div>
-        </a>
-      </div>
+      <p class="r-body">Prefer the concise version? Download my résumé for a quick view of experience, scope, and technical focus.</p>
+      <a class="r-cv" href="${esc(c.cv)}" target="_blank" rel="noopener noreferrer">Download résumé PDF →</a>
     </section>
     <section class="r-sec" id="contact">
       <h2 class="r-h" data-section="contact">Contact ${sectionCopyIcon('contact')}</h2>
@@ -1968,7 +2089,9 @@ function buildReader(){
       </div>
     </section>
     <section class="r-sec" id="guestbook">
-      <h2 class="r-h" data-section="guestbook">Guestbook ${sectionCopyIcon('guestbook')}</h2>
+      <h2 class="r-h" data-section="guestbook">Write in guestbook ${sectionCopyIcon('guestbook')}</h2>
+      <p class="r-body">Good support work rarely ends when the ticket is closed. It ends when the explanation is clearer, the next person is less blocked, and the system is a little easier to use.</p>
+      <p class="r-body">What brought you here, which idea stood out, or what would you like to leave for Emily and other visitors? A sentence is enough.</p>
       <div id="reader-guestbook"></div>
     </section>
     <section class="r-sec" style="border: 1px dashed var(--accent); border-radius: 8px; padding: 18px 22px; background: var(--glow);">
@@ -2081,20 +2204,11 @@ function buildReader(){
     }
 
     // Lock height to tallest slide (collapsed state)
-    (function lockHeight() {
-      const slide = document.getElementById('t-slide');
-      let maxH = 0;
-      for (let i = 0; i < tOrder.length; i++) {
-        renderTSlide(i, null);
-        maxH = Math.max(maxH, slide.scrollHeight);
-      }
-      slide.style.minHeight = maxH + 'px';
-      renderTSlide(0, null);
-      tIdx = 0;
-    })();
+    renderTSlide(0, null);
+    tIdx = 0;
 
     function startTTimer() {
-      if (tPausedByUser) return;
+      if (tPausedByUser || root.dataset.a11yMotion === 'true') return;
       clearInterval(tAutoTimer);
       tAutoTimer = setInterval(() => {
         tIdx = nextTIndex(1);
@@ -2117,10 +2231,14 @@ function buildReader(){
     document.getElementById('t-pause').addEventListener('click', () => {
       if (!tPausedByUser) { pauseTCarousel(); return; }
       tPausedByUser = false;
+      const motionOverride = root.dataset.a11yMotion === 'true';
       document.getElementById('t-pause').textContent = '⏸ Pause';
       document.getElementById('t-pause').setAttribute('aria-label', 'Pause testimonial animation');
       document.getElementById('t-slide').setAttribute('aria-live', 'off');
-      startTTimer();
+      if (!motionOverride) startTTimer();
+    });
+    document.addEventListener('a11y-motion-change', () => {
+      if (root.dataset.a11yMotion === 'true') pauseTCarousel();
     });
     car.addEventListener('focusin', e => { if (e.target.id !== 't-pause') pauseTCarousel(); });
     car.addEventListener('mouseenter', () => clearInterval(tAutoTimer));
@@ -2183,14 +2301,20 @@ function buildReader(){
   const rNav = document.getElementById('r-nav');
   const readerEl = document.getElementById('reader');
   const checkNavFit = () => {
-    if (!readerEl.clientWidth) return;
+    if (!readerEl.clientWidth || !rNav.isConnected) return;
     rNav.classList.remove('nav-compact');
     const links = rNav.querySelector('.r-nav-links');
-    const compact = readerEl.clientWidth < 780 || links.scrollWidth > links.clientWidth + 1;
+    // Compare natural link width to the real available row width. The old fixed
+    // 780px cutoff compacted navigation even when every section label fit.
+    const compact = links.scrollWidth > links.clientWidth + 1;
     rNav.classList.toggle('nav-compact', compact);
   };
-  new ResizeObserver(checkNavFit).observe(readerEl);
-  new ResizeObserver(checkNavFit).observe(rNav.querySelector('.r-nav-links'));
+  document.addEventListener('a11y-text-change', () => requestAnimationFrame(checkNavFit));
+  const navFitObserver = new ResizeObserver(checkNavFit);
+  navFitObserver.observe(readerEl);
+  navFitObserver.observe(rNav);
+  navFitObserver.observe(rNav.querySelector('.r-nav-links'));
+  window.addEventListener('resize', checkNavFit);
   document.fonts.ready.then(checkNavFit);
   checkNavFit();
 }

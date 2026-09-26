@@ -156,3 +156,35 @@ manual review. The four barriers found in that audit have since been fixed: enla
 terminal disclosure focus, hidden command-shortcut focus, and guestbook pagination focus.
 The final targeted verification run passed 33 automated scans and keyboard regression checks.
 See [the re-audit report](ACCESSIBILITY-REAUDIT.md) for reproduction steps and evidence.
+
+## Persistent accessibility settings — 26 September 2026
+
+The portfolio now provides a compact, persistent Accessibility button in the window
+title bar beside the Reader/Terminal and Theme controls. The default experience is
+unchanged until a visitor explicitly chooses a setting.
+
+Available settings are larger text, largest text, high contrast, underlined links,
+reduced motion, and reset preferences. Settings use native controls, persist locally,
+are keyboard and touch accessible, and close with Escape or outside activation. Focus
+returns to the launcher when Escape closes the panel.
+
+The testimonial carousel remains user-controlled. Enabling reduced motion pauses its
+automatic rotation; Play, Pause, previous, next, and manual testimonial selection
+remain available. A visitor may explicitly choose Play after enabling reduced motion.
+
+Acceptance criteria for this feature:
+
+- Default Reader and Terminal views retain their existing layout and controls.
+- The launcher is available within the first keyboard stops, has a visible focus state,
+  and has a touch target of at least 44px.
+- The panel has an accessible name, exposes expanded/collapsed state, and does not trap
+  focus or obscure the focused control at mobile widths.
+- The panel reflows within 320px and remains scrollable at enlarged text sizes.
+- Preferences persist after reload and Reset restores the default experience.
+- Reduced motion removes added animation and pauses testimonial auto-rotation without
+  removing explicit playback or manual navigation.
+- Inline JavaScript parses and `git diff --check` passes.
+
+Static verification passed on 26 September 2026. Full WCAG 2.2 AA conformance is not
+claimed until browser zoom, VoiceOver/Safari, NVDA/Firefox, and production interaction
+states are tested as described above.
