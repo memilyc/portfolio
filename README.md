@@ -24,8 +24,10 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
 * **Command History:** Arrow keys to cycle through history, `!!` to repeat last command, `history` to view
 * **Easter Eggs:** 20+ hidden commands to discover (`whyhireme`, `uptime`, `tail -f production.log`, `sudo make me a sandwich`, `salary`, and more)
 * **Themes:** Dark, Light, and Brown themes — switchable via dot buttons in the title bar, the `theme` terminal command, or the `?theme=brown` URL parameter (useful for CV links).
-* **Résumé Preview:** A blurred preview card in the Reader view — clicking it opens the canonical PDF from `assets/download/` in a new tab.
+* **Résumé:** A direct download link to the canonical PDF in `assets/download/`, keeping the reader flow focused on evidence and contact.
 * **Responsive Design:** Fully fluid layout that adjusts from desktop terminals to mobile device touch targets. Reader view is the default on all devices.
+* **Reader navigation:** The Sections bar stays sticky in the desktop window layout. On mobile, it becomes a compact bottom-right control so it does not consume the top of the screen or cover content.
+* **Accessibility:** Reader content supports text-size, contrast, link-visibility, and motion preferences. Motion is reduced or removed when requested, and mobile controls reserve space for keyboard and safe-area use.
 * **Performance:** Zero frontend dependencies (Supabase JS client loaded via CDN), lightning-fast loading, no build process required.
 * **Analytics:** Built-in privacy-friendly visitor tracking with referrer analysis (no cookies, no third-party services).
 
@@ -35,6 +37,14 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
 * **Backend:** Supabase (PostgreSQL, Edge Functions, RLS)
 * **Styling:** CSS Variables for easy theme management and modular component design
 * **Deployment:** Static site hosting friendly (GitHub Pages, Netlify, etc.)
+
+## Portfolio positioning
+
+The reader flow positions Emily as a Senior Support Engineer who solves complex enterprise incidents across applications, databases, and infrastructure, then leaves behind durable improvements such as clearer guidance, useful tools, and better practices.
+
+The featured PostgreSQL case study is the primary proof point. The portfolio also includes community leadership as Co-director of The Digital Nomad CMX Community, public speaking and event work, a guest appearance on the tech tarik talks podcast, and a guestbook for visitor notes.
+
+The site is intentionally a static, dependency-light portfolio. It uses motion sparingly and keeps the terminal experience as an optional layer rather than making visitors learn the interface before they can understand the work.
 
 ## Project Structure
 
