@@ -443,6 +443,7 @@ const TESTIMONIALS = [
   }
   .r-nav-links {
     display: flex;
+    align-items: stretch;
     overflow-x: auto;
     scrollbar-width: none;
     flex: 1;
@@ -516,6 +517,8 @@ const TESTIMONIALS = [
 
   /* ── Window State Behaviors ─────────────────────────────── */
   .window {
+    container-type: inline-size;
+    container-name: portfolio-window;
     transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
                 height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
                 transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
@@ -704,6 +707,16 @@ const TESTIMONIALS = [
   .r-h .copy-link:hover { color: var(--accent); background: var(--bg-bar); }
   .r-h .copy-link.copied { color: var(--accent); }
   .r-body { font-size: 15px; line-height: 1.9; color: var(--fg); margin-bottom: 1em; }
+  /* Keep long-form reading lines comfortable on wide screens while letting
+     cards and controls continue to use the full available width. */
+  .r-body,
+  .r-exp-summary,
+  .r-exp-highlights,
+  .r-proj-desc,
+  .t-slide-quote,
+  .t-slide-full,
+  .r-test-cta,
+  .r-gb-cta { max-width: 72ch; }
   .r-links { list-style: none; }
   .r-links li { display: flex; gap: 14px; padding: 8px 0; flex-wrap: wrap; align-items: baseline; }
   .r-lk { color: var(--magenta); font-weight: 700; flex: 0 0 90px; }
@@ -816,7 +829,7 @@ const TESTIMONIALS = [
   }
   .r-proj-card.featured .r-proj-desc { max-width: 72ch; }
   .r-proj-case { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); }
-  .r-proj-emoji { font-size: 24px; line-height: 1.2; margin-bottom: 8px; }
+  .r-proj-emoji { font-size: 1.15em; line-height: 1; margin-right: 6px; }
   .r-proj-title { color: var(--cyan); font-weight: 700; font-size: 15px; line-height: 1.35; }
   .r-proj-pills { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
   .r-proj-desc { font-size: 14px; color: var(--fg); line-height: 1.65; }
@@ -992,14 +1005,15 @@ const TESTIMONIALS = [
     margin-bottom: 22px;
   }
   .gb-book-nav {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
     margin-top: 18px;
     padding-top: 12px;
     border-top: 1px dashed var(--border);
     flex-shrink: 0;
   }
+  .gb-book-nav .t-dots { min-width: 0; }
   .gb-nav-btn {
     background: none;
     border: 1px solid var(--border);
@@ -1229,7 +1243,7 @@ const TESTIMONIALS = [
   .gb-nav-btn { min-width: 24px; min-height: 24px; }
   #analytics-optout-btn { min-width: 24px; min-height: 44px; padding: 8px 14px; }
   .t-dot { width: 24px; height: 24px; }
-  .t-dots, .gb-book-nav { flex-wrap: wrap; }
+  .t-dots { flex-wrap: wrap; }
   .r-nav-link { text-decoration: none; }
   .r-h .copy-link { background: transparent; border: 0; font: inherit; }
   .r-h .copy-link:focus-visible { opacity: 1; }
@@ -1360,6 +1374,37 @@ const TESTIMONIALS = [
   }
   @media (max-height: 500px) and (max-width: 600px) {
     .terminal-options { max-height: 25dvh; }
+  }
+
+  /* A resized portfolio window should get the same responsive treatment as
+     a genuinely narrow viewport, even when the surrounding screen is wide. */
+  @container portfolio-window (max-width: 600px) {
+    .bar .dot, .bar .title, .resize-handle { display: block; }
+    .bar { padding: 8px 12px; gap: 6px; flex-wrap: wrap; }
+    .bar .title { min-width: 0; font-size: 10px; }
+    .bar-btn { min-height: 44px; font-size: 12px; }
+    .a11y-launcher { min-height: 44px; padding-inline: 9px; font-size: 10px; }
+    .reader { padding: 0 0 110px; }
+    .r-body-wrap { padding: 18px 16px 24px; }
+    .r-nav-links { display: none; }
+    .r-nav { position: relative; inset: auto; width: 100%; border-radius: 0; box-shadow: none; }
+    .r-nav-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; margin: 0; padding: 10px 16px; min-height: 44px; }
+    .r-nav-dropdown { top: auto; bottom: 100%; border-top: 1px solid var(--border); border-bottom: none; border-radius: 6px 6px 0 0; margin-bottom: 0; }
+    .r-nav-dropdown .r-nav-link { min-height: 44px; white-space: normal; }
+    .r-nav.nav-compact { position: absolute; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); top: auto; inset-inline: auto; width: fit-content; max-width: calc(100% - 24px); z-index: 40; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); }
+    .r-nav.nav-compact .r-nav-toggle { width: 100%; border: 0; border-radius: 0; justify-content: flex-start; }
+    .r-nav.nav-compact .r-nav-dropdown { position: static; inset: auto; width: 100%; max-height: min(45dvh, 320px); overflow-y: auto; border: 0; border-radius: 0; box-shadow: none; }
+    .r-sec { scroll-margin-top: 70px; }
+    .r-proj-grid, .r-case-grid { grid-template-columns: 1fr; }
+    .t-section-heading { align-items: flex-start; flex-direction: column; }
+    .t-section-heading .r-h { width: 100%; }
+    #t-carousel .t-dots { gap: 5px; }
+    #t-carousel .t-dot { width: 14px; height: 14px; }
+    #t-carousel .gb-nav-btn { padding: 5px 10px; }
+    header { flex-direction: column-reverse; align-items: flex-start !important; gap: 15px !important; }
+    .r-strengths li { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: start; }
+    .r-strengths li::before { grid-row: 1 / span 2; }
+    .r-st, .r-sd { grid-column: 2; min-width: 0; }
   }
 
 </style>
@@ -1532,7 +1577,7 @@ const CONFIG = {
     {
       title:  "📊 SQL vs NoSQL: MongoDB & MySQL Performance Study",
       stack:  "MongoDB · MySQL · Python · Big Data",
-      desc:   "Co-authored with Hui Na Chua and published by Springer in 2019. The study compares MongoDB and MySQL CRUD performance across 1 million semi-structured records.",
+      desc:   "This final-year project was selected for publication, and I presented the paper at the FICC Conference 2018 in Singapore. The study concluded that MongoDB was faster in the tested scenarios, while MySQL offered more performance-tuning options.",
       short:  "2019 Springer publication with Hui Na Chua comparing MongoDB and MySQL performance across 1 million records.",
       url:    "https://link.springer.com/chapter/10.1007/978-3-030-03402-3_20",
       label:  "Read on Springer →",
@@ -1744,8 +1789,7 @@ function renderProjectCard(p, fallbackText){
             </details>` : '';
   return `
           <li class="r-proj-card${p.featured ? ' featured' : ''}">
-            ${emoji ? `<div class="r-proj-emoji" aria-hidden="true">${emoji}</div>` : ''}
-            <div class="r-proj-title">${escapeHtml(title)}</div>
+            <div class="r-proj-title">${emoji ? `<span class="r-proj-emoji" aria-hidden="true">${emoji}</span>` : ''}${escapeHtml(title)}</div>
             <div class="r-proj-pills">${pills}</div>
             <div class="r-proj-desc">${escapeHtml(p.short || p.desc)}</div>
             ${caseStudy || (p.short && p.short !== p.desc ? `
@@ -1812,7 +1856,7 @@ function buildReaderGuestbookForm(container) {
             </div>
             </div>`;
           container.innerHTML = bookHtml + `
-            <p class="r-gb-cta">Want to leave something for Emily and other visitors? Share what brought you here or what stood out.</p>
+            <p class="r-gb-cta">Write in my guestbook on this tiny corner of the internet. I read everything.</p>
             <div class="r-gb-form" id="gb-form">
               <label for="gb-nick">Nickname (3–20 letters, numbers, spaces, underscores or hyphens)</label>
               <input aria-describedby="gb-status" id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
@@ -1911,7 +1955,7 @@ function buildReaderGuestbookForm(container) {
           document.getElementById('gb-next').addEventListener('click', () => { page++; renderPage('next'); });
         } else {
           container.innerHTML = `<p class="r-gb-status dim" style="margin-bottom:16px;">No entries yet — be the first!</p>
-            <p class="r-gb-cta">Want to leave something for Emily and other visitors? Share what brought you here or what stood out.</p>
+            <p class="r-gb-cta">Write in my guestbook on this tiny corner of the internet. I read everything.</p>
             <div class="r-gb-form" id="gb-form">
               <label for="gb-nick">Nickname (3–20 letters, numbers, spaces, underscores or hyphens)</label>
               <input aria-describedby="gb-status" id="gb-nick" type="text" placeholder="Your nickname (3–20 chars)" maxlength="20" autocomplete="off" />
@@ -1966,9 +2010,9 @@ function buildReader(){
   const esc = escapeHtml;
   const SKILL_ICONS = { Support: '🎧', Systems: '🖥', Cloud: '☁️', Databases: '🗄️', Code: '👾', Tooling: '⚙️' };
   const R_NAV_SECTIONS = [
-    ['about','About'], ['experience','Experience'], ['impact-loop','How I work'], ['projects','Work'],
-    ['testimonials','Testimonials'], ['community','Community'], ['skills','Skills'], ['strengths','Strengths'],
-    ['resume','Résumé'], ['contact','Contact'], ['guestbook','Write in guestbook']
+    ['about','About'], ['experience','Experience'], ['projects','Work'],
+    ['testimonials','Testimonials'], ['community','Community'], ['skills','Skills'],
+    ['resume','Résumé'], ['contact','Contact'], ['guestbook','Guestbook']
   ];
   reader.innerHTML = `
     <nav class="r-nav" id="r-nav" aria-label="Portfolio sections">
@@ -1998,17 +2042,6 @@ function buildReader(){
       <p class="r-body">My career moved from software engineering to systems administration and then into technical support, bringing me closer to the point where software, infrastructure, and people meet.</p>
       <p class="r-body">That background helps me investigate beyond the visible symptom while keeping the person on the other side of the incident informed. Today, I support enterprise customers through complex cases and turn what I learn into improvements that help the next engineer or customer.</p>
     </section>
-    <section class="r-sec" id="impact-loop">
-      <h2 class="r-h" data-section="impact-loop">From customer problem to durable improvement ${sectionCopyIcon('impact-loop')}</h2>
-      <p class="r-body">I move from customer impact to technical evidence, a safe resolution, and something reusable for the next person.</p>
-      <ol class="r-strengths" aria-label="Emily's support impact loop">
-        <li><span class="r-st">Listen</span><span class="r-sd">Understand what is blocked and what matters now.</span></li>
-        <li><span class="r-st">Investigate</span><span class="r-sd">Trace symptoms across the application, database, infrastructure, and configuration.</span></li>
-        <li><span class="r-st">Explain</span><span class="r-sd">Make the evidence and next action clear to customers and Engineering.</span></li>
-        <li><span class="r-st">Improve</span><span class="r-sd">Turn recurring problems into guidance, tools, documentation, or better process.</span></li>
-      </ol>
-      <p class="r-sub"><strong>Beyond individual cases:</strong> 125+ documentation updates · 600+ technical pairing sessions</p>
-    </section>
     <section class="r-sec" id="experience">
       <h2 class="r-h" data-section="experience">Experience ${sectionCopyIcon('experience')}</h2>
       <ol class="r-exp-list">
@@ -2030,6 +2063,15 @@ function buildReader(){
     </section>
     <section class="r-sec" id="projects">
       <h2 class="r-h" data-section="projects">Selected impact ${sectionCopyIcon('projects')}</h2>
+      <h3 class="r-exp-role">How I work</h3>
+      <p class="r-body">I move from customer impact to technical evidence, a safe resolution, and something reusable for the next person.</p>
+      <ol class="r-strengths" aria-label="Emily's support impact loop">
+        <li><span class="r-st">Listen</span><span class="r-sd">Understand what is blocked and what matters now.</span></li>
+        <li><span class="r-st">Investigate</span><span class="r-sd">Trace symptoms across the application, database, infrastructure, and configuration.</span></li>
+        <li><span class="r-st">Explain</span><span class="r-sd">Make the evidence and next action clear to customers and Engineering.</span></li>
+        <li><span class="r-st">Improve</span><span class="r-sd">Turn recurring problems into guidance, tools, documentation, or better process.</span></li>
+      </ol>
+      <p class="r-sub"><strong>Beyond individual cases:</strong> 125+ documentation updates · 600+ technical pairing sessions</p>
       <ul class="r-proj-grid">
         ${c.projects.map(p => renderProjectCard(p, '// link coming soon')).join('')}
       </ul>
@@ -2330,7 +2372,9 @@ function buildReader(){
     const links = rNav.querySelector('.r-nav-links');
     // Compare natural link width to the real available row width. The old fixed
     // 780px cutoff compacted navigation even when every section label fit.
-    const compact = links.scrollWidth > links.clientWidth + 1;
+    // Mobile uses the compact control intentionally. Desktop keeps every
+    // section link visible in one horizontally scrollable row.
+    const compact = readerEl.clientWidth <= 600;
     rNav.classList.toggle('nav-compact', compact);
   };
   document.addEventListener('a11y-text-change', () => requestAnimationFrame(checkNavFit));
@@ -2433,7 +2477,7 @@ document.getElementById('dotMaximize').addEventListener('click', (e) => {
 // ── Drag & Resize ────────────────────────────────────────────
 const MIN_W = 400, MIN_H = 220;
 
-function isMobileNow() { return window.innerWidth <= 600; }
+function isMobileNow() { return win.clientWidth <= 600; }
 
 function enterUserPositioned() {
   if (isMobileNow()) return;

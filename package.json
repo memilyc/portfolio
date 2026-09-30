@@ -1,0 +1,14 @@
+{
+  "name": "emily-chang-portfolio",
+  "private": true,
+  "scripts": {
+    "a11y:pa11y": "pa11y-ci --config .pa11yci.json"
+  },
+  "devDependencies": {
+    "pa11y": "^9.1.1",
+    "pa11y-ci": "^4.0.2"
+  },
+  "allowScripts": {
+    "puppeteer@24.43.1": true
+  }
+}

@@ -15,3 +15,6 @@ supabase/.temp/
 .qoder/
 venv/
 .tokensave
+node_modules/
+.pa11yci.json
+audits/pa11y-*

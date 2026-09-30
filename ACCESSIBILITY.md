@@ -188,3 +188,13 @@ Acceptance criteria for this feature:
 Static verification passed on 26 September 2026. Full WCAG 2.2 AA conformance is not
 claimed until browser zoom, VoiceOver/Safari, NVDA/Firefox, and production interaction
 states are tested as described above.
+
+## Pa11y HTML CodeSniffer verification — 27 September 2026
+
+Pa11y CI was added as a reproducible local check using headless Chrome, the HTML CodeSniffer
+runner, and the `WCAG2AA` standard. The locally served portfolio reported **0 errors**.
+Configuration is in `package.json` and `.pa11yci.json`; the run output is recorded in
+`audits/pa11y-wcag2aa-2026-09-27.txt`.
+
+This is automated evidence, not a full conformance certification. Manual screen-reader testing,
+real browser zoom, production states, and warnings or notices still require human review.
