@@ -1504,11 +1504,11 @@ const CONFIG = {
       company: "GitLab",
       period: "Feb 2024 – Jun 2026",
       meta: "Support Engineer: Aug 2020 – Feb 2024 · APAC · Self-managed enterprise DevSecOps",
-      summary: "Supported complex production environments across application, database, authentication, integration, and infrastructure layers while partnering with customers and Engineering.",
+      summary: "Supported complex production environments across application, database, authentication, integration, and infrastructure layers.",
       highlights: [
         "Promoted in 2024; supported customer portfolios worth up to US$9M ARR and participated in the 24/7 Customer Emergency On-Call rotation.",
-        "Reproduced defects, coordinated high-severity escalations, and translated incident findings into product, process, and documentation improvements.",
-        "Authored 125+ documentation updates, led 600+ technical pairing sessions, and built tools adopted across a company operating in 65+ countries.",
+        "Reproduced defects, coordinated high-severity escalations, and turned findings into product, process, and documentation improvements.",
+        "Authored 125+ documentation updates, led 600+ pairing sessions, and built tools used across a company operating in 65+ countries.",
       ],
     },
     {
@@ -1516,7 +1516,7 @@ const CONFIG = {
       company: "Arvato Systems Malaysia",
       period: "Feb 2019 – Aug 2020",
       meta: "Associate Systems Administrator: May 2018 – Feb 2019 · Enterprise infrastructure",
-      summary: "Maintained 99.95% availability for systems supporting 3,000+ developers and helped reduce downtime by 40% through platform upgrades, migrations, monitoring, and automation.",
+      summary: "Maintained 99.95% availability for systems supporting 3,000+ developers and helped reduce downtime by 40% through upgrades, monitoring, and automation.",
       highlights: [],
     },
     {
@@ -1524,7 +1524,7 @@ const CONFIG = {
       company: "Juris Technologies",
       period: "Sep 2017 – May 2018",
       meta: "Enterprise fintech · Software delivery and workflow systems",
-      summary: "Developed and supported loan-management workflows using Oracle PL/SQL and IBM DB2, translated client requirements, and contributed to Agile delivery as Scrum Master.",
+      summary: "Developed loan-management workflows with Oracle PL/SQL and IBM DB2, translated client requirements, and contributed to Agile delivery as Scrum Master.",
       highlights: [],
     },
   ],
@@ -1555,8 +1555,7 @@ const CONFIG = {
       short:  "Led a performance war room from ambiguous slowness to safer PostgreSQL capacity guidance, then built the calculator I wished I had during the incident.",
       caseStudy: [
         ["Situation", "I was paged into a customer war room after GitLab performance worsened ahead of an upcoming deployment. The customer described slow performance broadly, so I broke it down by workflow while teammates analysed logs in parallel."],
-        ["Investigation", "We found database connection errors on a single instance running web and database services together. I cross-checked GitLab's PostgreSQL tuning guidance, reviewed resources and configuration, and traced the pressure to an increased Sidekiq migration workload."],
-        ["Action", "I recommended reducing the migration workload and setting a reasonable explicit Puma limit so application concurrency stayed within a safe database-connection budget. We did not recommend increasing the connection limit beyond what the server could safely support."],
+        ["Action", "I traced the pressure to an increased Sidekiq migration workload on a single instance running web and database services together. After reviewing resources, configuration, and GitLab's PostgreSQL guidance, I recommended reducing the migration workload and setting an explicit Puma limit within a safe database-connection budget."],
         ["Outcome", "Connection errors stopped, page loads became faster, server computing load decreased, and developers could continue using GitLab. The longer-term plan was to move PostgreSQL to a separate database instance."],
         ["Durable improvement", "I created the PostgreSQL Connection Calculator because it was the tool I wished I had during the incident, giving other engineers reusable guidance for similar situations."],
       ],
@@ -2034,15 +2033,15 @@ function buildReader(){
     <div class="r-role">${esc(c.role)}</div>
     <p class="r-tag">${esc(c.tagline)}</p>
     <p class="r-availability">Based in Kuala Lumpur · Open to remote APAC/global roles</p>
-    <p class="r-hero-proof">With <strong>9+ years</strong> across engineering, systems, and support, I help enterprise customers solve complex issues across applications, databases, and infrastructure, then turn recurring problems into clearer guidance, useful tools, and better practices.</p>
+    <p class="r-hero-proof">With <strong>9+ years</strong> across engineering, systems, and support, I help enterprise customers solve complex issues and turn recurring problems into clearer guidance and useful tools.</p>
     <div class="r-hero-actions">
       <a class="r-cv" href="#projects">View featured impact →</a>
       <a class="tlink" href="${esc(c.cv)}" target="_blank" rel="noopener noreferrer">Download résumé →</a>
     </div>
     <section class="r-sec" id="about">
       <h2 class="r-h" data-section="about">About ${sectionCopyIcon('about')}</h2>
-      <p class="r-body">My career moved from software engineering to systems administration and then into technical support, bringing me closer to the point where software, infrastructure, and people meet.</p>
-      <p class="r-body">That background helps me investigate beyond the visible symptom while keeping the person on the other side of the incident informed. Today, I support enterprise customers through complex cases and turn what I learn into improvements that help the next engineer or customer.</p>
+      <p class="r-body">I moved from software engineering to systems administration and technical support, working where software, infrastructure, and people meet.</p>
+      <p class="r-body">I investigate beyond the visible symptom, keep customers informed, and turn recurring issues into improvements for the next person.</p>
     </section>
     <section class="r-sec" id="experience">
       <h2 class="r-h" data-section="experience">Experience ${sectionCopyIcon('experience')}</h2>
@@ -2066,12 +2065,12 @@ function buildReader(){
     <section class="r-sec" id="projects">
       <h2 class="r-h" data-section="projects">Selected impact ${sectionCopyIcon('projects')}</h2>
       <h3 class="r-exp-role">How I work</h3>
-      <p class="r-body">I move from customer impact to technical evidence, a safe resolution, and something reusable for the next person.</p>
+      <p class="r-body">I move from customer impact to evidence, a safe resolution, and something reusable.</p>
       <ol class="r-strengths" aria-label="Emily's support impact loop">
         <li><span class="r-st">Listen</span><span class="r-sd">Understand what is blocked and what matters now.</span></li>
-        <li><span class="r-st">Investigate</span><span class="r-sd">Trace symptoms across the application, database, infrastructure, and configuration.</span></li>
-        <li><span class="r-st">Explain</span><span class="r-sd">Make the evidence and next action clear to customers and Engineering.</span></li>
-        <li><span class="r-st">Improve</span><span class="r-sd">Turn recurring problems into guidance, tools, documentation, or better process.</span></li>
+        <li><span class="r-st">Investigate</span><span class="r-sd">Trace symptoms across the stack.</span></li>
+        <li><span class="r-st">Explain</span><span class="r-sd">Make the evidence and next action clear.</span></li>
+        <li><span class="r-st">Improve</span><span class="r-sd">Turn recurring problems into reusable guidance or tools.</span></li>
       </ol>
       <p class="r-sub"><strong>Beyond individual cases:</strong> 125+ documentation updates · 600+ technical pairing sessions</p>
       <ul class="r-proj-grid">
@@ -2103,7 +2102,7 @@ function buildReader(){
           <span class="r-exp-period">Since Aug 2026</span>
         </div>
         <div class="r-exp-company">The Digital Nomad CMX Community</div>
-        <p class="r-exp-summary">I create global community experiences from start to finish, including Bevy setup, speaker coordination, slides, scripts, hosting, and post-event communication.</p>
+        <p class="r-exp-summary">I create global community events, from setup and speaker coordination to hosting and follow-up.</p>
         <ul class="r-exp-highlights">
           <li>Hosted a Global Community Mixer with participants from five continents.</li>
           <li>Invited and hosted a talk with a speaker from San Francisco.</li>
@@ -2112,7 +2111,7 @@ function buildReader(){
       </article>
       <article class="r-exp-card">
         <div class="r-exp-company">🎙️ Guest | tech tarik talks Podcast</div>
-        <p class="r-exp-summary">Discussed moving from a technical role with no direct customer experience into Senior Support Engineering, handling complex cases with global teams while working remotely from Malaysia.</p>
+        <p class="r-exp-summary">Discussed moving into Senior Support Engineering and handling complex cases with global teams from Malaysia.</p>
         <p><a class="tlink" href="https://youtube.com/watch?si=dHQJYx1ZVrZ7UElC&amp;v=C7T2Us5cYgA&amp;feature=youtu.be" target="_blank" rel="noopener noreferrer">Listen to the episode →</a></p>
       </article>
     </section>
@@ -2140,7 +2139,7 @@ function buildReader(){
     </section>
     <section class="r-sec" id="resume">
       <h2 class="r-h" data-section="resume">Résumé ${sectionCopyIcon('resume')}</h2>
-      <p class="r-body">Prefer the concise version? Download my résumé for a quick view of experience, scope, and technical focus.</p>
+      <p class="r-body">For a shorter view of my experience and technical focus, download my résumé.</p>
       <a class="r-cv" href="${esc(c.cv)}" target="_blank" rel="noopener noreferrer">Download résumé PDF →</a>
     </section>
     <section class="r-sec" id="contact">
@@ -2741,7 +2740,14 @@ function highlightAbout(s){
 }
 function validateNickname(nick){ return nick && nick.length >= 3 && nick.length <= 20 && /^[a-zA-Z0-9 _-]+$/.test(nick); }
 function hasHelpFlag(argv){ return argv.includes('-h') || argv.includes('--help') || argv.includes('-help'); }
-function shuffle(arr){ return [...arr].sort(() => Math.random() - 0.5); }
+function shuffle(arr){
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 function formatDate(str){ return new Date(str).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }); }
 function safeSave(key, val){ try { localStorage.setItem(key, val); } catch(e){} }
 function safeLoad(key, def){ try { return localStorage.getItem(key) ?? def; } catch(e){ return def; } }
@@ -4292,6 +4298,7 @@ const EASTER_EGGS = {
   '🐰':                     'easter-egg',
   '🐇':                     'easter-egg',
 };
+const EASTER_EGG_KEYS = Object.keys(EASTER_EGGS).sort((a, b) => b.length - a.length);
 
 const HUNT_EGGS = new Set([
   'tail -f', 'systemctl status emily', 'git blame', 'sudo',
@@ -4525,8 +4532,7 @@ function resolve(raw){
   if (!v) return null;
   const mathResult = tryMath(v);
   if (mathResult !== null) return { name: '__math__', result: mathResult };
-  const easterKeys = Object.keys(EASTER_EGGS).sort((a,b) => b.length - a.length);
-  for (const ek of easterKeys) {
+  for (const ek of EASTER_EGG_KEYS) {
     if (v === ek || v.startsWith(ek + ' ')) {
       return { name: EASTER_EGGS[ek], corrected: false, easter: true };
     }
