@@ -1345,7 +1345,7 @@ const TESTIMONIALS = [
     .window:has(#terminal-settings[open]) #mobile-chips { display: none; }
     .input-row .ps { font-size: 12px; }
     .input-row .ps > span:first-child { display: none; }
-    .window.reader-scrolled .a11y-launcher { opacity: 0; visibility: hidden; pointer-events: none; }
+    .window.reader-scrolled .a11y-launcher { display: none; }
   }
 
   /* Desktop keeps Sections in the window-layout header flow. This comes
@@ -1406,7 +1406,7 @@ const TESTIMONIALS = [
     .r-strengths li { display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: start; }
     .r-strengths li::before { grid-row: 1 / span 2; }
     .r-st, .r-sd { grid-column: 2; min-width: 0; }
-    .window.reader-scrolled .a11y-launcher { opacity: 0; visibility: hidden; pointer-events: none; }
+    .window.reader-scrolled .a11y-launcher { display: none; }
   }
 
 </style>
