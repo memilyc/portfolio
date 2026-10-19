@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+# Search availability and training permission are independent choices.
+User-agent: GPTBot
+Disallow: /
+
+Sitemap: https://memilyc.github.io/portfolio/sitemap.xml

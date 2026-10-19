@@ -1,0 +1,13 @@
+# M. Emily Chang | Senior Support Engineer
+
+> Portfolio for M. Emily Chang, a Kuala Lumpur-based Senior Support Engineer who investigates complex enterprise incidents and turns recurring problems into clearer guidance and useful tools.
+
+## Portfolio
+
+- [Portfolio](https://memilyc.github.io/portfolio/): Experience, selected impact, public work, skills, résumé, and contact details.
+- [PostgreSQL Connection Calculator](https://postgresql-connection-calculator-759014.gitlab.io/): A reusable tool created after a PostgreSQL connection-capacity investigation.
+
+## Profiles
+
+- [LinkedIn](https://linkedin.com/in/memilyc)
+- [GitHub](https://github.com/memilyc)
