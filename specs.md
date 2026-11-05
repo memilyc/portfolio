@@ -4,7 +4,7 @@ Current implementation reference for the portfolio in this repository. Update th
 
 ## Purpose and experience
 
-The site presents M. Emily Chang as a Senior Support Engineer. The default reader view leads with customer and technical impact. An optional terminal view offers commands, a mock filesystem, quiz, easter egg hunt, leaderboard, and guestbook. The featured PostgreSQL performance story and Connection Calculator are the main technical proof point.
+The site presents Emily Chang as a Support Engineer based in Kuala Lumpur with 9+ years of experience. The default reader view is a concise scroll story: selected work, career context, colleague and customer feedback, community work, skills, contact, and guestbook. An optional terminal view offers commands, a mock filesystem, quiz, easter egg hunt, leaderboard, and guestbook. The featured PostgreSQL performance story and Connection Calculator are the main technical proof point.
 
 ## Architecture
 
@@ -17,7 +17,7 @@ The site presents M. Emily Chang as a Senior Support Engineer. The default reade
 
 ## Reader view
 
-The reader is the default view. The initial HTML contains a semantic summary of the career narrative, selected impact, and contact route so it remains understandable before JavaScript runs. `buildReader()` then renders the full interactive reader and its flat navigation. The navigation order is About, Experience, Work, Testimonials, Community, Skills, Résumé, Contact, Guestbook. Work links to `#projects`. Strengths and the accessibility statement appear in the document but are not separate navigation items.
+The reader is the default view. The initial HTML contains a semantic summary of the career narrative, selected impact, and contact route so it remains understandable before JavaScript runs. `buildReader()` then renders the full reader and its flat navigation. The navigation order is Work, About, Experience, Testimonials, Community, Skills, Contact, Guestbook. Work links to `#projects`. Project stories and impact metrics are visible in the scroll flow; scroll reveals fail open to visible content and respect reduced-motion settings. The four selected attributed testimonial excerpts use a small animated carousel with manual controls. The experience section uses local company logo assets, and the podcast card uses its local Tech Tarik Talks logo. The About section says Claude, Qoder, and Codex were used through many iterations, while the ideas, structure, and content are Emily's.
 
 The desktop navigation is one horizontally scrollable row. When the reader is 600 CSS pixels wide or narrower, `checkNavFit()` adds `nav-compact` and shows the Sections button. The compact control sits near the bottom-right of the portfolio window, with a scrollable dropdown. It precedes reader content in DOM order. Choosing a section moves focus to it and scrolls it into view.
 
@@ -37,4 +37,4 @@ Page-view tracking records the path, referrer, browser user agent, coarse locati
 
 ## Search metadata
 
-The document head declares the canonical portfolio URL and supplies title, description, Open Graph, Twitter, and `Person` JSON-LD metadata. JSON-LD represents only visible, sourced identity and profile information: M. Emily Chang, Senior Support Engineer, Kuala Lumpur, portfolio URL, public image, LinkedIn, and GitHub.
+The document head declares the canonical portfolio URL and supplies title, description, Open Graph, Twitter, and `Person` JSON-LD metadata. JSON-LD represents only visible, sourced identity and profile information: Emily Chang, Support Engineer, Kuala Lumpur, portfolio URL, public image, LinkedIn, and GitHub. Metadata does not claim that Emily is looking for work.

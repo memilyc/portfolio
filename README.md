@@ -16,7 +16,7 @@ A sleek, retro-inspired personal portfolio that functions as both a static docum
 * **Easter Egg Hunt:** Timed hunt for 20+ hidden commands — server-side session tracking prevents score spoofing
 * **Leaderboard:** Filter by difficulty or category — `leaderboard easy`, `leaderboard emily`, `leaderboard egg-hunt`
 * **Guestbook:** Sign and read messages — `guestbook` / `guestbook sign` (profanity filtering, link redaction, spam protection, soft-hide moderation via `hidden` column)
-* **Testimonials:** LinkedIn recommendations in an auto-advancing carousel (4.5s, pause on hover, dot indicators) with progressive "read more" expansion — in both reader and terminal views
+* **Testimonials:** Four concise, attributed excerpts in a small reader carousel with manual controls and reduced-motion support; full recommendations remain available through the interactive terminal
 * **Mock Filesystem:** Explorable directory at `/home/emily/portfolio` — `ls`, `cat`, `tree`, `cd` all work; includes `about.md`, `changelog.md`, `status.txt`, `contact.txt`, project READMEs, and a hidden easter egg
 * **Quote Command:** Random inspirational quotes with options — `quote -n 5`, `quote --all`
 * **Dad Jokes:** Terrible jokes with options — `dadjoke -n 3`, `dadjoke --all`
@@ -56,6 +56,8 @@ portfolio/
 │   │   └── Emily_Chang_Resume.pdf # Canonical public résumé
 │   ├── em.png              # Avatar / apple-touch-icon
 │   ├── em.ico              # Favicon
+│   ├── logos/               # Local GitLab, Arvato Systems, and JurisTech marks
+│   ├── tech-tarik-talks.jpg # Tech Tarik Talks logo used on the podcast card
 │   ├── preview-resume.png  # Blurred résumé preview shown in Reader view
 │   └── social-preview.png  # 1200x630 social sharing image
 ├── supabase/

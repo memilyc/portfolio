@@ -6,8 +6,12 @@ Acceptance criteria for changes to this portfolio. These describe intended behav
 
 - Reader view must be usable immediately without opening the terminal.
 - The public career narrative must use the actual Software Engineer → Systems Administrator → Support Engineer → Senior Support Engineer progression and defensible evidence. Do not add unsourced metrics, dates, outcomes, or attribution.
-- Keep the reader navigation flat and in this order: About → Experience → Work → Testimonials → Community → Skills → Résumé → Contact → Guestbook. Keep its labels and anchors aligned with the rendered sections.
-- Keep the PostgreSQL performance case and Connection Calculator prominent. Keep testimonials attributed and expandable without losing context.
+- Identify Emily at a glance as a Support Engineer based in Kuala Lumpur with 9+ years of experience; keep CV and contact links visible near the top.
+- Put selected work immediately after the hero, before career context. Keep the reader navigation flat and in this order: Work → About → Experience → Testimonials → Community → Skills → Contact → Guestbook. Keep its labels and anchors aligned with the rendered sections.
+- Remove job-seeking availability claims from the visible page, metadata, terminal profile, and social preview while retaining CV and contact links. Do not disclose a new employer unless Emily asks.
+- Describe the portfolio's AI-assisted creation accurately and visibly: Claude, Qoder, and Codex were used through iterations; the ideas, structure, and content come from Emily's experience.
+- Keep work and public perspective claims evidence-based. The Slack bot detects timestamps in messages, converts them to UTC, provides a local-time link, and is used company-wide.
+- Keep the PostgreSQL performance case and Connection Calculator prominent. Show concise project stories, AI authorship context, selected feedback, strengths, and impact metrics directly in the scroll flow. Keep project evidence visible without disclosure controls; testimonial excerpts may use a controlled, reduced-motion-friendly carousel.
 - Keep the terminal optional. Switching views must preserve usable focus and an obvious way back.
 
 ## Responsive behavior
